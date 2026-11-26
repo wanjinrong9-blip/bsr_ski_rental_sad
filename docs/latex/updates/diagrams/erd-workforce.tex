@@ -1,0 +1,13 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[>=Latex,font=\small,t/.style={draw,rectangle split,rectangle split parts=2,rectangle split part fill={IceLight,white},text width=4.6cm,inner sep=8pt,align=left}]
+\node[t] (t0) at (0,0) {\centering\bfseries users\nodepart{second}\scriptsize PK id\\ name / email UQ / phone\\ role / store\_\allowbreak{}id FK};
+\node[t] (t1) at (6,0) {\centering\bfseries employee\_\allowbreak{}profiles\nodepart{second}\scriptsize PK FK user\_\allowbreak{}id → users.id\\ employee\_\allowbreak{}no UQ\\ department / job\_\allowbreak{}title\\ expertise / qualification\\ joined\_\allowbreak{}on / work\_\allowbreak{}location};
+\node[t] (t2) at (12,0) {\centering\bfseries stores\nodepart{second}\scriptsize PK id\\ name / address\\ open\_\allowbreak{}hours};
+\node[t] (t3) at (0,-6.3) {\centering\bfseries attendance\nodepart{second}\scriptsize PK id / user\_\allowbreak{}id FK\\ store\_\allowbreak{}id FK / work\_\allowbreak{}date\\ clock\_\allowbreak{}in\_\allowbreak{}at / clock\_\allowbreak{}out\_\allowbreak{}at\\ note\\ UQ(user\_\allowbreak{}id,work\_\allowbreak{}date)};
+\node[t] (t4) at (6,-6.3) {\centering\bfseries 每日到岗投影 非表\nodepart{second}\scriptsize 按人员与日期关联班次、出勤\\ ON\_\allowbreak{}DUTY / OFF\_\allowbreak{}DUTY\\ NOT\_\allowbreak{}ARRIVED / UNSCHEDULED\\ late / early 不独立持久化};
+\node[t] (t5) at (12,-6.3) {\centering\bfseries shifts\nodepart{second}\scriptsize PK id / user\_\allowbreak{}id FK\\ store\_\allowbreak{}id FK / work\_\allowbreak{}date\\ start\_\allowbreak{}time / end\_\allowbreak{}time\\ UQ(user\_\allowbreak{}id,work\_\allowbreak{}date)};
+\draw[->] (t1)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=.7cm,align=center] {1 : 1}(t0);
+\draw[->] (t3)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=1.2cm,align=center] {N : 1}(t0);
+\draw[->] (t5)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=1.2cm,align=center] {N : 1}(t2);
+\draw[dashed,->] (t3)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=.7cm,align=center] {查询}(t4);
+\draw[dashed,->] (t5)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=.7cm,align=center] {查询}(t4);
+\end{tikzpicture}}\par\smallskip{\scriptsize PK 主键；FK 已声明外键；UQ 唯一；虚线为查询对照或逻辑引用。}

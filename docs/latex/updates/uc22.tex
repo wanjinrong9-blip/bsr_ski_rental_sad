@@ -1,0 +1,17 @@
+\Needspace{12\baselineskip}
+\subsubsection{3.2.22 UC22 查看维修人员基本资料与任务概况}\label{uc-v3-22}
+\begin{BSRUsecase}{UC22 查看维修人员基本资料与任务概况}
+主执行者 & 维修技师；店员、经理查询维修团队 \\
+辅执行者 & 无独立外部执行者；数据库、SSE 与计时模块均为系统内部机制。 \\
+涉众利益 & 技师需要核对本人工作身份与联系方式；门店需要找到负责人并了解当前任务负荷。 \\
+目标与触发 & 执行者进入维修工作区，查看人员档案和分配任务。 \\
+前置条件 & 已登录为非顾客角色；技师只能读取本人档案和本人维修任务。 \\
+成功后置条件 & 返回只读的资料和任务概况；不修改账户角色、工时、费用或库存。 \\
+最小保证 & 失败不提交部分业务变更；权限或版本冲突返回明确原因。业务事实以服务器记录为准。 \\
+基本流程 & \begin{minipage}[t]{\linewidth}\raggedright 1 执行者打开维修工作区。\\ 2 系统按角色取得人员资料及获授权工单。\\ 3 技师端显示工号、姓名、岗位、电话、邮箱、加入时间、能力和培训信息。\\ 4 管理端显示技师联系方式、专业方向及未关闭任务数。\\ 5 执行者从工单卡片进入具体任务，按授权操作。\strut\end{minipage} \\
+扩展流程 & \begin{minipage}[t]{\linewidth}\raggedright 2a 未分配给当前技师的工单：不返回正文。\\ 3a 档案可选字段未填写：显示未登记，不编造资质或评分。\\ 4a 无任务：显示零和空态；任务数不能替代正式绩效评分。\strut\end{minipage} \\
+字段与状态事件 & user id、name、phone、email、role、employeeNo、department、jobTitle、expertise、qualification、joinedOn、workLocation。 \\
+\rowcolor{GoldPale}业务规则 & BR-035；个人基本档案与登录账户分离；角色授予不等于资质认证，演示培训资料须保留演示标识。 \\
+质量与验收 & 核对技师本人资料、管理团队联系人、空字段与跨技师访问拒绝；页面岗位和工号来源可追溯到数据库。 \\
+设计约束 & GET /api/employees；users 与 employee\_\allowbreak{}profiles 联合查询，当前工作区为展示用途，不宣称已实现资质上传审核。 \\
+\end{BSRUsecase}

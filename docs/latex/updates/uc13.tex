@@ -1,0 +1,17 @@
+\Needspace{12\baselineskip}
+\subsubsection{3.2.13 UC13 检查维修并提交验收}\label{uc-v3-13}
+\begin{BSRUsecase}{UC13 检查维修并提交验收}
+主执行者 & 维修技师；门店经理可协助处理 \\
+辅执行者 & 无独立外部执行者；数据库、SSE 与计时模块均为系统内部机制。 \\
+涉众利益 & 技师需要保存诊断、配件进度与工时；经理需要可验证的安全检查；门店不能因文字“完成”提前出租装备。 \\
+目标与触发 & 技师接收获分配工单，记录处理过程并提交经理验收。 \\
+前置条件 & 已登录；工单未关闭且当前技师为负责人，或操作者为经理；提交携带最新 version。 \\
+成功后置条件 & 工单按合法阶段更新并增加版本；追加时间线；提交验收后为 AWAITING\_\allowbreak{}REVIEW，装备仍为 MAINTENANCE。 \\
+最小保证 & 失败不提交部分业务变更；权限或版本冲突返回明确原因。业务事实以服务器记录为准。 \\
+基本流程 & \begin{minipage}[t]{\linewidth}\raggedright 1 技师按处理中、超期、已关闭或关键词查找本人任务。\\ 2 系统显示工单、负责人、优先级、装备、期限、版本与历史。\\ 3 技师接单进入 INSPECTING，填写诊断，再进入 REPAIRING。\\ 4 技师记录配件、累计工时、材料费和处理结果，可分次保存。\\ 5 技师完成外观、紧固件、功能和清洁附件四项检查。\\ 6 技师选择提交验收；系统验证诊断、结果、正工时和全部安全检查。\\ 7 系统保存 AWAITING\_\allowbreak{}REVIEW、版本和时间线，通知经理并推送变更。\strut\end{minipage} \\
+扩展流程 & \begin{minipage}[t]{\linewidth}\raggedright 3a 等待配件：填写至少 3 字配件或等待原因，转 WAITING\_\allowbreak{}PARTS；恢复时先回 REPAIRING。\\ 6a 诊断或结果不足 3 字、工时非正或检查未全通过：保持原状态，返回缺失项。\\ 任一步版本冲突：拒绝旧版本更新，保留用户输入并提示关闭后重新读取。\\ 任一步越权或工单已关闭：拒绝；技师不能直接设置 COMPLETED 或 RETIRED。\strut\end{minipage} \\
+字段与状态事件 & status、diagnosis、result、parts、hours、costNok、checklist、version；日志 note 3–2000 字；工时 0–1000，材料费为非负整数 NOK 且不超过 1000000。 \\
+\rowcolor{GoldPale}业务规则 & BR-035 至 BR-040；相同阶段可保存资料；工时为累计数，不在每次保存时重复相加；当前材料费不自动计算人工结算。 \\
+质量与验收 & 覆盖合法阶段、待配件原因、四项检查不全、越权和旧版本；本地集成及浏览器流程已验证提交验收仍隔离库存。 \\
+设计约束 & PATCH /api/maintenance/{id}；action=progress 或 note；工时界面步进为 0.25 小时，服务器整倍数约束与历史费率快照列为后续建设。 \\
+\end{BSRUsecase}

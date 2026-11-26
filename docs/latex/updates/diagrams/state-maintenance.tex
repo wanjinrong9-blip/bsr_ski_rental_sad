@@ -1,0 +1,12 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[>=Latex,font=\small,s/.style={draw,rounded corners=5pt,minimum width=3.1cm,minimum height=1cm,align=center}]
+\node[s] (a) at (0,0) {待接单\\ASSIGNED};\node[s] (i) at (4.2,0) {检查诊断\\INSPECTING};\node[s] (r) at (8.4,0) {维修中\\REPAIRING};\node[s] (v) at (12.8,0) {待经理验收\\AWAITING\_REVIEW};
+\node[s] (w) at (8.4,-3.4) {等待配件\\WAITING\_PARTS};\node[s] (c) at (12.8,-3.4) {已验收入库\\COMPLETED};\node[s] (x) at (12.8,-6.6) {已报废\\RETIRED};
+\fill (-2.5,0) circle (.10);\draw[->] (-2.4,0)--(a);\draw[->] (a)--node[above,font=\scriptsize]{接单}(i);\draw[->] (i)--node[above,font=\scriptsize]{维修}(r);\draw[->] (r)--node[above,font=\scriptsize]{提交}(v);
+\draw[->] (r) to[bend right=16] node[left,font=\scriptsize]{待配件}(w);\draw[->] (w) to[bend right=16] node[right,font=\scriptsize]{恢复}(r);
+\draw[->] (i.south)--++(0,-2) -| node[pos=.25,left,font=\scriptsize]{待配件}(w.west);
+\draw[->] (i.north)--++(0,1.8)-| node[pos=.25,above,font=\scriptsize]{检查完成可直接提交验收}(v.north);
+\draw[->] (v) to[bend right=30] node[above,font=\scriptsize]{经理退回}(r);
+\draw[->] (v)--node[left,font=\scriptsize]{经理通过}(c);
+\draw[->] (v.east)--++(.8,0)|-node[pos=.7,right,font=\scriptsize]{确认报废}(x.east);
+\node[align=left,font=\scriptsize,anchor=west] at (-1.4,-5.2) {提交验收：诊断、结果、正工时、四项检查均满足。\\验收通过：经理确认且无其他开放工单，才恢复可用。\\所有写入须权限与版本一致，关闭后不再修改。\\待接单至待验收均保持 MAINTENANCE；报废为 RETIRED。};
+\end{tikzpicture}}

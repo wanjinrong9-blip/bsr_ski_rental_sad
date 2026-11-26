@@ -1,0 +1,31 @@
+\resizebox{.98\linewidth}{!}{%
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\scriptsize,
+  cls/.style={draw=Navy,fill=white,line width=.8pt,rectangle split,
+  rectangle split parts=3,rectangle split part align={center,left,left},
+  text width=4.05cm,inner sep=6pt,align=left}]
+\node[cls] (view) at (0,0) {\centering\textless\textless boundary\textgreater\textgreater\\\bfseries 微信身份界面
+  \nodepart{second}- 临时登录码\\- 待绑定状态
+  \nodepart{third}+ 发起验证()\\+ 提交显式绑定()};
+\node[cls] (control) at (5.8,0) {\centering\textless\textless control\textgreater\textgreater\\\bfseries 小程序身份控制
+  \nodepart{second}- AppID / HMAC 密钥版本\\- 失败计数
+  \nodepart{third}+ 交换临时码()\\+ 验证账号()\\+ 撤销会话()};
+\node[cls] (binding) at (11.6,0) {\centering\textless\textless entity\textgreater\textgreater\\\bfseries 微信身份绑定
+  \nodepart{second}- AppID / OpenID 摘要\\- 顾客 ID / 绑定与撤销时刻
+  \nodepart{third}+ 检查唯一性()\\+ 解除绑定()};
+\node[cls] (challenge) at (0,-5.3) {\centering\textless\textless entity\textgreater\textgreater\\\bfseries 一次性绑定挑战
+  \nodepart{second}- 挑战摘要 / 过期时刻\\- 尝试次数 / 消耗时刻
+  \nodepart{third}+ 检查有效期()\\+ 消耗()};
+\node[cls] (customer) at (5.8,-5.3) {\centering\textless\textless entity\textgreater\textgreater\\\bfseries 顾客账号
+  \nodepart{second}- ID / 角色 / 账号状态\\- 认证纪元
+  \nodepart{third}+ 验证密码证明()\\+ 失效会话()};
+\node[cls] (session) at (11.6,-5.3) {\centering\textless\textless entity\textgreater\textgreater\\\bfseries 小程序会话
+  \nodepart{second}- 令牌摘要 / 到期时刻\\- 绑定 ID / 认证纪元
+  \nodepart{third}+ 校验本人权限()\\+ 退出()};
+\draw[dashed,->,Navy] (view.east)--node[above,fill=white,inner sep=1pt]{请求}(control.west);
+\draw[->,Teal] (control.east)--node[above,fill=white,inner sep=1pt]{定位}(binding.west);
+\draw[->,Teal] (control.south west) to[out=235,in=65]
+  node[above,sloped,fill=white,inner sep=1pt]{发行/消耗}(challenge.north east);
+\draw[->,Teal] (control.south)--node[right,fill=white,inner sep=1pt]{验证}(customer.north);
+\draw[->,Teal] (binding.south)--node[right,fill=white,inner sep=1pt]{1 : 多}(session.north);
+\draw[->,Navy] (session.west)--node[above,fill=white,inner sep=1pt]{归属}(customer.east);
+\end{tikzpicture}}

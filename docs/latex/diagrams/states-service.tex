@@ -1,0 +1,56 @@
+% 边上的 D/M/F 编号对照 analysis-states.tex。
+\newcommand{\BSRStateDamage}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[bsrState] (suspect) at (0,0) {疑似受损};
+  \node[bsrState] (assigned) at (3.4,0) {技师已指派};
+  \node[bsrState] (initial) at (6.8,0) {24h 初评};
+  \node[bsrState] (review) at (10.2,0) {经理复核};
+  \node[bsrState] (approved) at (13.6,0) {核定};
+  \node[bsrState] (supplement) at (6.8,-3) {退回补证};
+  \node[bsrState] (dispute) at (13.6,-3) {争议};
+  \draw[bsrMessage] (suspect) -- node[above,font=\tiny]{D1} (assigned);
+  \draw[bsrMessage] (assigned) -- node[above,font=\tiny]{D2} (initial);
+  \draw[bsrMessage] (initial) -- node[above,font=\tiny]{D3} (review);
+  \draw[bsrMessage] (review) -- node[above,font=\tiny]{D4} (approved);
+  \draw[bsrMessage] (review) -- node[sloped,above,font=\tiny]{D5} (supplement);
+  \draw[bsrMessage] (supplement) -- node[right,font=\tiny]{D6} (initial);
+  \draw[bsrMessage] (review) -- node[right,font=\tiny]{D7} (dispute);
+\end{tikzpicture}}
+
+\newcommand{\BSRStateMaintenance}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[bsrState] (queued) at (0,0) {待接单};
+  \node[bsrState] (diagnose) at (3.4,0) {诊断};
+  \node[bsrState] (repair) at (6.8,0) {维修};
+  \node[bsrState] (review) at (10.2,0) {待安全验收};
+  \node[bsrState] (safe) at (13.6,0) {可租};
+  \node[bsrState] (parts) at (6.8,-3) {待配件};
+  \node[bsrState] (reject) at (10.2,-3) {退回重修};
+  \node[bsrState] (scrap) at (13.6,-3) {报废};
+  \draw[bsrMessage] (queued) -- node[above,font=\tiny]{M1} (diagnose);
+  \draw[bsrMessage] (diagnose) -- node[above,font=\tiny]{M2} (repair);
+  \draw[bsrMessage] (repair) -- node[above,font=\tiny]{M3} (review);
+  \draw[bsrMessage] (repair) -- node[right,font=\tiny]{M4} (parts);
+  \draw[bsrMessage] (parts) to[out=180,in=220,looseness=1] node[left,font=\tiny]{M5} (repair);
+  \draw[bsrMessage] (review) -- node[above,font=\tiny]{M6} (safe);
+  \draw[bsrMessage] (review) -- node[right,font=\tiny]{M7} (reject);
+  \draw[bsrMessage] (reject) -- node[above,font=\tiny]{M8} (repair);
+  \draw[bsrMessage] (review) -- node[sloped,above,font=\tiny]{M9} (scrap);
+\end{tikzpicture}}
+
+\newcommand{\BSRStateDeposit}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[bsrState] (hold) at (0,0) {押金暂持};
+  \node[bsrState] (calc) at (3.4,0) {费用待核};
+  \node[bsrState] (approved) at (6.8,0) {结算已核};
+  \node[bsrState] (refunding) at (10.2,0) {退款发起};
+  \node[bsrState] (done) at (13.6,0) {已到账/完成};
+  \node[bsrState] (dispute) at (3.4,-3) {争议冻结};
+  \node[bsrState] (supplement) at (6.8,-3) {待联系补差};
+  \node[bsrState] (failed) at (10.2,-3) {退款失败/待核实};
+  \draw[bsrMessage] (hold) -- node[above,font=\tiny]{F1} (calc);
+  \draw[bsrMessage] (calc) -- node[above,font=\tiny]{F2} (approved);
+  \draw[bsrMessage] (approved) -- node[above,font=\tiny]{F3} (refunding);
+  \draw[bsrMessage] (refunding) -- node[above,font=\tiny]{F4} (done);
+  \draw[bsrMessage] (calc) -- node[right,font=\tiny]{F5} (dispute);
+  \draw[bsrMessage] (approved) -- node[right,font=\tiny]{F6} (supplement);
+  \draw[bsrMessage] (refunding) -- node[right,font=\tiny]{F7} (failed);
+  \draw[bsrMessage] (failed) to[out=55,in=-55,looseness=1.2] node[right,font=\tiny]{F8} (refunding);
+\end{tikzpicture}}

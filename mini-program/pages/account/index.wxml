@@ -1,0 +1,43 @@
+<view class="page">
+  <view class="account-brand"><image class="account-logo" src="/assets/bsr-logo.png" mode="aspectFill" aria-label="BSR 标志"/><view><view class="eyebrow">YOUR BSR ACCOUNT</view><view class="title">我的</view></view></view>
+  <view class="simulation">{{wechatMode ? '安全合成展示：微信临时登录码由服务端验证，绑定现有顾客账号后共享网页订单；付款、退款和签署仍为模拟。' : '这是微信开发者工具的本机演示。当前用同一个 BSR 顾客账号查看网页与小程序订单；真实微信登录和账号绑定尚未启用。'}}</view>
+  <view class="loading" wx:if="{{loading}}">正在核对账号…</view>
+  <view class="notice notice-error" wx:elif="{{error}}">{{error}}</view>
+  <view wx:elif="{{!user}}">
+    <view class="card" wx:if="{{wechatMode}}"><view class="eyebrow">WECHAT IDENTITY</view><view class="card-title">安全登录</view>
+      <view class="muted">先由微信提供临时登录码，服务端核验微信身份。首次使用还需证明并明确绑定已有顾客账号；微信身份不会自动取得员工权限。</view>
+      <button class="btn full" loading="{{busy}}" disabled="{{busy}}" bindtap="onWechatLogin">{{bindingChallenge ? '重新获取微信身份' : '验证微信身份'}}</button>
+      <view wx:if="{{bindingChallenge}}"><view class="notice">微信身份已核验。请在 {{bindingExpiresAt}} 前绑定你控制的 BSR 顾客账号。</view>
+        <view class="field"><text class="field-label">顾客账号邮箱</text><input class="field-control" type="text" value="{{loginEmail}}" data-key="loginEmail" bindinput="onLoginInput"/></view>
+        <view class="field"><text class="field-label">顾客账号密码</text><input class="field-control" password="true" value="{{loginPassword}}" data-key="loginPassword" bindinput="onLoginInput"/></view>
+        <checkbox-group bindchange="onBindConsent"><label class="agree"><checkbox value="yes" checked="{{bindConsent}}" color="#12375f"/><text>我确认将此微信身份绑定到上述顾客账号</text></label></checkbox-group>
+        <button class="btn full" loading="{{busy}}" disabled="{{busy || !bindConsent}}" bindtap="onBindWechat">验证账号并绑定</button>
+      </view>
+    </view>
+    <view class="card" wx:else><view class="eyebrow">{{mode === 'login' ? 'WELCOME BACK' : 'JOIN THE JOURNEY'}}</view><view class="card-title">{{mode === 'login' ? '登录顾客账号' : '创建演示顾客账号'}}</view><view class="muted">仅供本机联调，不会自动获取微信身份。请使用虚构演示资料。</view>
+      <view wx:if="{{mode === 'register'}}" class="field"><text class="field-label">姓名</text><input class="field-control" placeholder="至少两个字" value="{{registerName}}" data-key="registerName" bindinput="onLoginInput"/></view>
+      <view class="field"><text class="field-label">电子邮箱</text><input class="field-control" type="text" placeholder="顾客账号邮箱" value="{{mode === 'login' ? loginEmail : registerEmail}}" data-key="{{mode === 'login' ? 'loginEmail' : 'registerEmail'}}" bindinput="onLoginInput"/></view>
+      <view class="field"><text class="field-label">密码</text><input class="field-control" password="true" placeholder="至少 8 位" value="{{mode === 'login' ? loginPassword : registerPassword}}" data-key="{{mode === 'login' ? 'loginPassword' : 'registerPassword'}}" bindinput="onLoginInput"/></view>
+      <button wx:if="{{mode === 'login'}}" class="btn full" loading="{{busy}}" disabled="{{busy}}" bindtap="onLogin">登录</button>
+      <button wx:else class="btn full" loading="{{busy}}" disabled="{{busy}}" bindtap="onRegister">创建账号</button>
+      <view class="switch" bindtap="toggleMode">{{mode === 'login' ? '没有账号？创建演示顾客账号' : '已有账号？返回登录'}}</view>
+    </view>
+  </view>
+  <view wx:else>
+    <view class="profile-head card"><view class="avatar">{{userInitial}}</view><view><view class="user-name">{{user.name}}</view><view class="muted">{{user.email}}</view><view class="tiny">顾客账号 · 网页与小程序共用订单</view></view></view>
+    <view class="card"><view class="card-title">租赁资料</view><view class="muted">开具订单合同时需要完整资料。请只填写虚构的课程演示信息。</view>
+      <view class="field"><text class="field-label">姓名</text><input class="field-control" value="{{profile.name}}" data-key="name" bindinput="onProfileInput"/></view>
+      <view class="field"><text class="field-label">电话</text><input class="field-control" type="number" value="{{profile.phone}}" data-key="phone" bindinput="onProfileInput"/></view>
+      <view class="field"><text class="field-label">地址</text><input class="field-control" value="{{profile.address}}" data-key="address" bindinput="onProfileInput"/></view>
+      <view class="field-grid"><view class="field"><text class="field-label">出生年</text><input class="field-control" type="number" value="{{profile.birthYear}}" data-key="birthYear" bindinput="onProfileInput"/></view><view class="field"><text class="field-label">身高 cm</text><input class="field-control" type="number" value="{{profile.heightCm}}" data-key="heightCm" bindinput="onProfileInput"/></view></view>
+      <view class="field-grid"><view class="field"><text class="field-label">体重 kg</text><input class="field-control" type="number" value="{{profile.weightKg}}" data-key="weightKg" bindinput="onProfileInput"/></view><view class="field"><text class="field-label">鞋码</text><input class="field-control" value="{{profile.shoeSize}}" data-key="shoeSize" bindinput="onProfileInput"/></view></view>
+      <button class="btn full" loading="{{busy}}" disabled="{{busy}}" bindtap="onSaveProfile">保存资料</button>
+    </view>
+    <view class="card" wx:if="{{wechatMode}}"><view class="card-title">解除微信绑定</view><view class="muted">解绑需再次输入顾客账号密码；解绑后此微信身份的现有小程序会话会失效，网页账号和订单保留。</view><view class="field"><text class="field-label">顾客账号密码</text><input class="field-control" password="true" value="{{unbindPassword}}" bindinput="onUnbindInput"/></view><button class="btn btn-danger" disabled="{{busy}}" bindtap="onUnbindWechat">验证并解除绑定</button></view>
+    <view class="action-stack"><button class="btn btn-ghost" bindtap="goOrders">查看我的订单</button><button class="btn btn-danger" disabled="{{busy}}" bindtap="onLogout">退出登录</button></view>
+  </view>
+  <view class="account-filing">
+    <text class="account-filing-name">WJR同学的BSR系统分析设计作业</text>
+    <text>小程序备案号：湘ICP备2026056763号-1X</text>
+  </view>
+</view>

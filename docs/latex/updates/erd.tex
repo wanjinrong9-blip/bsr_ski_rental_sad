@@ -1,0 +1,19 @@
+% 007 数据设计：分模块 ERD；图内“目标”表不得误读为当前已落库。
+\input{diagrams/erd-customer-inventory-contract.tex}
+\input{diagrams/erd-service-finance-workforce.tex}
+\noindent 六图的共同约定：PK 为恒定主键，FK 为引用键，UQ 为唯一，NN 为非空，CK 为检查；目标表直接标“目标”。字段类型、迁移状态及规则来源见《数据字典》和《现有目标数据差异》。图仅展示主链路，省略重复的审计字段。
+\BSRNewFigure{\BSRERCust}{ER-CUST 顾客、预约行与条款同意；UC-01～04}{fig:er-cust}
+\BSRNewFigure{\BSRERInventory}{ER-INV 商品类别、规格、实体单件与门店；UC-02/07/09/13}{fig:er-inv}
+\BSRNewFigure{\BSRERContract}{ER-CONT 合同版本、准备和逐件交接；UC-05～09}{fig:er-cont}
+\BSRNewFigure{\BSRERService}{ER-SERV 归还鉴定、照片、维修与安全验收；UC-09/10/12}{fig:er-serv}
+\BSRNewFigure{\BSRERFinance}{ER-FIN 超时与受损费用、押金、补差和资金回执；UC-03/08/11}{fig:er-fin}
+\BSRNewFigure{\BSRERWorkforce}{ER-STAFF 员工档案、排班、考勤、提醒与审计；UC-14/15}{fig:er-staff}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 关系或约束 & \color{white}\bfseries 设计理由与实现边界 \\
+顾客与预约 / 预约与行 & 均为 1:n，FK 放预约和行；条款同意保留版本，历史事件不可覆盖。\\
+类别树 / 账号档案 & 类别 parent\_id 是自反 FK，并通过服务规则阻止环；员工档案以 user\_id 同时作 PK/FK，顾客账号不强制建档。\\
+预约行与实体装备 & 准备绑定和实际租用分别用连接表拆解 m:n，保存时间与责任人；单件活跃占用有唯一/排他守卫。\\
+费用与签署快照 & 参考价值 8\% 押金、价目版本、合同版本、技师费率和规则版本在交易时冻结；后改价不回写历史单。\\
+跨店归还与调拨 & 实还门店记录在逐件交接；单件当前店可改变，归属店只随正式调拨接收更新。\\
+目标与现有 & categories、contract\_lines、safety\_acceptances 等是目标关系；当前演示仍使用文本类别、JSON 快照或事件表。\\
+\end{BSRTable}

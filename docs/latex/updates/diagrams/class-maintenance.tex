@@ -1,0 +1,13 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small,cls/.style={draw,rectangle split,rectangle split parts=3,rectangle split part align={center,left,left},text width=4.5cm,inner sep=7pt,align=left}]
+\node[cls] (c0) at (0,0) {\centering\scriptsize\textless\textless boundary\textgreater\textgreater\\\small\bfseries 维修工作区\nodepart{second}\scriptsize - 筛选 / 当前工单\\ - 表单与版本\nodepart{third}\scriptsize + 保存处理()\\ + 提交或验收()};
+\node[cls] (c1) at (6,0) {\centering\scriptsize\textless\textless control\textgreater\textgreater\\\small\bfseries 维修控制\nodepart{second}\scriptsize - 会话角色\\ - 预期版本\nodepart{third}\scriptsize + 验证迁移与检查()\\ + 验收并更新库存()};
+\node[cls] (c2) at (12,0) {\centering\scriptsize\textless\textless entity\textgreater\textgreater\\\small\bfseries 维修工单\nodepart{second}\scriptsize - id / 单件 / 负责人\\ - 状态 / 优先级 / dueAt\\ - 诊断 / 结果 / 配件\\ - 工时 / NOK 材料费 / version\nodepart{third}\scriptsize + 提交验收()\\ + 通过、退回或报废()};
+\node[cls] (c3) at (0,-6) {\centering\scriptsize\textless\textless entity\textgreater\textgreater\\\small\bfseries 装备单件\nodepart{second}\scriptsize - 库存编号 / 所在门店\\ - 当前状态\nodepart{third}\scriptsize + 隔离()\\ + 验收后恢复或报废()};
+\node[cls] (c4) at (6,-6) {\centering\scriptsize\textless\textless entity\textgreater\textgreater\\\small\bfseries 维修事件\nodepart{second}\scriptsize - 工单 / 操作者\\ - 前后状态 / 时间\\ - 说明\nodepart{third}\scriptsize + 追加事件()};
+\node[cls] (c5) at (12,-6) {\centering\scriptsize\textless\textless value object\textgreater\textgreater\\\small\bfseries 安全检查\nodepart{second}\scriptsize - 外观 / 紧固件\\ - 功能 / 清洁附件\nodepart{third}\scriptsize + 全部通过()};
+\draw[dashed,->] (c0)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=.85cm,align=center] {请求}(c1);
+\draw[dashed,->] (c1)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=.85cm,align=center] {协调}(c2);
+\draw[Diamond-] (c2)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=1.35cm,align=center] {1 包含 1}(c5);
+\draw[-] (c4)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=1.35cm,align=center] {0..* 归属 1}(c2);
+\draw[dashed,->] (c0)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=1.35cm,align=center] {查看}(c3);
+\end{tikzpicture}}

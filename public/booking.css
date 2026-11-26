@@ -1,0 +1,41 @@
+.booking-panel{position:relative;z-index:2;margin:-26px 0 0;padding:24px 28px 21px;border-color:#cddfdb;box-shadow:0 17px 42px rgba(39,84,89,.09);overflow:hidden}
+.booking-title{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:18px}
+.booking-title h2{font-size:26px;margin:5px 0 7px;color:#24494d}
+.booking-title p{font-size:12px;color:#5c797a;margin:0;max-width:680px}
+.booking-mini-peak{width:100px;height:62px;position:relative;flex:none;color:transparent;background:linear-gradient(160deg,#eaf3f0,#f9fbf8);border-radius:10px;overflow:hidden}
+.booking-mini-peak:before,.booking-mini-peak:after,.booking-pending-art:before,.booking-pending-art:after{content:"";position:absolute;bottom:0;clip-path:polygon(0 100%,48% 0,100% 100%)}
+.booking-mini-peak:before{left:13px;width:64px;height:55px;background:#a7c9c3}
+.booking-mini-peak:after{left:53px;width:55px;height:41px;background:#c7dad3}
+.booking-grid{display:grid;grid-template-columns:minmax(160px,1.15fr) minmax(150px,1fr) minmax(150px,1fr) auto;gap:13px;align-items:end}
+.booking-grid .field label{font-size:11px;color:#3d6569}
+.booking-grid input,.booking-grid select{min-height:48px;background:#fbfdfc;border-color:#cddeda;font-size:13px}
+.booking-grid .btn{min-height:48px;padding:9px 19px}
+.booking-foot{font-size:11px;color:#678489;margin-top:13px}
+.booking-confirmed{color:#337557;font-weight:750}
+.booking-pending,.booking-cart-gate{text-align:center;border:1px dashed #b9d5d2;background:linear-gradient(165deg,#f4f8f5,#fff);border-radius:17px;padding:40px 22px 44px;margin-top:26px}
+.booking-pending h2,.booking-cart-gate h2{font-size:23px;margin:7px 0}
+.booking-pending p,.booking-cart-gate p{font-size:12px;color:#658080;max-width:460px;margin:0 auto 16px}
+.booking-cart-gate{margin-top:0}
+.booking-pending-art{width:82px;height:66px;margin:0 auto 15px;position:relative;color:transparent}
+.booking-pending-art:before{left:4px;width:66px;height:60px;background:#93bbb6}
+.booking-pending-art:after{left:40px;width:46px;height:39px;background:#c3d8d2}
+.late-disclosure{border-left:3px solid #a8ba88;background:#f4f7ef;border-radius:5px;padding:11px 12px;margin:14px 0;display:grid;gap:5px;font-size:11px;color:#596b53;line-height:1.65}
+.late-disclosure b{color:#3d614e;font-size:12px}
+.skill-explainer{background:linear-gradient(135deg,#eef5f0,#f8faf5);border:1px solid #d5e3d6;padding:17px 19px;border-radius:12px;margin:19px 0 9px}
+.skill-explainer h3{font-size:17px;margin:5px 0 7px}
+.skill-explainer p{font-size:12px;color:#5d7668;line-height:1.7}
+.skill-explainer .field{max-width:530px}
+.late-order-section{margin:16px 0 22px;border:1px solid #d6e3d6;border-left:4px solid #83ad94;background:#fafcf8;padding:18px 20px;border-radius:11px}
+.late-order-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.late-order-head h3{font-size:17px;margin:4px 0 0}
+.late-order-section p{font-size:12px;color:#5b725d;line-height:1.8;margin:10px 0}
+.late-order-section details{border-top:1px solid #dbe8df;padding-top:10px;margin-top:13px}
+.late-order-section summary{font-size:11px;color:#426c60;cursor:pointer;font-weight:700}
+.late-estimate{font-size:11px;color:#8a6a3f;background:#fff6e8;border-radius:6px;padding:9px 11px}
+.late-unit-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #e5eee6;padding:9px 0;font-size:11px}
+.late-unit-row small{display:block;color:#708679;margin-top:3px}
+.late-unit-row b{white-space:nowrap}
+.sidebar-note{position:relative;overflow:hidden}
+.sidebar-note:after{content:"";position:absolute;right:-18px;bottom:-7px;width:76px;height:44px;background:#d6e8e5;clip-path:polygon(0 100%,37% 6%,55% 55%,72% 20%,100% 100%);opacity:.7;pointer-events:none}
+@media(max-width:1100px){.booking-grid{grid-template-columns:1fr 1fr}.booking-grid .btn{width:100%}}
+@media(max-width:760px){.booking-panel{margin-top:-15px;padding:20px 17px}.booking-title h2{font-size:22px}.booking-mini-peak{width:70px;height:55px}.booking-grid{grid-template-columns:1fr 1fr}.booking-grid .field:first-child,.booking-grid .btn{grid-column:1/-1}.late-order-head{align-items:start;flex-direction:column}.late-unit-row{flex-direction:column}.booking-pending{padding:31px 18px}}

@@ -1,0 +1,59 @@
+\BSRAppendix{C}{关键数据字典与关系约束}
+\noindent 本附录给出实施和评审必须看到的关键字段。PK 为恒定主键，FK 为外键，UQ 为唯一，NN 为非空，CK 为检查；金额均为整数 NOK，业务日期按 Europe/Oslo 解读并保存可追溯服务器时刻。表中的“目标”不表示当前 SQLite 已建表。
+
+\subsection*{C.1 顾客、预约与同意（UC-01～04）}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 对象 & \color{white}\bfseries 关键字段、关系、约束与现状 \\
+顾客身份 & \texttt{users.id} 为 PK；\texttt{email} UQ/NN，用于回头客查找；姓名、电话和尺码可变。分析上的 Customer 可作视图，不能用邮箱当历史外键。\\
+租赁时段 & \texttt{reservations.store\_id} FK、\texttt{pickup\_at} 和 \texttt{return\_at} NN；归还须晚于起租。本次 \texttt{customer\_skill} 存订单，不写永久技能。时段为值对象，无需独立表。\\
+预约行 & \texttt{reservation\_items.id} PK；\texttt{reservation\_id}、\texttt{variant\_id} FK/NN；\texttt{qty>0}；单价、押金、政策版本和计费天数保留快照。一个预约可有多行。\\
+预约提交映射 & \texttt{reservation\_requests} 以 \texttt{actor\_id/channel/request\_key} 为复合 PK；\texttt{actor\_id} 指实际顾客或员工，渠道限 ONLINE/COUNTER；\texttt{reservation\_id} FK/UQ，\texttt{payload\_hash} 为 64 位 SHA-256，\texttt{created\_at} NN。与预约同事务插入；历史订单不回填。\\
+暂留到期 & \texttt{reservations.hold\_expires\_at} 为服务器到期时刻；原始 \texttt{status=HOLD} 且到期时，读取模型返回 EXPIRED。原始行、NOK 报价及同意快照不改写；库存和未解决提醒按到期时刻排除。\\
+政策同意 & 当前 \texttt{damage\_consents} 记录预约、顾客、版本及同意时刻；目标 PolicyConsent 同时覆盖损坏与超时全文，不以新文本重释旧同意。购物车是暂态草稿，不占库存。\\
+\end{BSRTable}
+
+\subsection*{C.2 类别、规格、物理单件与门店（UC-02/13）}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 对象 & \color{white}\bfseries 关键字段、关系、约束与现状 \\
+类别树（目标） & \texttt{categories.id} PK、\texttt{parent\_id} 自反 FK、\texttt{name} NN；顶级父键可空，禁止自身及祖先成环。当前为规格文本类别，迁移须先去重。\\
+商品规格 & \texttt{variants.id} PK；款式、尺码、类别、参考价值 \texttt{retail\_nok}；目标 \texttt{category\_id} FK。护膝、滑雪镜等配件不强制技能筛选。规格数量不等于可交付单件数。\\
+实物单件 & \texttt{units.id} PK、\texttt{inventory\_no} UQ/NN、\texttt{variant\_id} FK；\texttt{store\_id} 为当前店、\texttt{home\_store\_id} 为归属店。状态与清洁标识决定可预约性；库存号不可复用。\\
+门店和流水 & \texttt{stores.id} PK；\texttt{stock\_events.unit\_id} FK，记录旧/新门店、状态及服务器时间。异店归还只改当前店，归属店随正式调拨接收改变。\\
+价目政策 & \texttt{price\_policies} 按规格、门店、版本唯一；日租金和参考价值押金规则以 NOK 保存。新单每件押金按参考价值 8\% 取整并冻结；旧单不回写。\\
+\end{BSRTable}
+
+\subsection*{C.3 合同、备货与逐件履约（UC-05～09）}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 对象 & \color{white}\bfseries 关键字段、关系、约束与现状 \\
+合同版本 & \texttt{contracts.id} PK、\texttt{code} UQ、\texttt{reservation\_id} FK；同预约的版本组合 UQ。\texttt{snapshot\_json/hash} 和签署事实保留历史；合格电子签署回执尚未接入。\\
+合同明细（目标） & \texttt{contract\_lines.id} PK、\texttt{contract\_id} FK；规格、数量、日价和押金形成版本行。当前主要在合同 JSON 快照和预约行，不得声称独立行已落库。\\
+准备任务 & \texttt{preparations.reservation\_id} 同时作 PK/FK；状态、指派人、公开阻塞说明和版本。\texttt{preparation\_units} 连接预约行与物理单件，活跃单件须唯一。\\
+逐件租用 & \texttt{rental\_units} 以预约行和单件复合键标识；借出、实还、归还门店及逐件超时费用冻结。预约行和单件的 m:n 通过准备/租用两组有时间属性的连接表拆分。\\
+合同调整 & \texttt{contract\_adjustments} 保存预约、基础版本、差额 NOK 和幂等引用；同预约/引用 UQ。换装和部分归还生成新版本，旧版只读。\\
+\end{BSRTable}
+
+\subsection*{C.4 归还鉴定与维修（UC-09/10/12）}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 对象 & \color{white}\bfseries 关键字段、关系、约束与现状 \\
+归还检查 & \texttt{inspections.id} PK；预约/单件 FK 组合 UQ；接收人、外观/功能/清洁事实和时间。前台记录事实，不直接判最终损坏费。\\
+受损案件与照片 & \texttt{damage\_cases.inspection\_id} UQ/FK；等级、指派技师、24 小时首评期限、实际反馈、状态和版本。\texttt{damage\_photos.case\_id} FK，图片与部位/上传者对应；按案件授权读取。\\
+维修与历史费率 & \texttt{maintenance.unit\_id} FK，指派技师、状态、0.25 小时工时及工单创建时费率快照。\texttt{contractor\_rates} 按承包商和生效日 UQ；新费率不得重算旧工单。\\
+安全验收（目标） & SafetyAcceptance 保存工单、经理、决定、时间和轮次；当前主要存在 \texttt{maintenance\_events} 及工单字段。技师提交不等于恢复可租，经理通过后才可解除隔离。\\
+\end{BSRTable}
+
+\subsection*{C.5 费用、押金与资金事件（UC-03/11）}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 对象 & \color{white}\bfseries 关键字段、关系、约束与现状 \\
+超时分项 & 每件 \texttt{rental\_units} 保存实还和冻结费用；LateCharge 是目标概念。首笔有效租赁宽限 120 分钟，此后每开始一小时按该件日租金 10\%，连续 24 小时封顶一天日租金；规则待 BSR 批准。\\
+损坏分项 & \texttt{damage\_cases.fee\_nok} 保存经理核费；正常磨损零费。DamageCharge 可是值对象或独立审计表；争议期间不得扣押金。\\
+结算账户 & \texttt{damage\_settlements.reservation\_id} PK/FK；损坏费、超时费、总费用、抵扣、可退和补差均为 NN 非负 NOK；\texttt{deducted=min(total,deposit)}。版本守卫防旧请求覆盖。\\
+支付和联系 & \texttt{payments.idempotency\_key} UQ；类型、金额、状态、提供方引用。当前为演示资金；\texttt{damage\_contacts} 记录超押金联系及结果，不得自动二次扣款。\\
+\end{BSRTable}
+
+\subsection*{C.6 人员、排班、提醒与审计（UC-14/15）}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 对象 & \color{white}\bfseries 关键字段、关系、约束与现状 \\
+身份泛化 & 当前 \texttt{users.role} 单表保存顾客/员工/技师/经理等身份；\texttt{employee\_profiles.user\_id} 同时作 PK/FK，\texttt{employee\_no} UQ。若拆角色子表须保持既有 ID 与授权记录。\\
+班次与考勤 & \texttt{shifts} 和 \texttt{attendance} 均以人员/挪威工作日 UQ；班次有门店与计划时间，打卡由服务端记本人实际时间，不能由班次伪造出勤。08:00～22:00 是演示班次窗口。\\
+提醒与审计 & \texttt{order\_alert\_reads} 以人员和预约作复合键，已读不等于业务结清；\texttt{audit\_log} 只追加操作者、对象、动作、时间和版本/请求引用。跨角色刷新仍按对象授权查询。\\
+\end{BSRTable}

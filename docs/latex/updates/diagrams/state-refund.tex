@@ -1,0 +1,3 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[>=Latex,font=\small,s/.style={draw,rounded corners=4pt,minimum width=3.3cm,minimum height=1.1cm,align=center}]
+\node[s] (n) at (0,0) {未到结算\\NOT\_DUE};\node[s] (r) at (5,0) {费用待复核\\REVIEW};\node[s] (d) at (10,0) {已模拟退回\\REFUNDED};\draw[->] (n)--node[above,font=\scriptsize]{归还存在费用}(r);\draw[->] (r)--node[above,font=\scriptsize]{经理批准费用}(d);\draw[->] (n.north)--++(0,1.6)-|node[pos=.3,above,font=\scriptsize]{无费用归还或已付款取消}(d.north);
+\node[font=\scriptsize,align=left,text width=12.4cm] at (5,-2.5) {当前退款由本地适配器在事务中生成演示流水，REFUNDED 不表示支付机构真实到账。\\支付与退款有唯一幂等键。真实异步退款中的受理、退款中、失败重试和到账状态仍为目标。};\end{tikzpicture}}

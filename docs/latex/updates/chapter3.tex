@@ -1,0 +1,26 @@
+\subsection{3.1 系统用例图}
+\noindent 系统用例以执行者得到的结果命名。顾客、租赁专员、门店运营经理、装备检修技师、经营负责人和权限管理员在系统边界外；外部签署/支付服务只是目标依赖。本地演示付款和纸质见证不得被图注称为正式第三方能力。
+
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 执行者 & \color{white}\bfseries 需要获得的系统价值及权限边界 \\
+顾客 & 选日期段/尺码并看剩余量，购物车清楚 NOK 租金和逐件押金；同意规则、看准备进度、逐件归还及押金结果，只访问本人。\\
+租赁专员 & 查本店回头客、开合同、具名备货、核码、逐件交付/接收和记录异常；外店只凭完整码办理实物归还，不看完整资料；不能单独核定高争议损坏费。\\
+门店运营经理 & 管理本店排班、调拨、价目、受损复核、维修安全验收与未解决事项；决定何时恢复可租。\\
+装备检修技师 & 只见本人被指派的鉴定与维修任务，上传对应部位照片并记录工时/材料；不能改顾客合同或直接恢复库存。\\
+经营负责人 & 看跨店经营、库存与订单提醒的匿名汇总及政策待决项；不读逐单客户资料；报表不自动决定工资奖金。\\
+权限管理员 & 维护账号与权限变更审计，业务提醒只看匿名汇总；不能凭管理员身份读合同、照片或代做经理验收。\\
+\end{BSRTable}
+
+\input{diagrams/system-usecases.tex}
+\BSRNewFigure{\BSRUsecaseCustomer}{U-CUST 顾客侧 UC-01～04：资料、日期段库存、购物车和同意预约}{fig:u-cust}
+\BSRNewFigure{\BSRUsecaseStore}{U-STORE 门店履约 UC-05～09/11：合同、备货、借还与结算}{fig:u-store}
+\BSRNewFigure{\BSRUsecaseService}{U-SERVICE 技师/经理 UC-10/12：初评、维修与安全复核}{fig:u-service}
+\BSRNewFigure{\BSRUsecaseManagement}{U-MGMT 经营治理 UC-13～15：多店、人员与提醒审计}{fig:u-mgmt}
+
+\input{updates/requirements.tex}
+\input{updates/mini-019-requirements.tex}
+
+\subsection{3.3 功能、数据与质量需求的确认}
+\noindent 需求台账使用 FR、DR、BR、NFR 稳定编号；每条可经《需求追溯矩阵》反查 UC、图、实体和证据。挪威正式金额始终以 NOK 结算，定位币种只作参考展示；起租 09:00 后、约定归还 16:00 前，逐件押金为参考价值的 8\%，均以订单政策版本冻结，正式商业条款待 BSR 批准。
+\input{updates/access-scope.tex}
+\BSRStatus{真实签署、第三方支付/退款及容量目标属于生产缺口；本地付款、退款和电子确认是演示。未取得 BSR 访谈或政策签字，不能将目标蓝图表述为组织既有制度。}

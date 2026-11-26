@@ -1,0 +1,18 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[x=1cm,y=1cm,font=\small]
+\draw[rounded corners] (0,1) rectangle (12,-5.7);\node at (6,.5) {BSR 装备维修工作区};
+\draw (-2,-0.65) circle (.12);\draw (-2,-0.77)--(-2,-1.2) (-2.25,-0.95)--(-1.75,-0.95) (-2,-1.2)--(-2.2,-1.5) (-2,-1.2)--(-1.8,-1.5);\node[below,text width=3cm,align=center] at (-2,-1.6) {维修技师};\coordinate (actor0) at (-1.75,-0.95);
+\draw (14,-2.8) circle (.12);\draw (14,-2.92)--(14,-3.35) (13.75,-3.1)--(14.25,-3.1) (14,-3.35)--(13.8,-3.65) (14,-3.35)--(14.2,-3.65);\node[below,text width=3cm,align=center] at (14,-3.75) {门店经理};\coordinate (actor1) at (13.75,-3.1);
+\draw (-2,-4.95) circle (.12);\draw (-2,-5.069999999999999)--(-2,-5.5) (-2.25,-5.25)--(-1.75,-5.25) (-2,-5.5)--(-2.2,-5.8) (-2,-5.5)--(-1.8,-5.8);\node[below,text width=3cm,align=center] at (-2,-5.8999999999999995) {店员};\coordinate (actor2) at (-1.75,-5.25);
+\node[draw,ellipse,minimum width=6.8cm,minimum height=.85cm,align=center] (uc0) at (6,-1.0) {UC12 登记故障并隔离};
+\node[draw,ellipse,minimum width=6.8cm,minimum height=.85cm,align=center] (uc1) at (6,-2.3) {UC13 检查维修并提交验收};
+\node[draw,ellipse,minimum width=6.8cm,minimum height=.85cm,align=center] (uc2) at (6,-3.6) {UC21 验收通过 退回 或报废};
+\node[draw,ellipse,minimum width=6.8cm,minimum height=.85cm,align=center] (uc3) at (6,-4.9) {UC22 查看维修人员基本资料};
+\draw (actor0)--(uc1);
+\draw (actor0)--(uc3);
+\draw (actor1)--(uc0);
+\draw (actor1)--(uc1);
+\draw (actor1)--(uc2);
+\draw (actor1)--(uc3);
+\draw (actor2)--(uc0);
+\draw (actor2)--(uc3);
+\end{tikzpicture}}

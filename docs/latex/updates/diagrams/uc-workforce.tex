@@ -1,0 +1,19 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[x=1cm,y=1cm,font=\small]
+\draw[rounded corners] (0,1) rectangle (12,-7.0);\node at (6,.5) {BSR 人员与考勤};
+\draw (-2,-0.65) circle (.12);\draw (-2,-0.77)--(-2,-1.2) (-2.25,-0.95)--(-1.75,-0.95) (-2,-1.2)--(-2.2,-1.5) (-2,-1.2)--(-1.8,-1.5);\node[below,text width=3cm,align=center] at (-2,-1.6) {非顾客工作人员};\coordinate (actor0) at (-1.75,-0.95);
+\draw (14,-2.8) circle (.12);\draw (14,-2.92)--(14,-3.35) (13.75,-3.1)--(14.25,-3.1) (14,-3.35)--(13.8,-3.65) (14,-3.35)--(14.2,-3.65);\node[below,text width=3cm,align=center] at (14,-3.75) {门店经理};\coordinate (actor1) at (13.75,-3.1);
+\node[draw,ellipse,minimum width=6.8cm,minimum height=.85cm,align=center] (uc0) at (6,-1.0) {UC19 上下班打卡与本人记录};
+\node[draw,ellipse,minimum width=6.8cm,minimum height=.85cm,align=center] (uc1) at (6,-2.3) {UC20 查询每日安排与到岗};
+\node[draw,ellipse,minimum width=6.8cm,minimum height=.85cm,align=center] (uc2) at (6,-3.6) {UC15 创建或编辑每日班次};
+\node[draw,ellipse,minimum width=6.8cm,minimum height=.85cm,align=center] (uc3) at (6,-4.9) {UC23 退出登录};
+\node[draw,ellipse,minimum width=6.8cm,minimum height=.85cm,align=center] (uc4) at (6,-6.2) {UC24 同步查看授权业务};
+\draw (actor0)--(uc0);
+\draw (actor0)--(uc1);
+\draw (actor0)--(uc3);
+\draw (actor0)--(uc4);
+\draw (actor1)--(uc0);
+\draw (actor1)--(uc1);
+\draw (actor1)--(uc2);
+\draw (actor1)--(uc3);
+\draw (actor1)--(uc4);
+\end{tikzpicture}}

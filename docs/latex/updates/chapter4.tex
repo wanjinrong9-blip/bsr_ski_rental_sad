@@ -1,0 +1,13 @@
+\input{updates/analysis-classes.tex}
+\input{updates/analysis-sequences.tex}
+\input{updates/analysis-states.tex}
+
+\subsection{4.4 需求到分析模型的一致性核对}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 关键规则 & \color{white}\bfseries 同一语义在类、序列与状态中的体现 \\
+整段库存与防双占 & `Unit` 不是规格库存数；S-UC02 只查询，S-UC04 再核，ST-UNIT 的准备占用/借出排斥重叠。\\
+当前合同签署与付款 & `Contract` 按版本保存，S-UC05/06 本地先自助确认或纸质见证再演示付款；ST-ORDER 未签不能付款与交付，真实第三方仍待接入。\\
+分批异店归还 & `RentalUnit` 各有实还时刻，`UnitLocation` 分当前/归属；S-UC09 更新当前店，ST-ORDER 仍可租赁中。\\
+受损初评与安全验收 & `DamageCase` 的 24 小时是初评；ST-DAMAGE 经理核费，`SafetyAcceptance` 与 ST-MAINT 决定可租。\\
+押金争议与费用 & `DepositSettlement` 抵扣不超押金，S-UC11 分项，ST-DEPOSIT 争议/失败不转已到账。\\
+\end{BSRTable}

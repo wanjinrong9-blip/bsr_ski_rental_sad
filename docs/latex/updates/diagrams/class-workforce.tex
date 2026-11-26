@@ -1,0 +1,14 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small,cls/.style={draw,rectangle split,rectangle split parts=3,rectangle split part align={center,left,left},text width=4.5cm,inner sep=7pt,align=left}]
+\node[cls] (c0) at (0,0) {\centering\scriptsize\textless\textless boundary\textgreater\textgreater\\\small\bfseries 排班与打卡界面\nodepart{second}\scriptsize - 人员 / 日期 / 门店\\ - 打卡类型\nodepart{third}\scriptsize + 保存班次()\\ + 本人打卡()};
+\node[cls] (c1) at (6,0) {\centering\scriptsize\textless\textless control\textgreater\textgreater\\\small\bfseries 人员考勤控制\nodepart{second}\scriptsize - 会话人员\\ - 服务器时钟 / 挪威日期\nodepart{third}\scriptsize + 验证唯一性与历史()\\ + 生成每日安排()};
+\node[cls] (c2) at (12,0) {\centering\scriptsize\textless\textless entity\textgreater\textgreater\\\small\bfseries 工作人员\nodepart{second}\scriptsize - 用户 id / 姓名 / 角色\\ - 非顾客角色集合\nodepart{third}\scriptsize + 识别本人()};
+\node[cls] (c3) at (0,-6) {\centering\scriptsize\textless\textless entity\textgreater\textgreater\\\small\bfseries 人员基本档案\nodepart{second}\scriptsize - 工号 / 岗位 / 部门\\ - 电话邮箱来自用户\\ - 能力 / 培训 / 加入时间\nodepart{third}\scriptsize + 查询资料()};
+\node[cls] (c4) at (6,-6) {\centering\scriptsize\textless\textless entity\textgreater\textgreater\\\small\bfseries 每日班次\nodepart{second}\scriptsize - 人员 / 门店 / 日期\\ - 开始 / 结束时间\nodepart{third}\scriptsize + 验证每日单班()\\ + 已有打卡拒绝编辑()};
+\node[cls] (c5) at (12,-6) {\centering\scriptsize\textless\textless entity\textgreater\textgreater\\\small\bfseries 出勤记录\nodepart{second}\scriptsize - 人员 / 工作日期 / 门店\\ - 上班 / 下班 UTC 时间\nodepart{third}\scriptsize + 记录上班()\\ + 记录下班与时长()};
+\draw[dashed,->] (c0)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=.85cm,align=center] {请求}(c1);
+\draw[dashed,->] (c1)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=.85cm,align=center] {身份}(c2);
+\draw[dashed,->] (c0)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=1.35cm,align=center] {展示}(c3);
+\draw[dashed,->] (c1)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=1.35cm,align=center] {协调}(c4);
+\draw[-] (c2)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=1.35cm,align=center] {1 对 0..*}(c5);
+\draw[dashed,->] (c4)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=.85cm,align=center] {人员/日期}(c5);
+\end{tikzpicture}}

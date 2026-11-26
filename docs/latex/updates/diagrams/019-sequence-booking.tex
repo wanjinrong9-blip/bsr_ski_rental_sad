@@ -1,0 +1,52 @@
+\resizebox{.98\linewidth}{!}{%
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\scriptsize]
+  % A classroom sequence diagram: actor, boundary, control, then entities.
+  \draw[Navy,line width=.85pt] (0,.42) circle (.13);
+  \draw[Navy,line width=.85pt] (0,.29)--(0,-.14)
+    (-.25,.10)--(.25,.10) (0,-.14)--(-.21,-.43) (0,-.14)--(.21,-.43);
+  \node[above,text=Navy] at (0,.68) {顾客};
+  \node[draw=Navy,fill=IceLight,minimum width=2.65cm,minimum height=.90cm,align=center]
+    at (3.55,0) {\textless\textless boundary\textgreater\textgreater\\小程序结账界面};
+  \node[draw=Navy,fill=IceLight,minimum width=2.65cm,minimum height=.90cm,align=center]
+    at (7.10,0) {\textless\textless control\textgreater\textgreater\\预约控制};
+  \node[draw=Navy,fill=IceLight,minimum width=2.65cm,minimum height=.90cm,align=center]
+    at (10.65,0) {\textless\textless entity\textgreater\textgreater\\共享购物车／报价};
+  \node[draw=Navy,fill=IceLight,minimum width=2.65cm,minimum height=.90cm,align=center]
+    at (14.20,0) {\textless\textless entity\textgreater\textgreater\\库存／预约订单};
+  \foreach \x in {0,3.55,7.10,10.65,14.20}
+    {\draw[dashed,Rule,line width=.65pt] (\x,-.55)--(\x,-12.80);}
+
+  \draw[->,Navy] (0,-1.18)--(3.55,-1.18);
+  \node[above,fill=white,inner sep=1pt,text width=3.3cm,align=center] at (1.775,-1.14)
+    {1 完整阅读并同意损坏规则};
+  \draw[->,Navy] (3.55,-2.32)--(7.10,-2.32);
+  \node[above,fill=white,inner sep=1pt,text width=3.3cm,align=center] at (5.325,-2.28)
+    {2 请求报价：购物车版本};
+  \draw[->,Teal] (7.10,-3.46)--(10.65,-3.46);
+  \node[above,fill=white,inner sep=1pt,text width=3.3cm,align=center] at (8.875,-3.42)
+    {3 读取本人购物车与版本};
+  \draw[->,Teal] (7.10,-4.60)--(14.20,-4.60);
+  \node[above,fill=white,inner sep=1pt,text width=6.8cm,align=center] at (10.65,-4.56)
+    {4 按租期核算 NOK、逐件押金及当前可用量};
+  \draw[dashed,->,Navy] (7.10,-5.74)--(3.55,-5.74);
+  \node[above,fill=white,inner sep=1pt,text width=3.3cm,align=center] at (5.325,-5.70)
+    {5 报价 ID、期限、金额与规则版本};
+  \draw[->,Navy] (3.55,-6.88)--(7.10,-6.88);
+  \node[above,fill=white,inner sep=1pt,text width=3.3cm,align=center] at (5.325,-6.84)
+    {6 预约：报价 ID、同意与幂等键};
+  \draw[->,Teal] (7.10,-8.02)--(10.65,-8.02);
+  \node[above,fill=white,inner sep=1pt,text width=3.3cm,align=center] at (8.875,-7.98)
+    {7 再验顾客、购物车版本和报价指纹};
+  \draw[->,Teal] (7.10,-9.16)--(14.20,-9.16);
+  \node[above,fill=white,inner sep=1pt,text width=6.8cm,align=center] at (10.65,-9.12)
+    {8 事务内复核整段库存并建立暂留与价格快照};
+  \draw[dashed,->,Navy] (7.10,-10.30)--(3.55,-10.30);
+  \node[above,fill=white,inner sep=1pt,text width=3.3cm,align=center] at (5.325,-10.26)
+    {9 返回同一订单号、NOK 明细与取货码};
+  \draw[dashed,->,Navy] (3.55,-11.44)--(0,-11.44);
+  \node[above,fill=white,inner sep=1pt,text width=3.3cm,align=center] at (1.775,-11.40)
+    {10 展示具名备货进度};
+  \node[draw=Amber,fill=GoldPale,rounded corners=1mm,align=center,
+    text width=13.5cm,inner sep=4pt] at (7.10,-12.38)
+    {扩展：版本过旧、报价失效或最后一件被占用，返回冲突并要求重新核价；失败不占库存。相同幂等键只找回原订单。};
+\end{tikzpicture}}

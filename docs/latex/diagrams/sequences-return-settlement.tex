@@ -1,0 +1,38 @@
+% S-UC09 逐件异店接收：当前店与永久归属分开。
+\newcommand{\BSRSeqUCNine}{\BSRAnalysisSeq{接收专员}{ReturnDesk}{ReturnCtrl}{RentalUnit}{UnitLocation}{%
+  \draw[bsrMessage] (0,-1) -- node[above,font=\tiny]{核订单/库存号/实物} (3.5,-1);
+  \draw[bsrMessage] (3.5,-2) -- node[above,font=\tiny]{校验该件尚未归还} (7,-2);
+  \draw[bsrMessage] (7,-3) -- node[above,font=\tiny]{冻结服务器实还/检查事实} (10.5,-3);
+  \draw[bsrMessage] (7,-4) -- node[above,font=\tiny]{异店只更新当前店} (14,-4);
+  \draw[bsrReturn] (7,-5) -- node[above,font=\tiny]{同步已还/未还/负责人} (3.5,-5);
+  \draw[bsrUnknown] (7,-6) -- node[above,font=\tiny]{alt 已还/不属于订单：拒绝} (3.5,-6);
+  \node[bsrNote] at (10.5,-7.8) {只冻结该件的超时费；未还件仍占库存，疑损件转 UC-10。};
+}}
+
+% S-UC10 技师初评、照片与经理复核。
+\newcommand{\BSRSeqUCTen}{\BSRAnalysisSeqSix{维修技师}{门店经理}{DamageDesk}{AssessmentCtrl}{DamageCase}{DamagePhoto}{%
+  \draw[bsrMessage] (0,-1) -- node[above,font=\tiny]{领取已指派任务} (5.6,-1);
+  \draw[bsrMessage] (5.6,-1.8) -- node[above,font=\tiny]{核单件/24h 截止} (8.4,-1.8);
+  \draw[bsrMessage] (8.4,-2.6) -- node[above,font=\tiny]{记级别/估值/工时} (11.2,-2.6);
+  \draw[bsrMessage] (8.4,-3.4) -- node[above,font=\tiny]{上传受损部位照片} (14,-3.4);
+  \draw[bsrReturn] (8.4,-4.2) -- node[above,font=\tiny]{初评及顾客可见进度} (5.6,-4.2);
+  \draw[bsrMessage] (2.8,-5) -- node[above,font=\tiny]{审实物与计价依据} (5.6,-5);
+  \draw[bsrMessage] (5.6,-5.8) -- node[above,font=\tiny]{核定或退回补证} (8.4,-5.8);
+  \draw[bsrMessage] (8.4,-6.6) -- node[above,font=\tiny]{存经理结论与历史版} (11.2,-6.6);
+  \draw[bsrUnknown] (8.4,-7.4) -- node[above,font=\tiny]{缺证据/争议：不核费} (11.2,-7.4);
+  \node[bsrNote] at (11.2,-8.8) {24 小时仅指初评反馈；正常磨损零费。技师不能替经理核费或安全验收。};
+}}
+
+% S-UC11 逐件超时、损坏费、押金抵扣与争议。
+\newcommand{\BSRSeqUCEleven}{\BSRAnalysisSeqSix{顾客}{门店经理}{SettlementView}{SettlementCtrl}{LateCharge}{DepositSettlement}{%
+  \draw[bsrMessage] (2.8,-1) -- node[above,font=\tiny]{确认核定损坏费} (5.6,-1);
+  \draw[bsrMessage] (5.6,-1.8) -- node[above,font=\tiny]{核已还/政策版/争议} (8.4,-1.8);
+  \draw[bsrMessage] (8.4,-2.6) -- node[above,font=\tiny]{逐件冻结超时费} (11.2,-2.6);
+  \draw[bsrMessage] (8.4,-3.4) -- node[above,font=\tiny]{抵扣/可退/补差 NOK} (14,-3.4);
+  \draw[bsrReturn] (8.4,-4.2) -- node[above,font=\tiny]{分项与资金状态} (5.6,-4.2);
+  \draw[bsrReturn] (5.6,-5) -- node[above,font=\tiny]{顾客查明细与证据} (0,-5);
+  \draw[bsrMessage] (0,-5.8) -- node[above,font=\tiny]{有异议时提出争议} (5.6,-5.8);
+  \draw[bsrMessage] (2.8,-6.6) -- node[above,font=\tiny]{复核/安排联系补差} (5.6,-6.6);
+  \draw[bsrUnknown] (8.4,-7.4) -- node[above,font=\tiny]{未还/争议/回执不明：暂停} (14,-7.4);
+  \node[bsrNote] at (11.2,-8.8) {无争议才发起退款；超押金由专员联系补差。演示回执不得写成真实到账。};
+}}

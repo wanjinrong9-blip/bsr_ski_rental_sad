@@ -1,0 +1,17 @@
+% BSR 对外业务价值图；椭圆表示业务用例，不是页面菜单。
+\newcommand{\BSRBusinessCases}{%
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \draw[Teal,line width=.8pt,rounded corners=2mm,fill=IceLight] (2.1,-.5) rectangle (12.5,-7.3);
+  \node[anchor=north west,font=\small\bfseries,text=Navy] at (2.4,-.7) {BSR 滑雪租赁业务边界};
+  \node[bsrActor] (customer) at (0,-3.0) {顾客\\外部执行者};
+  \node[bsrActor] (resort) at (14.6,-3.0) {度假村\\外部涉众};
+  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=5cm,minimum height=.8cm] (rent) at (7.3,-1.7) {B-CASE-01 租赁合适装备};
+  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=5cm,minimum height=.8cm] (hand) at (7.3,-2.8) {B-CASE-02 到店逐件交付};
+  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=5cm,minimum height=.8cm] (return) at (7.3,-3.9) {B-CASE-03 接收逐件归还};
+  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=5cm,minimum height=.8cm] (maint) at (7.3,-5.0) {B-CASE-04 维护安全装备};
+  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=5cm,minimum height=.8cm] (cross) at (7.3,-6.1) {B-CASE-05 提供跨店服务};
+  \foreach \x in {rent,hand,return,maint,cross} {\draw[Navy,line width=.7pt] (customer.east) -- (\x.west);}
+  \draw[Navy,line width=.7pt] (resort.west) -- (maint.east);
+  \draw[Navy,line width=.7pt] (resort.west) -- (cross.east);
+\end{tikzpicture}%
+}

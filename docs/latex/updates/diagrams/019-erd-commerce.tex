@@ -1,0 +1,29 @@
+\resizebox{.98\linewidth}{!}{%
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\footnotesize,
+  tbl/.style={draw=Navy,fill=white,line width=.8pt,rectangle split,
+    rectangle split parts=2,rectangle split part fill={IceLight,white},
+    text width=4.05cm,inner sep=7pt,align=left}]
+  \node[tbl] (users) at (0,0) {\centering\bfseries users（共用顾客）
+    \nodepart{second}PK id\\role = customer\\网页与小程序同一顾客 ID};
+  \node[tbl] (cart) at (5.8,0) {\centering\bfseries customer\_carts
+    \nodepart{second}PK id\\FK customer\_id → users.id UQ\\FK store\_id → stores.id\\pickup\_at / return\_at\\version / updated\_at};
+  \node[tbl] (lines) at (11.6,0) {\centering\bfseries customer\_cart\_lines
+    \nodepart{second}PK(cart\_id, variant\_id)\\FK cart\_id → customer\_carts.id\\FK variant\_id → variants.id\\qty 1..5 / updated\_at};
+
+  \node[tbl] (quote) at (0,-6.6) {\centering\bfseries mini\_quotes
+    \nodepart{second}PK quote\_id\\FK customer\_id → users.id\\cart\_version / fingerprint\\cart\_json / expires\_at\\created\_at};
+  \node[tbl] (order) at (5.8,-6.6) {\centering\bfseries reservations（共用订单）
+    \nodepart{second}PK id\\FK user\_id → users.id\\store\_id / pickup\_at / return\_at\\租金、押金、NOK 政策快照\\状态／取货码／结算};
+  \node[tbl] (variant) at (11.6,-6.6) {\centering\bfseries variants（装备规格）
+    \nodepart{second}PK id\\类别／款式／尺码\\参考价值与价格政策\\实体单件另由 units 记录};
+
+  \draw[->,Teal] (cart.west)--node[above,fill=white,inner sep=1pt]{1 : 1}(users.east);
+  \draw[->,Teal] (lines.west)--node[above,fill=white,inner sep=1pt]{N : 1}(cart.east);
+  \draw[->,Teal] (quote.north)--node[right,fill=white,inner sep=1pt]{N : 1}(users.south);
+  \draw[->,Teal] (lines.south)--node[right,fill=white,inner sep=1pt]{N : 1}(variant.north);
+  \draw[->,Teal] (order.north)--(5.8,-3.45)
+    --node[above,fill=white,inner sep=1pt]{N : 1}(2.35,-3.45)
+    --(2.35,-1.92)--(users.south east);
+  \node[font=\footnotesize,text=Muted,align=center,text width=13.7cm] at (5.8,-10.25)
+    {报价与预约各自以顾客外键归属；购物车到订单没有直接外键。提交时核对购物车版本、报价指纹及幂等键。};
+\end{tikzpicture}}

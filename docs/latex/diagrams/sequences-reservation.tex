@@ -1,0 +1,32 @@
+% S-UC02 日期段剩余量，UC-02 基本 1–5/扩展 4b。
+\newcommand{\BSRSeqUCTwo}{\BSRAnalysisSeq{顾客}{CatalogPage}{AvailabilityCtrl}{RentalWindow}{Unit}{%
+  \draw[bsrMessage] (0,-1) -- node[above,font=\tiny]{选门店/日期/尺码} (3.5,-1);
+  \draw[bsrMessage] (3.5,-2) -- node[above,font=\tiny]{查询整个区间} (7,-2);
+  \draw[bsrMessage] (7,-3) -- node[above,font=\tiny]{校验 Oslo 09:00/16:00} (10.5,-3);
+  \draw[bsrMessage] (7,-4) -- node[above,font=\tiny]{排除重叠/未还/隔离} (14,-4);
+  \draw[bsrReturn] (7,-5) -- node[above,font=\tiny]{返回每规格剩余量} (3.5,-5);
+  \draw[bsrUnknown] (7,-6) -- node[above,font=\tiny]{alt 查询后被占用：结账重核} (3.5,-6);
+  \node[bsrNote] at (10.5,-7.8) {UC-02 查询不锁库存；UC-04 提交时由服务端原子再检。};
+}}
+
+% S-UC03 购物车与报价，UC-03 扩展 4a。
+\newcommand{\BSRSeqUCThree}{\BSRAnalysisSeq{顾客}{CartPage}{QuoteCtrl}{PricePolicy}{CartLine}{%
+  \draw[bsrMessage] (0,-1) -- node[above,font=\tiny]{加入/改数量} (3.5,-1);
+  \draw[bsrMessage] (3.5,-2) -- node[above,font=\tiny]{服务端重报价} (7,-2);
+  \draw[bsrMessage] (7,-3) -- node[above,font=\tiny]{取门店/规格价目版本} (10.5,-3);
+  \draw[bsrMessage] (7,-4) -- node[above,font=\tiny]{写行租金/逐件 8\% 押金} (14,-4);
+  \draw[bsrReturn] (7,-5) -- node[above,font=\tiny]{NOK 分项/时段} (3.5,-5);
+  \draw[bsrUnknown] (3.5,-6) -- node[above,font=\tiny]{alt 改日期/门店：旧报价失效} (7,-6);
+  \node[bsrNote] at (10.5,-7.8) {报价是草稿，不是库存承诺；参考币种不改变 NOK 合同额。};
+}}
+
+% S-UC04 规则同意与预约，UC-04 扩展 3a/4a/5a。
+\newcommand{\BSRSeqUCFour}{\BSRAnalysisSeq{顾客}{ConsentPage}{ReservationCtrl}{PolicyConsent}{Reservation}{%
+  \draw[bsrMessage] (0,-1) -- node[above,font=\tiny]{阅读到底并主动勾选} (3.5,-1);
+  \draw[bsrMessage] (3.5,-2) -- node[above,font=\tiny]{提交报价/版本/幂等键} (7,-2);
+  \draw[bsrMessage] (7,-3) -- node[above,font=\tiny]{核当前政策并存同意} (10.5,-3);
+  \draw[bsrMessage] (7,-4) -- node[above,font=\tiny]{再核库存，原子暂留} (14,-4);
+  \draw[bsrReturn] (14,-5) -- node[above,font=\tiny]{订单号/暂留截止} (3.5,-5);
+  \draw[bsrUnknown] (7,-6) -- node[above,font=\tiny]{alt 价变/缺货/新政策：撤销并重显} (3.5,-6);
+  \node[bsrNote] at (10.5,-7.8) {先查账号/渠道/键与负载摘要：同键同内容返回原单，改内容冲突；新意向须重新同意。};
+}}

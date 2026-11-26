@@ -1,0 +1,62 @@
+\BSRAppendix{E}{需求追溯、证据状态与待决策}
+\noindent 本附录使 PDF 可独立从源需求定位到用例、图与验收。图号是稳定追溯 ID；“本地”只表示课程演示可回归，“目标”指尚需外部服务或正式数据迁移，“待访谈/待 BSR 确认”不能写为组织已批准。
+
+\subsection*{E.1 功能需求到用例、图和验收}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 用例 / 源编号 & \color{white}\bfseries 分析及设计证据、验收与状态 \\
+UC-01\newline FR-C01、FR-F01 & 顾客档案与回头客：U-CUST、C-CUST、ER-CUST；E-01。本地档案/授权可测，保存期限待决定。\\
+UC-02\newline FR-C02、FR-C03、FR-I01 & 本次技能、时段可订量与实物：S-UC02、C-BOOK、ST-UNIT、ER-INV；E-02。本地可测，营业时刻待批准。\\
+UC-03\newline FR-C04、FR-C05 & 购物车与 NOK 报价：S-UC03、C-CUST、C-FIN、ER-CUST/FIN；E-03。本地可测，正式价目和汇率源待定。\\
+UC-04\newline FR-C06、FR-C07 & 主动同意、预约去重与暂留：S-UC04、ST-ORDER、ER-CUST、预约提交映射；E-04。同键重放、冲突、迁移、到期读取状态、库存释放和重新选期本地可测，条款文本待批准。\\
+UC-05\newline FR-F02、FR-F03 & 合同版本与当前签署：S-UC05、C-CONT、ER-CONT；E-05。本地自助确认和纸质见证可测，合格电子签署为生产缺口。\\
+UC-06\newline FR-C07、FR-F03、FR-F04 & 支付确认与备货任务：S-UC06、ST-ORDER、ER-FIN；E-06。仅演示资金；真实回调和对账为目标。\\
+UC-07\newline FR-C08、FR-F04、FR-F05 & 具名备货、核码与逐件交付：S-UC07、ST-PREP、ER-CONT；E-07。本地可测。\\
+UC-08\newline FR-F06、FR-F07 & 租中更换/部分归还：C-CONT、ST-ORDER、ER-CONT；E-08。本地变更可测，真实差额清算为目标。\\
+UC-09\newline FR-F07、FR-I02 & 逐件异店归还：S-UC09、ST-UNIT、ER-CONT；E-09。本地可测。\\
+UC-10\newline FR-D01、FR-D02、FR-D03 & 受损照片、24 小时初评与经理核定：S-UC10、ST-DAMAGE、ER-SERV；E-10。本地可测，赔偿政策待批准。\\
+UC-11\newline FR-D04、FR-D05、FR-F08 & 超时、损坏、押金和补差：S-UC11、ST-DEPOSIT、ER-FIN；E-11。本地分项可测，真实退款为生产缺口。\\
+UC-12\newline FR-R01、FR-R02、FR-D03 & 维修和经理安全验收：C-SERV、ST-MAINT、ER-SERV；E-12。本地可测，正式安全检查表待批准。\\
+UC-13\newline FR-I01、FR-I02 & 新门店、入库与调拨：C-BOOK、ST-UNIT、ER-INV；E-13。本地可测，多店生产容量待验证。\\
+UC-14\newline FR-W01、FR-W02、FR-W03 & 档案、班次、打卡和年度归属：C-STAFF、ER-STAFF；E-14。本地可测，奖金口径待 BSR 决定。\\
+UC-15\newline FR-O01、FR-O02、FR-A01、FR-C08 & 新增/未解决提醒、角色权限与审计：C-STAFF、ER-STAFF；E-15。本地可测，外部通知为目标。\\
+\end{BSRTable}
+
+\subsection*{E.2 数据、规则与质量编号反查}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 源编号 & \color{white}\bfseries 主用例与模型、可判定的检查点 \\
+DR-01 & UC-01 → ER-CUST；客户恒定 ID、邮箱唯一、历史档案快照。\\
+DR-02 & UC-02/13 → ER-INV；规格与单件分离、库存号唯一、类别自反。\\
+DR-03 & UC-09/13 → ER-INV；当前店、归属店、清洁和调拨事件分开。\\
+DR-04 & UC-04/05/08 → ER-CONT；预约/合同编号、版本、逐项金额与签署状态。\\
+DR-05 & UC-07/09 → ER-CONT；订单行与单件经时间化连接表拆解 m:n。\\
+DR-06 & UC-03/04/11 → ER-FIN；政策/同意版本、费用、押金、回执与联系。\\
+DR-07 & UC-10/12 → ER-SERV；一单一件一技师、照片与费率快照。\\
+DR-08 & UC-14/15 → ER-STAFF；员工/班次/打卡唯一及审计。\\
+DR-09 & 六张 ERD 与附录 C/D；PK、FK、UQ、NN、CK、1:n、m:n、自反与历史不回写。\\
+BR-01 & UC-02/04 → S-UC02/04；Oslo 日期、09:00/16:00 与整段再核。\\
+BR-02 & UC-03/11 → C-FIN、ER-FIN；NOK、参考价值 8\% 押金和旧价冻结。\\
+BR-03 & UC-11 → ST-DEPOSIT、ER-FIN；首笔有效租赁 120 分钟宽限、10\% 起算小时及 24 小时封顶；待批准。\\
+BR-04 & UC-10/11 → ST-DAMAGE；等级、证据、修复成本和折旧上限、经理核费。\\
+BR-05 & UC-11 → ER-FIN；费用合计、抵扣、可退、补差及争议阻断。\\
+BR-06 & UC-10/12 → ER-SERV；0.25 小时工时、创建日费率和 24 小时初评。\\
+BR-07 & UC-02/07/09/13 → ST-UNIT；重叠占用排斥、隔离和异店/调拨分离。\\
+BR-08 & UC-05/06/07 → ST-ORDER；当前合同签署是本地演示付款和交付守卫，真实签署与第三方付款尚未接入。\\
+NFR-01 & UC-01/10/12/15；岗位/对象授权、照片保护。验收见附录 A。\\
+NFR-02 & UC-02/03/04/07/11；手机全流程与可恢复错误提示。验收见附录 A。\\
+NFR-03 & UC-04/06/07/09/11/13；事务、版本冲突、请求映射和跨角色一致性；预约并发同键只建一单。\\
+NFR-04 & UC-02/07/15；多店旺季性能基线及容量待 BSR 签署。\\
+NFR-05 & 全部用例；模块和三层设计、规则/访问分离、版本与模型追溯。\\
+NFR-06 & UC-05/11/13/15；备份、重复迁移、恢复和历史快照。\\
+FR-S01 & 横向运行约束，无业务用例；NFR-01/06 → AC-05 → 013 启动配置闸门。回环 HOST、有效端口须在打开数据库前验证；本地专项已通过，正式部署另验。\\
+FR-S02 & 横向运行约束，无业务用例；NFR-01/06 → AC-05 → 013 数据库路径与静态文件真实路径闸门。公开目录及链接逃逸拒绝；本地专项已通过，正式文件权限另验。\\
+\end{BSRTable}
+
+\subsection*{E.3 证据边界与业务决策登记}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 决策或证据 & \color{white}\bfseries 当前结论与负责人 \\
+现状流程 & BSR 案例能支持 Excel 工作簿与纸质维修等事实；现场开单、交付、归还与调拨细节待老板、经理、专员、技师访谈/观察。B-ASIS 图中的暖色虚线不是已证实现状。\\
+正式商业政策 & 8\% 押金、10\%/小时超时、首租 2 小时宽限、损坏估值、取消/异议/退款时限是演示规则；需 BSR 业务负责人、门店经理和财务共同核准、版本化和生效。\\
+正式外部服务 & 支付、银行退款、电子签署、短信/邮件及汇率提供方待选；接入后需回调签名、幂等、对账、失败重试与客户可见状态验收。\\
+生产部署 & 生产数据库、并发、监控、安全、隐私保留和备份加密/异地保管需要单独设计与验收；本地 Node/SQLite 的 71 项自动测试、启动与静态读取闸门、隔离恢复演练不是生产 SLA 证明。\\
+变更规则 & 修改任何 FR/DR/BR/NFR 时，同时检查对应 UC 基本/扩展流程、类/序列/状态、ERD/字段、迁移和 E 场景；更新版本记录并保留旧合同/规则快照。\\
+\end{BSRTable}

@@ -1,0 +1,38 @@
+% C-CUST 顾客与预约：分析类，不等同现有数据库表。
+\newcommand{\BSRClassCustomer}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRClassCard{account}{0}{0}{Account《抽象》}{id；role；status}{authenticate()；authorize()}
+  \BSRClassCard{customer}{5.1}{0}{Customer}{customerId；email；量体}{updateProfile()；identify()}
+  \BSRClassCard{reservation}{10.2}{0}{Reservation}{id；租期；状态；技能自评}{hold()；cancel()}
+  \BSRClassCard{cart}{0}{-4.2}{CartLine}{规格；数量；报价版本}{changeQty()；invalidateQuote()}
+  \BSRClassCard{item}{5.1}{-4.2}{ReservationItem}{规格；数量；单价快照}{freezeQuote()；reprice()}
+  \BSRClassCard{consent}{10.2}{-4.2}{PolicyConsent}{政策版本；同意时间}{recordConsent()；verify()}
+  \draw[Navy,line width=.7pt,-{Triangle[open]}] (customer) -- node[above,font=\tiny,fill=white]{泛化 1:1} (account);
+  \draw[Navy,line width=.7pt] (customer) -- node[above,font=\tiny,fill=white]{1:n 预约} (reservation);
+  \draw[Navy,line width=.7pt,{Diamond[fill=Navy,length=2.5mm,width=2.2mm]}-] (reservation) -- node[sloped,above,font=\tiny,fill=white]{组合 1:n} (item);
+  \draw[Navy,line width=.7pt] (reservation) -- node[right,font=\tiny,fill=white]{1:1 同意} (consent);
+  \draw[Navy,dashed,line width=.7pt,-{Latex}] (cart) -- node[above,font=\tiny,fill=white]{提交后生成} (item);
+  \node[bsrNote] at (5.1,-7.2) {来源：UC-01～04。CartLine 可为短暂对象；ReservationItem 与 PolicyConsent 才保留历史承诺。};
+\end{tikzpicture}}
+
+% C-BOOK 商品规格、物理单件与门店。
+\newcommand{\BSRClassInventory}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRClassCard{category}{0}{0}{Category}{id；name；parentId}{addChild()；checkCycle()}
+  \BSRClassCard{variant}{5.1}{0}{Variant}{id；款式；尺码；技能}{matches()；quote()}
+  \BSRClassCard{unit}{10.2}{0}{Unit}{unitId；库存号；状态}{isAvailable()；isolate()}
+  \BSRClassCard{store}{0}{-4.2}{Store}{storeId；名称；营业时段}{receive()；handover()}
+  \BSRClassCard{location}{5.1}{-4.2}{UnitLocation}{当前店；归属店；版本}{moveCurrent()；transferHome()}
+  \BSRClassCard{movement}{10.2}{-4.2}{InventoryMovement}{unitId；来源/目标店；时间}{append()；audit()}
+  \BSRClassCard{price}{5.1}{-8.4}{PricePolicy}{规格/门店；日价 NOK；版本}{effectiveAt()；snapshot()}
+  \draw[Navy,line width=.7pt] (category) -- node[above,font=\tiny,fill=white]{1:n 分类} (variant);
+  \draw[Navy,line width=.7pt] (variant) -- node[above,font=\tiny,fill=white]{1:n 实物} (unit);
+  \draw[Navy,line width=.7pt] (category.west) to[out=165,in=115,looseness=2] node[left,font=\tiny]{自反 0:n} (category.north);
+  \draw[Navy,line width=.7pt] (store) -- node[above,font=\tiny,fill=white]{1:n 位置} (location);
+  \draw[Navy,line width=.7pt] (unit) -- node[sloped,above,font=\tiny,fill=white]{1:1 位置} (location);
+  \draw[Navy,line width=.7pt] (unit) -- node[right,font=\tiny,fill=white]{1:n 流水} (movement);
+  % 价格政策从规格外侧绕行，避免纵线穿过 UnitLocation 类框。
+  \coordinate (priceRouteTop) at ([xshift=7mm]variant.east);
+  \coordinate (priceRouteBottom) at (priceRouteTop |- price.east);
+  \draw[Navy,line width=.7pt] (variant.east) -- (priceRouteTop) -- (priceRouteBottom) -- (price.east);
+  \node[font=\tiny,rotate=90,fill=white,inner sep=1pt] at ($(priceRouteTop)!0.73!(priceRouteBottom)$) {1:n 价目版本};
+  \node[bsrNote] at (10.2,-8.4) {来源：UC-02/07/09/13。规格用于筛选，单件用于交接；异店归还只改当前店。};
+\end{tikzpicture}}

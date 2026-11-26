@@ -1,0 +1,55 @@
+% ER-CUST 顾客/预约。字段约束详见 usecase/数据字典.md。
+\newcommand{\BSRERCust}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRERCard{customers}{0}{0}{customers / users}{PK customer\_id\newline UQ email, NN name\newline 现有 users 映射}
+  \BSRERCard{reservations}{5.2}{0}{reservations}{PK id\newline FK user\_id,store\_id\newline NN pickup\_at,return\_at}
+  \BSRERCard{items}{10.4}{0}{reservation\_items}{PK id\newline FK reservation\_id,variant\_id\newline CK qty>0; NOK 快照}
+  \BSRERCard{consents}{5.2}{-3.8}{damage\_consents}{PK/FK reservation\_id\newline FK user\_id\newline NN version,accepted\_at}
+  \BSRERCard{requests}{0}{-3.8}{reservation\_requests}{PK actor/channel/key\newline UQ/FK reservation\_id\newline NN payload\_hash,created\_at}
+  \BSRERCard{variant}{10.4}{-3.8}{variants}{PK id\newline style,size,skill\newline 规格而非物理单件}
+  \draw[Navy] (customers) -- node[above,font=\tiny,fill=white]{1:n} (reservations);
+  \draw[Navy] (reservations) -- node[above,font=\tiny,fill=white]{1:n} (items);
+  \draw[Navy] (reservations) -- node[right,font=\tiny,fill=white]{1:0..1 同意} (consents);
+  \draw[Navy] (requests.north east) -- node[above,sloped,font=\tiny,fill=white]{1:1} (reservations.south west);
+  \draw[Navy,dashed] (customers) -- node[left,font=\tiny,fill=white]{actor FK} (requests);
+  \draw[Navy] (items) -- node[right,font=\tiny,fill=white]{n:1 FK variant\_id} (variant);
+  \node[bsrNote] at (5.2,-7.1) {租期是预约值字段；购物车不占库存。提交映射按实际账号、渠道和键唯一；历史订单可无映射。};
+\end{tikzpicture}}
+
+% ER-INV 商品/单件/门店；类别树是目标表。
+\newcommand{\BSRERInventory}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRERCard{category}{0}{0}{categories 目标}{PK id\newline FK parent\_id→本表\newline CK 无环}
+  \BSRERCard{variant}{5.2}{0}{variants}{PK id\newline FK category\_id 目标\newline NN style,size; retail\_nok}
+  \BSRERCard{unit}{10.4}{0}{units}{PK id; UQ inventory\_no\newline FK variant\_id,store\_id\newline FK home\_store\_id; status}
+  \BSRERCard{store}{0}{-4}{stores}{PK id\newline NN name,address\newline open\_hours}
+  \BSRERCard{policy}{5.2}{-4}{price\_policies}{PK id\newline FK variant\_id,store\_id\newline UQ variant/store/version}
+  \BSRERCard{events}{10.4}{-4}{stock\_events}{PK id; FK unit\_id\newline from/to store,status\newline NN created\_at}
+  \draw[Navy] (category) -- node[above,font=\tiny,fill=white]{1:n 类别} (variant);
+  \draw[Navy] (variant) -- node[above,font=\tiny,fill=white]{1:n 单件} (unit);
+  \draw[Navy] (category.west) to[out=165,in=115,looseness=2] node[left,font=\tiny]{自反 1:n} (category.north);
+  \draw[Navy] (store) -- node[above,font=\tiny,fill=white]{1:n 价目} (policy);
+  \draw[Navy] (policy) -- node[right,font=\tiny,fill=white]{n:1 规格} (variant);
+  \draw[Navy] (unit) -- node[right,font=\tiny,fill=white]{1:n 事件} (events);
+  \draw[Navy,dashed] (store) -- node[sloped,above,font=\tiny,fill=white]{当前/归属 两条 FK} (unit);
+\end{tikzpicture}}
+
+% ER-CONT 合同版本、预约行和单件 m:n 连接。
+\newcommand{\BSRERContract}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRERCard{reservation}{0}{0}{reservations}{PK id\newline FK user\_id,store\_id\newline status,contract\_version}
+  \BSRERCard{contract}{5.2}{0}{contracts}{PK id; UQ code\newline FK reservation\_id\newline UQ reservation/version}
+  \BSRERCard{clines}{10.4}{0}{contract\_lines 目标}{PK id; FK contract\_id\newline variant,qty,NOK\newline 当前在 snapshot\_json}
+  \BSRERCard{prep}{0}{-3.8}{preparations}{PK/FK reservation\_id\newline assigned\_to,status\newline version}
+  \BSRERCard{punit}{5.2}{-3.8}{preparation\_units}{PK (res,unit)\newline FK item,unit\newline UQ active unit}
+  \BSRERCard{unit}{10.4}{-3.8}{units}{PK id; UQ inventory\_no\newline 状态/当前店/归属店}
+  \BSRERCard{item}{0}{-7.6}{reservation\_items}{PK id\newline FK reservation,variant\newline qty,NOK 快照}
+  \BSRERCard{runit}{5.2}{-7.6}{rental\_units}{PK (item,unit)\newline out\_at,returned\_at\newline FK return\_store\_id}
+  \BSRERCard{adjust}{10.4}{-7.6}{contract\_adjustments}{PK id; FK reservation\_id\newline UQ reservation/reference\newline base\_version,差额 NOK}
+  \draw[Navy] (reservation) -- node[above,font=\tiny,fill=white]{1:n 版本} (contract);
+  \draw[Navy] (contract) -- node[above,font=\tiny,fill=white]{1:n 目标行} (clines);
+  \draw[Navy] (reservation) -- node[left,font=\tiny,fill=white]{1:1 当前备货} (prep);
+  \draw[Navy] (prep) -- node[above,font=\tiny,fill=white]{1:n} (punit);
+  \draw[Navy] (punit) -- node[above,font=\tiny,fill=white]{n:1 实物} (unit);
+  \draw[Navy] (punit) -- node[right,font=\tiny,fill=white]{交付后 1:1} (runit);
+  \draw[Navy] (item) -- node[above,font=\tiny,fill=white]{1:n 逐件借还} (runit);
+  \draw[Navy] (item) -- node[sloped,above,font=\tiny,fill=white]{1:n 准备绑定} (punit);
+  % 调整记录跨过两条逐件连接线；以卡片 FK 和数据字典表达，避免连线压住字段。
+\end{tikzpicture}}

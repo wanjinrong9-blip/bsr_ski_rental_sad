@@ -1,0 +1,39 @@
+% C-FIN 费用、押金与资金流水；正式金额只有 NOK。
+\newcommand{\BSRClassFinance}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRClassCard{late}{0}{0}{LateCharge}{unitId；实还时间；规则版本}{estimate()；freeze()}
+  \BSRClassCard{damagec}{5.1}{0}{DamageCharge}{鉴定号；核定金额；依据}{review()；approve()}
+  \BSRClassCard{settle}{10.2}{0}{DepositSettlement}{押金；抵扣；可退；补差}{calculate()；holdDispute()}
+  \BSRClassCard{pay}{0}{-4.2}{PaymentEvent}{类型；金额 NOK；回执状态}{recordOnce()；verify()}
+  \BSRClassCard{contact}{5.1}{-4.2}{SupplementContact}{责任专员；联系结果；时间}{logContact()；close()}
+  \BSRClassCard{rule}{10.2}{-4.2}{PolicySnapshot}{超时/损坏版；同意时间}{resolve()；preserve()}
+  % 超时费用至押金结算的关联走上方，不穿过 DamageCharge。
+  \coordinate (settleRouteL) at ([yshift=7mm]late.north);
+  \coordinate (settleRouteR) at ([yshift=7mm]settle.north);
+  \draw[Navy,line width=.7pt] (late.north) -- (settleRouteL) -- node[midway,above,font=\tiny,fill=white]{0:n 汇总} (settleRouteR) -- (settle.north);
+  \draw[Navy,line width=.7pt] (damagec) -- node[above,font=\tiny,fill=white]{0:n 汇总} (settle);
+  \draw[Navy,line width=.7pt] (settle) -- node[sloped,above,font=\tiny,fill=white]{1:n 资金事件} (pay);
+  \draw[Navy,line width=.7pt] (settle) -- node[above,font=\tiny,fill=white]{0:n 补差联系} (contact);
+  \draw[Navy,line width=.7pt] (rule) -- node[right,font=\tiny,fill=white]{1:1 冻结规则} (settle);
+  \node[bsrNote] at (5.1,-7.2) {来源：UC-03/05/08/11。费用扣抵按整数 NOK；争议暂停结清，模拟回执不等于真实到账。};
+\end{tikzpicture}}
+
+% C-STAFF 人员/排班/提醒。账号为共同身份，技师有对象级任务授权。
+\newcommand{\BSRClassWorkforce}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRClassCard{identity}{0}{0}{WorkerIdentity《抽象》}{accountId；角色；状态}{authenticate()；authorize()}
+  \BSRClassCard{employee}{5.1}{0}{Employee}{employeeId；所属店；资料}{viewShift()；clock()}
+  \BSRClassCard{technician}{10.2}{0}{Technician}{contractorId；专业；费率}{acceptTask()；recordWork()}
+  \BSRClassCard{shift}{0}{-4.2}{Shift}{日期；工作店；起止}{assign()；rejectConflict()}
+  \BSRClassCard{punch}{5.1}{-4.2}{Punch}{上/下班时刻；工作日}{clockIn()；clockOut()}
+  \BSRClassCard{alert}{10.2}{-4.2}{OrderAlert}{对象；责任人；已读/未结}{markRead()；resolveCase()}
+  \BSRClassCard{audit}{5.1}{-8.4}{AuditEvent}{操作者；对象；前后状态}{append()；query()}
+  \draw[Navy,line width=.7pt,-{Triangle[open]}] (employee) -- node[above,font=\tiny,fill=white]{泛化} (identity);
+  % 技师泛化线绕过 Employee 类框，空心三角仍指向抽象身份类。
+  \coordinate (techRouteR) at ([yshift=7mm]technician.north);
+  \coordinate (techRouteL) at ([yshift=7mm]identity.north);
+  \draw[Navy,line width=.7pt,-{Triangle[open]}] (technician.north) -- (techRouteR) -- node[midway,above,font=\tiny,fill=white]{泛化} (techRouteL) -- (identity.north);
+  \draw[Navy,line width=.7pt] (employee) -- node[sloped,above,font=\tiny,fill=white]{1:n 计划} (shift);
+  \draw[Navy,line width=.7pt] (employee) -- node[right,font=\tiny,fill=white]{1:n 事实} (punch);
+  \draw[Navy,line width=.7pt] (identity) -- node[sloped,above,font=\tiny,fill=white]{0:n 授权提醒} (alert);
+  \draw[Navy,line width=.7pt] (identity) -- node[pos=.82,right,font=\tiny,fill=white]{1:n 审计} (audit);
+  \node[bsrNote] at (10.2,-8.4) {来源：UC-14/15。班次是计划，打卡是事实；已读提醒与订单未解决分离。};
+\end{tikzpicture}}

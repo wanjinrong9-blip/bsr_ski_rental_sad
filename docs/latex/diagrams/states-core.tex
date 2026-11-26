@@ -1,0 +1,55 @@
+% 边上的 O/U/P 编号对照 analysis-states.tex 的触发/守卫/岗位/副作用表。
+\newcommand{\BSRStateOrder}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[bsrState] (draft) at (0,0) {草稿};
+  \node[bsrState] (hold) at (3.2,0) {暂留};
+  \node[bsrState] (confirmed) at (6.4,0) {已确认};
+  \node[bsrState] (prepare) at (9.6,0) {备货中};
+  \node[bsrState] (renting) at (12.8,0) {租赁中};
+  \node[bsrState] (cancel) at (3.2,-3) {已取消};
+  \node[bsrState] (expired) at (0,-3) {暂留已过期};
+  \node[bsrState] (settle) at (9.6,-3) {待结算};
+  \node[bsrState] (done) at (12.8,-3) {完成};
+  \draw[bsrMessage] (draft) -- node[above,font=\tiny]{O1} (hold);
+  \draw[bsrMessage] (hold) -- node[above,font=\tiny]{O2} (confirmed);
+  \draw[bsrMessage] (confirmed) -- node[above,font=\tiny]{O3} (prepare);
+  \draw[bsrMessage] (prepare) -- node[above,font=\tiny]{O4} (renting);
+  \draw[bsrMessage] (renting) -- node[right,font=\tiny]{O5} (settle);
+  \draw[bsrMessage] (settle) -- node[above,font=\tiny]{O6} (done);
+  \draw[bsrMessage] (hold) -- node[right,font=\tiny]{O7} (cancel);
+  \draw[bsrMessage,dashed] (hold) to[out=220,in=50] node[above,font=\tiny]{O8} (expired);
+\end{tikzpicture}}
+
+\newcommand{\BSRStateUnit}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[bsrState] (available) at (0,0) {可租};
+  \node[bsrState] (reserved) at (3.3,0) {准备占用};
+  \node[bsrState] (out) at (6.6,0) {借出};
+  \node[bsrState] (dirty) at (9.9,0) {待清洁};
+  \node[bsrState] (isolate) at (6.6,-3) {疑损隔离};
+  \node[bsrState] (repair) at (9.9,-3) {维修};
+  \node[bsrState] (accept) at (13.2,-3) {待安全验收};
+  \node[bsrState] (retired) at (13.2,-5.4) {报废};
+  \draw[bsrMessage] (available) -- node[above,font=\tiny]{U1} (reserved);
+  \draw[bsrMessage] (reserved) -- node[above,font=\tiny]{U2} (out);
+  \draw[bsrMessage] (out) -- node[above,font=\tiny]{U3} (dirty);
+  \draw[bsrMessage] (dirty) to[out=90,in=90,looseness=1] node[above,font=\tiny]{U4} (available);
+  \draw[bsrMessage] (out) -- node[left,font=\tiny]{U5} (isolate);
+  \draw[bsrMessage] (isolate) -- node[above,font=\tiny]{U6} (repair);
+  \draw[bsrMessage] (repair) -- node[above,font=\tiny]{U7} (accept);
+  \draw[bsrMessage] (accept) to[out=70,in=25,looseness=1] node[above,font=\tiny]{U8} (available);
+  \draw[bsrMessage] (accept) -- node[right,font=\tiny]{U9} (retired);
+\end{tikzpicture}}
+
+\newcommand{\BSRStatePreparation}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[bsrState] (new) at (0,0) {待分派};
+  \node[bsrState] (assigned) at (3.4,0) {已指派};
+  \node[bsrState] (picking) at (6.8,0) {逐件准备};
+  \node[bsrState] (ready) at (10.2,0) {已备妥};
+  \node[bsrState] (handed) at (13.6,0) {已交付};
+  \node[bsrState] (blocked) at (6.8,-3) {阻塞/替换};
+  \draw[bsrMessage] (new) -- node[above,font=\tiny]{P1} (assigned);
+  \draw[bsrMessage] (assigned) -- node[above,font=\tiny]{P2} (picking);
+  \draw[bsrMessage] (picking) -- node[above,font=\tiny]{P3} (ready);
+  \draw[bsrMessage] (ready) -- node[above,font=\tiny]{P4} (handed);
+  \draw[bsrMessage] (picking) -- node[right,font=\tiny]{P5} (blocked);
+  \draw[bsrMessage] (blocked) to[out=180,in=220,looseness=1] node[left,font=\tiny]{P6} (picking);
+\end{tikzpicture}}

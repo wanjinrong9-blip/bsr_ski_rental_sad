@@ -1,0 +1,13 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small,cls/.style={draw,rectangle split,rectangle split parts=3,rectangle split part align={center,left,left},text width=4.5cm,inner sep=7pt,align=left}]
+\node[cls] (c0) at (0,0) {\centering\scriptsize\textless\textless boundary\textgreater\textgreater\\\small\bfseries 购物车界面\nodepart{second}\scriptsize - 门店与租期\\ - 当前选择\nodepart{third}\scriptsize + 增加、减少、移除()\\ + 展示报价()};
+\node[cls] (c1) at (6,0) {\centering\scriptsize\textless\textless control\textgreater\textgreater\\\small\bfseries 报价控制\nodepart{second}\scriptsize - 当前执行者\\ - 报价上下文\nodepart{third}\scriptsize + 校验数量()\\ + 读取可用量与价目()};
+\node[cls] (c2) at (12,0) {\centering\scriptsize\textless\textless entity\textgreater\textgreater\\\small\bfseries 装备规格\nodepart{second}\scriptsize - id / 类别 / 尺码\\ - 款式 / 可用量\nodepart{third}\scriptsize + 查询规格()};
+\node[cls] (c3) at (0,-6) {\centering\scriptsize\textless\textless client state\textgreater\textgreater\\\small\bfseries 购物车\nodepart{second}\scriptsize - 浏览器选择键\\ - items\nodepart{third}\scriptsize + 保存选择()\\ + 创建预约后清空()};
+\node[cls] (c4) at (6,-6) {\centering\scriptsize\textless\textless value object\textgreater\textgreater\\\small\bfseries 购物车项目\nodepart{second}\scriptsize - variantId\\ - qty\nodepart{third}\scriptsize + 增减数量()\\ + 校验 1–5 件()};
+\node[cls] (c5) at (12,-6) {\centering\scriptsize\textless\textless value object\textgreater\textgreater\\\small\bfseries 报价结果\nodepart{second}\scriptsize - 租金 / 押金 / NOK 合计\\ - 政策版本 / 租期天数\nodepart{third}\scriptsize + 核对总额()};
+\draw[dashed,->] (c0)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=.85cm,align=center] {请求}(c1);
+\draw[dashed,->] (c1)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=.85cm,align=center] {读取}(c2);
+\draw[dashed,->] (c0)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=1.35cm,align=center] {显示}(c3);
+\draw[Diamond-] (c3)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=.85cm,align=center] {1 包含 0..12}(c4);
+\draw[dashed,->] (c1)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=1.35cm,align=center] {生成}(c5);
+\end{tikzpicture}}

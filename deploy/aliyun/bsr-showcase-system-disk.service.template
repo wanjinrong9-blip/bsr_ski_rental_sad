@@ -1,0 +1,30 @@
+# Template only for a system-disk-only Ubuntu instance.
+# Keep disabled until backup copies exist off this disk and a separate restore
+# target has been verified. The checks below guard paths, not backup quality.
+[Unit]
+Description=BSR synthetic showcase (system disk, loopback behind Nginx)
+After=network-online.target local-fs.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=bsr
+Group=bsr
+WorkingDirectory=/opt/bsr/app
+EnvironmentFile=/etc/bsr/showcase-system-disk.env
+ExecStartPre=/usr/bin/test -r /var/lib/bsr/data/showcase.sqlite
+ExecStartPre=/usr/bin/test -d /var/lib/bsr/backups
+ExecStartPre=/usr/bin/test -w /var/lib/bsr/data
+ExecStartPre=/usr/bin/test -w /var/lib/bsr/backups
+ExecStart=/usr/bin/node src/server.mjs
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/bsr
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,27 @@
+# Template only. Do not enable until the synthetic data and private storage gates pass.
+[Unit]
+Description=BSR synthetic showcase (loopback behind Nginx)
+After=network-online.target local-fs.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=bsr
+Group=bsr
+WorkingDirectory=/opt/bsr/app
+EnvironmentFile=/etc/bsr/showcase.env
+ExecStartPre=/usr/bin/mountpoint -q /srv/bsr
+ExecStartPre=/usr/bin/test -r /srv/bsr/data/showcase.sqlite
+ExecStartPre=/usr/bin/test -d /srv/bsr/backups
+ExecStart=/usr/bin/node src/server.mjs
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/srv/bsr
+
+[Install]
+WantedBy=multi-user.target

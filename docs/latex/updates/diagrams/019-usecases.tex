@@ -1,0 +1,28 @@
+\resizebox{.98\linewidth}{!}{%
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small]
+  \draw[Navy,line width=.8pt,rounded corners=2mm] (0,1) rectangle (13,-8.4);
+  \node[font=\small\bfseries,text=Navy] at (6.5,.58) {BSR 共用业务服务（Web 与微信小程序）};
+  % 课件式系统用例：执行者在边界外，用例采用椭圆。
+  \draw[Navy,line width=.9pt] (-2.5,-2.8) circle (.13);
+  \draw[Navy,line width=.9pt] (-2.5,-2.93)--(-2.5,-3.4)
+    (-2.77,-3.12)--(-2.23,-3.12) (-2.5,-3.4)--(-2.73,-3.72) (-2.5,-3.4)--(-2.27,-3.72);
+  \node[below,align=center,text width=2.5cm] at (-2.5,-3.82) {顾客\\业务执行者};
+  \draw[Navy,line width=.9pt] (15.4,-1.35) circle (.13);
+  \draw[Navy,line width=.9pt] (15.4,-1.48)--(15.4,-1.95)
+    (15.13,-1.67)--(15.67,-1.67) (15.4,-1.95)--(15.17,-2.27) (15.4,-1.95)--(15.63,-2.27);
+  \node[below,align=center,text width=2.5cm] at (15.4,-2.37) {微信平台\\外部系统执行者};
+  \draw[Navy,line width=.9pt] (15.4,-5.75) circle (.13);
+  \draw[Navy,line width=.9pt] (15.4,-5.88)--(15.4,-6.35)
+    (15.13,-6.07)--(15.67,-6.07) (15.4,-6.35)--(15.17,-6.67) (15.4,-6.35)--(15.63,-6.67);
+  \node[below,align=center,text width=2.9cm] at (15.4,-6.77) {门店租赁专员\\网页端业务工人};
+  \node[draw=Navy,fill=white,ellipse,minimum width=7.6cm,minimum height=.9cm,align=center] (entry) at (6.5,-.58) {UC-16 查看受控小程序入口};
+  \node[draw=Navy,fill=white,ellipse,minimum width=7.6cm,minimum height=.9cm,align=center] (login) at (6.5,-1.9) {UC-17 验证微信身份并绑定顾客};
+  \node[draw=Navy,fill=white,ellipse,minimum width=7.6cm,minimum height=.9cm,align=center] (cart) at (6.5,-3.22) {UC-18 按日期管理共享购物车};
+  \node[draw=Navy,fill=white,ellipse,minimum width=7.6cm,minimum height=.9cm,align=center] (book) at (6.5,-4.54) {UC-19 核价、同意并预约};
+  \node[draw=Navy,fill=white,ellipse,minimum width=7.6cm,minimum height=.9cm,align=center] (track) at (6.5,-5.86) {UC-20 查询同一订单与具名进度};
+  \node[draw=Navy,fill=white,ellipse,minimum width=7.6cm,minimum height=.9cm,align=center] (revoke) at (6.5,-7.18) {UC-21 退出与解除微信绑定};
+  \foreach \uc in {entry,login,cart,book,track,revoke}{\draw[Navy,line width=.65pt] (-2.22,-3.12)--(\uc.west);}
+  \draw[Teal,line width=.7pt] (15.13,-1.67)--(login.east);
+  \draw[Teal,line width=.7pt] (15.13,-6.07)--(track.east);
+  \node[font=\scriptsize,text=Muted,align=center] at (6.5,-7.91) {扫码仅打开客户端；账号权限由独立会话与顾客 ID 裁决};
+\end{tikzpicture}}

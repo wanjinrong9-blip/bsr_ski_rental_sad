@@ -1,0 +1,4 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[>=Latex,font=\small,s/.style={draw,rounded corners=5pt,minimum width=3.6cm,minimum height=1.2cm,align=center}]
+\node[s] (a) at (0,0) {当天未打卡\\无当天记录};\node[s] (b) at (5.5,0) {在岗\\已上班 未下班};\node[s] (c) at (11,0) {已下班\\当天记录只读};\fill (-2.5,0) circle(.1);\draw[->] (-2.4,0)--(a);
+\draw[->] (a)--node[above,font=\scriptsize]{上班 IN}(b);\draw[->] (b)--node[above,font=\scriptsize]{下班 OUT}(c);
+\node[draw,dashed,align=left,text width=12.4cm,font=\scriptsize] at (5.5,-2.4) {拒绝：未上班直接 OUT、重复 IN、重复 OUT、顾客或无权限调用。\\工作日期由服务器按 Europe/Oslo 计算；下一工作日建立另一条记录，不复用旧记录。\\本轮不实现跨午夜班次、补签或工资计算。};\end{tikzpicture}}

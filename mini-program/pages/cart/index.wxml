@@ -1,0 +1,47 @@
+<view class="page">
+  <view class="brand-mini"><image class="brand-mini-logo" src="/assets/bsr-logo.png" mode="aspectFill" aria-label="BSR 标志"/><text>BSR · SKARDALEN</text></view>
+  <view class="eyebrow">YOUR RENTAL KIT</view><view class="title">购物车</view>
+  <view class="muted">{{pickupDate}} 09:00 起租 — {{returnDate}} 16:00 前归还</view>
+  <view class="simulation">{{wechatMode ? '安全合成展示' : '本机课程演示'}} · NOK 记账 · 无真实支付或有效电子签署</view>
+
+  <view class="loading" wx:if="{{loading}}">正在核对当前租期的库存与报价…</view>
+  <view class="empty" wx:elif="{{!lines.length}}"><view class="symbol">◇</view><view class="heading">装备还没有加入购物车</view><view>先选取还日期，再查看该日期段的可用数量。</view><button class="btn" wx:if="{{wechatMode && !user}}" bindtap="goAccount">先验证微信身份</button><button class="btn" wx:else bindtap="goCatalog">去挑选装备</button></view>
+  <view wx:else>
+    <view class="card cart-line" wx:for="{{lines}}" wx:key="variantId">
+      <view class="gear-name">{{item.name}}</view>
+      <view class="muted">{{item.category}} · {{item.size}}</view>
+      <view class="cart-line-controls">
+        <view class="cart-line-facts"><view>日租 NOK {{item.dailyNok}}</view><view>本期可订 {{item.available}} 件</view></view>
+        <view class="quantity"><button class="quantity-btn" data-id="{{item.variantId}}" data-delta="-1" bindtap="onQuantity">−</button><text class="quantity-count">{{item.qty}}</text><button class="quantity-btn" data-id="{{item.variantId}}" data-delta="1" bindtap="onQuantity">＋</button></view>
+      </view>
+    </view>
+    <view class="notice notice-error" wx:if="{{quoteError}}">{{quoteError}}。请调整数量或租期后重新核对。</view>
+    <view class="card quote-card" wx:if="{{quote}}"><view class="card-title">当前报价 · NOK</view><view class="price-row"><text>装备租金</text><text class="price-value">NOK {{quote.rentNok}}</text></view><view class="price-row"><text>可退押金 · 参考价值的 8%</text><text class="price-value">NOK {{quote.depositNok}}</text></view><view class="line"></view><view class="price-row total"><text>合计</text><text class="price-value">NOK {{quote.totalNok}}</text></view><view class="tiny">本报价仅供此租期核对，提交时服务端会再次检查库存与价目。</view></view>
+    <view class="card"><view class="card-title">预约前确认</view>
+      <view class="field"><text class="field-label">本次滑雪水平 · 必选</text><picker mode="selector" range="{{skills}}" value="{{skillIndex}}" bindchange="onSkill"><view class="field-control picker-text {{skillIndex < 0 ? 'placeholder' : ''}}">{{skillIndex < 0 ? '请选择' : skills[skillIndex]}}</view></picker><view class="tiny">用于门店准备适合你这次滑行的装备。</view></view>
+      <view class="policy-summary"><text>超时、受损与押金规则</text><text class="pill">{{policy.version || '待加载'}}</text></view>
+      <view class="muted">首次有效租赁可免费超时两小时；维修技师对受损设备在归还后 24 小时内反馈鉴定。严重受损超出押金的部分由员工联系说明，不自动追加扣款。</view>
+      <button class="btn btn-ghost" bindtap="openPolicy">阅读完整规则并确认</button>
+      <view class="notice {{accepted ? '' : 'notice-warn'}}">{{accepted ? '已读完并同意当前规则' : '请阅读完整规则至末尾，再主动勾选同意'}}</view>
+    </view>
+    <button class="btn checkout" disabled="{{submitting || !quote || !accepted || skillIndex < 0}}" loading="{{submitting}}" bindtap="onCheckout">{{user ? '确认预约并暂留装备' : '先登录顾客账号'}}</button>
+    <button wx:if="{{pending}}" class="btn btn-ghost retry" disabled="{{submitting}}" bindtap="onRetry">找回上次预约提交</button>
+  </view>
+
+  <view wx:if="{{showPolicy}}" class="overlay">
+    <view class="policy-dialog">
+      <view class="row policy-head"><view><view class="eyebrow">READ BEFORE BOOKING</view><view class="card-title">{{policy.title}}</view></view><text class="close" bindtap="closePolicy">×</text></view>
+      <view class="notice notice-warn">正式金额单位为挪威克朗 NOK；押金按每件装备参考价值 8% 计。{{wechatMode ? '合成预览中的收付款仅为模拟。' : '所有收付款在本机仅作模拟。'}}</view>
+      <scroll-view class="policy-scroll" scroll-y="true" lower-threshold="12" bindscrolltolower="onPolicyBottom">
+        <view class="policy-section-title">五级受损分类</view>
+        <view class="grade" wx:for="{{policy.grades}}" wx:key="code"><view class="pill">{{item.label}}</view><view class="muted">{{item.description}}</view><view class="tiny">{{item.basis}}</view></view>
+        <view class="policy-section-title">鉴定、扣款与补差流程</view>
+        <view class="step" wx:for="{{policy.steps}}" wx:key="index"><view class="step-num">{{index + 1}}</view><view>{{item}}</view></view>
+        <view class="policy-end">你已阅读到本版规则末尾。</view>
+      </scroll-view>
+      <view class="tiny">{{policyRead ? '已阅读到底部，请主动确认。' : '请向下滚动阅读完整规则。'}}</view>
+      <checkbox-group bindchange="onAccepted"><label class="agree"><checkbox value="yes" checked="{{accepted}}" disabled="{{!policyRead}}" color="#12375f"/><text class="agree-copy">我已阅读并同意本版超时、受损、押金抵扣及超额补差规则</text></label></checkbox-group>
+      <button class="btn" bindtap="closePolicy">返回购物车</button>
+    </view>
+  </view>
+</view>

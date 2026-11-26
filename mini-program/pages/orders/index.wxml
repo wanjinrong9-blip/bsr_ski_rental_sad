@@ -1,0 +1,18 @@
+<view class="page">
+  <view class="brand-mini"><image class="brand-mini-logo" src="/assets/bsr-logo.png" mode="aspectFill" aria-label="BSR 标志"/><text>BSR · SKARDALEN</text></view>
+  <view class="eyebrow">YOUR JOURNEYS</view><view class="title">我的订单</view><view class="muted">网页和小程序读取同一套订单与库存；刷新可查看最新处理进度。</view>
+  <view class="simulation">本机课程演示：金额和流程均为模拟，不发生真实收付款。</view>
+  <view class="loading" wx:if="{{loading}}">正在读取订单…</view>
+  <view class="notice notice-error" wx:elif="{{error}}">{{error}}</view>
+  <view class="empty" wx:elif="{{!user}}"><view class="symbol">◇</view><view class="heading">登录后查看订单</view><view>使用网页中的同一个 BSR 顾客账号，可读取相同订单。</view><button class="btn" bindtap="goAccount">去登录</button></view>
+  <view class="empty" wx:elif="{{!orders.length}}"><view class="symbol">❄</view><view class="heading">还没有预约记录</view><view>选择取还日期与装备，开始第一段雪途。</view><button class="btn" bindtap="goCatalog">挑选装备</button></view>
+  <view wx:else>
+    <view class="card order-card" wx:for="{{orders}}" wx:key="id" data-id="{{item.id}}" bindtap="openOrder">
+      <view class="row"><text class="order-code">{{item.code}}</text><text class="pill {{item.status === 'EXPIRED' || item.status === 'SETTLEMENT' ? 'pill-warm' : ''}}">{{item.statusLabel}}</text></view>
+      <view class="order-store">{{item.store_name}}</view>
+      <view class="time-grid"><view class="time-cell"><text class="time-label">取货</text><text class="time-value">{{item.pickupText}}</text></view><view class="time-cell"><text class="time-label">归还</text><text class="time-value">{{item.returnText}}</text></view></view>
+      <view class="line"></view><view class="row"><view class="stage"><view class="tiny">当前步骤 · {{item.workflow.current}}</view><view class="handler">{{item.workflow.handler.name || '待分派'}} 负责</view><view class="tiny">备货：{{item.prepLabel}}</view></view><view class="amount">NOK {{item.total_nok}}</view></view>
+      <view class="order-open">查看详情与取货码　›</view>
+    </view>
+  </view>
+</view>

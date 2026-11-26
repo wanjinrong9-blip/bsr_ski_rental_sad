@@ -1,0 +1,45 @@
+% 五张改进业务蓝图；均为目标设计，待 BSR 业务确认。
+\newcommand{\BSRToBeBooking}{\BSRBizSeq{顾客\\执行者}{租赁专员\\工人}{BSR 系统\\自动化}{单件库存\\实体}{%
+  \draw[bsrMessage] (0,-1.1) -- node[above,font=\scriptsize]{选门店/09:00 起至 16:00 还} (8.6,-1.1);
+  \draw[bsrMessage] (8.6,-2.1) -- node[above,font=\scriptsize]{核整个时段可订量} (12.9,-2.1);
+  \draw[bsrReturn] (8.6,-3.1) -- node[above,font=\scriptsize]{NOK 租金/逐件 8\% 押金} (0,-3.1);
+  \draw[bsrMessage] (0,-4.1) -- node[above,font=\scriptsize]{阅读同意，提交预约} (8.6,-4.1);
+  \draw[bsrMessage] (8.6,-5.1) -- node[above,font=\scriptsize]{再核库存，生成备货任务} (4.3,-5.1);
+  \node[bsrNote] at (6.45,-6.6) {纸面查价/口头传递转为统一信息流；价格政策与 8\% 押金待 BSR 批准。};
+}}
+
+\newcommand{\BSRToBeHandover}{\BSRBizSeq{顾客\\执行者}{租赁专员\\工人}{BSR 系统\\自动化}{实体装备\\实体}{%
+  \draw[bsrMessage] (8.6,-1.1) -- node[above,font=\scriptsize]{分派具名备货任务} (4.3,-1.1);
+  \draw[bsrMessage] (4.3,-2.1) -- node[above,font=\scriptsize]{逐件拣货/安全检查} (12.9,-2.1);
+  \draw[bsrReturn] (8.6,-3.1) -- node[above,font=\scriptsize]{向顾客同步准备进度} (0,-3.1);
+  \draw[bsrMessage] (0,-4.1) -- node[above,font=\scriptsize]{到店出示取货码并核身份} (4.3,-4.1);
+  \draw[bsrMessage] (4.3,-5.1) -- node[above,font=\scriptsize]{核当前签约版后逐件交付} (12.9,-5.1);
+  \node[bsrNote] at (6.45,-6.6) {系统自动阻止未签/重复交付；实物检验与交接仍由专员完成。蓝图待 BSR 确认。};
+}}
+
+\newcommand{\BSRToBeReturn}{\BSRBizSeq{顾客\\执行者}{接收专员\\工人}{BSR 系统\\自动化}{实体装备\\实体}{%
+  \draw[bsrMessage] (0,-1.1) -- node[above,font=\scriptsize]{原店或异店交回部分实物} (4.3,-1.1);
+  \draw[bsrMessage] (4.3,-2.1) -- node[above,font=\scriptsize]{核库存号/记录检查事实} (12.9,-2.1);
+  \draw[bsrMessage] (4.3,-3.1) -- node[above,font=\scriptsize]{逐件提交实还时刻/当前门店} (8.6,-3.1);
+  \draw[bsrMessage] (8.6,-4.1) -- node[above,font=\scriptsize]{冻结超时费/隔离疑损单件} (12.9,-4.1);
+  \draw[bsrReturn] (8.6,-5.1) -- node[above,font=\scriptsize]{同步已还/未还与责任人} (0,-5.1);
+  \node[bsrNote] at (6.45,-6.6) {系统处理逐件状态，异店归还只改当前店；损坏由技师与经理另审。蓝图待 BSR 确认。};
+}}
+
+\newcommand{\BSRToBeRepair}{\BSRBizSeq{门店顾客\\执行者}{技师/经理\\工人}{BSR 系统\\自动化}{故障单件\\实体}{%
+  \draw[bsrMessage] (12.9,-1.1) -- node[above,font=\scriptsize]{故障事实/隔离} (8.6,-1.1);
+  \draw[bsrMessage] (8.6,-2.1) -- node[above,font=\scriptsize]{授权分派并冻结费率} (4.3,-2.1);
+  \draw[bsrMessage] (4.3,-3.1) -- node[above,font=\scriptsize]{诊断/照片/工时/安全项} (8.6,-3.1);
+  \draw[bsrReturn] (8.6,-4.1) -- node[above,font=\scriptsize]{24h 初评与进度可见} (0,-4.1);
+  \draw[bsrMessage] (4.3,-5.1) -- node[above,font=\scriptsize]{经理实物验收后才复租} (12.9,-5.1);
+  \node[bsrNote] at (6.45,-6.6) {纸单转电子工单；技师完成不等于可租，经理验收不可由系统替代。蓝图待 BSR 确认。};
+}}
+
+\newcommand{\BSRToBeTransfer}{\BSRBizSeq{顾客\\执行者}{两店专员\\工人}{BSR 系统\\自动化}{实体装备\\实体}{%
+  \draw[bsrMessage] (0,-1.1) -- node[above,font=\scriptsize]{异店归还或调拨需求} (4.3,-1.1);
+  \draw[bsrMessage] (4.3,-2.1) -- node[above,font=\scriptsize]{核单件状态/登记当前店} (8.6,-2.1);
+  \draw[bsrMessage] (8.6,-3.1) -- node[above,font=\scriptsize]{永久调拨需批准并标在途} (12.9,-3.1);
+  \draw[bsrMessage] (4.3,-4.1) -- node[above,font=\scriptsize]{搬运/目标店逐件接收} (12.9,-4.1);
+  \draw[bsrMessage] (4.3,-5.1) -- node[above,font=\scriptsize]{接收后更新永久归属} (8.6,-5.1);
+  \node[bsrNote] at (6.45,-6.6) {调拨审批/位置日志信息化；实物运输和验收由员工完成。蓝图待 BSR 确认。};
+}}

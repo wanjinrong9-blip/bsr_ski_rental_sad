@@ -1,0 +1,13 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small,cls/.style={draw,rectangle split,rectangle split parts=3,rectangle split part align={center,left,left},text width=4.5cm,inner sep=7pt,align=left}]
+\node[cls] (c0) at (0,0) {\centering\scriptsize\textless\textless boundary\textgreater\textgreater\\\small\bfseries 角色页面\nodepart{second}\scriptsize - 当前角色 / 路由\\ - 草稿 / 对话框状态\nodepart{third}\scriptsize + 显示待更新()\\ + 空闲后重绘()};
+\node[cls] (c1) at (6,0) {\centering\scriptsize\textless\textless control\textgreater\textgreater\\\small\bfseries 同步控制\nodepart{second}\scriptsize - 连接状态 / pendingSync\\ - syncBusy / 当前修订\nodepart{third}\scriptsize + 合并信号()\\ + 按权限重新查询()};
+\node[cls] (c2) at (12,0) {\centering\scriptsize\textless\textless event\textgreater\textgreater\\\small\bfseries 修订信号\nodepart{second}\scriptsize - revision / topic / at\\ - 不含业务正文\nodepart{third}\scriptsize + 通知已发生变化()};
+\node[cls] (c3) at (0,-6) {\centering\scriptsize\textless\textless client state\textgreater\textgreater\\\small\bfseries 标签页会话\nodepart{second}\scriptsize - 令牌 / 用户身份\\ - 标签页存储\nodepart{third}\scriptsize + 为查询附身份()\\ + 注销清除()};
+\node[cls] (c4) at (6,-6) {\centering\scriptsize\textless\textless value object\textgreater\textgreater\\\small\bfseries 业务查询结果\nodepart{second}\scriptsize - 库存 / 排班 / 工单等\\ - 来源为授权查询\nodepart{third}\scriptsize + 替换页面读模型()};
+\node[cls] (c5) at (12,-6) {\centering\scriptsize\textless\textless entity\textgreater\textgreater\\\small\bfseries 业务实体\nodepart{second}\scriptsize - 数据库唯一业务事实\\ - 单件 / 工单 / 出勤\nodepart{third}\scriptsize + 按领域事务更新()};
+\draw[dashed,->] (c0)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=.85cm,align=center] {可刷新状态}(c1);
+\draw[dashed,->] (c2)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=.85cm,align=center] {触发}(c1);
+\draw[dashed,->] (c0)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=1.35cm,align=center] {使用}(c3);
+\draw[dashed,->] (c1)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=1.35cm,align=center] {取得}(c4);
+\draw[dashed,->] (c4)--node[fill=white,inner sep=.6pt,font=\scriptsize,text width=.85cm,align=center] {读取而非写入}(c5);
+\end{tikzpicture}}

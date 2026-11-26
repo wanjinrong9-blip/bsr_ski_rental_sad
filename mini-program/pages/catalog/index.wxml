@@ -1,0 +1,41 @@
+<view class="page">
+  <view class="hero">
+    <view class="mountains"><view class="peak peak-back"></view><view class="peak peak-front"></view><view class="snowline"></view></view>
+    <image class="hero-logo" src="/assets/bsr-logo.png" mode="aspectFill" aria-label="BSR 标志"/>
+    <view class="eyebrow light">SKARDALEN · NORWAY</view>
+    <view class="hero-title">装备备妥，<br/>雪途更从容。</view>
+    <view class="hero-caption">先选租期，再看这段时间真正可租的单件数量。</view>
+  </view>
+
+  <view class="booking card">
+    <view class="section-title compact"><text class="name">规划租期</text><text class="pill">挪威当地时间</text></view>
+    <view class="field"><text class="field-label">取货门店</text><picker mode="selector" range="{{storeNames}}" value="{{storeIndex}}" bindchange="onStoreChange"><view class="field-control picker-text">{{storeNames[storeIndex] || '请选择门店'}}</view></picker></view>
+    <view class="dates">
+      <view class="field"><text class="field-label">起租日期 · 09:00 后</text><picker mode="date" value="{{pickupDate}}" start="{{minDate}}" bindchange="onPickupChange"><view class="field-control picker-text">{{pickupDate}}</view></picker></view>
+      <view class="field"><text class="field-label">归还日期 · 16:00 前</text><picker mode="date" value="{{returnDate}}" start="{{pickupDate}}" bindchange="onReturnChange"><view class="field-control picker-text">{{returnDate}}</view></picker></view>
+    </view>
+    <button class="btn" loading="{{searching}}" bindtap="onSearch">查询该日期段库存</button>
+    <view class="tiny booking-foot">金额以挪威克朗 NOK 记账；押金为每件装备参考价值的 8%。</view>
+  </view>
+
+  <view class="section-title"><text class="name">可租装备</text><text class="muted" wx:if="{{availabilityReady}}">{{visibleItems.length}} 款规格</text></view>
+  <scroll-view class="filters" scroll-x="true" enable-flex="true">
+    <view class="filter-row"><view wx:for="{{categories}}" wx:key="*this" class="filter {{category === item ? 'selected' : ''}}" data-category="{{item}}" bindtap="onCategory">{{item}}</view></view>
+  </scroll-view>
+  <view class="facet-row">
+    <view class="facet"><text class="facet-label">尺码</text><picker mode="selector" range="{{sizes}}" value="{{sizeIndex}}" bindchange="onSize"><view class="facet-value">{{size}}</view></picker></view>
+    <view class="facet"><text class="facet-label">款式</text><picker mode="selector" range="{{styles}}" value="{{styleIndex}}" bindchange="onStyle"><view class="facet-value">{{style}}</view></picker></view>
+  </view>
+  <view class="loading" wx:if="{{loading}}">正在核对库存…</view>
+  <view class="notice notice-error" wx:elif="{{error}}">{{error}}</view>
+  <view class="notice" wx:elif="{{!availabilityReady}}">租期或门店已更改，请先查询该日期段库存，再选择装备。</view>
+  <view class="empty" wx:elif="{{!visibleItems.length}}"><view class="symbol">❄</view><view class="heading">此筛选暂无装备</view><view>试试其他分类或调整租期。</view></view>
+  <view wx:else>
+    <view class="gear-card card" wx:for="{{visibleItems}}" wx:key="id">
+      <view class="gear-top"><view class="gear-symbol">{{item.categoryMark}}</view><view class="gear-info"><view class="gear-name">{{item.name}}</view><view class="muted">{{item.category}} · {{item.size}} · {{item.style}}</view></view><view class="pill {{item.available ? '' : 'pill-warm'}}">{{item.available ? '剩余 ' + item.available + ' 件' : '此段已订满'}}</view></view>
+      <view class="line"></view><view class="row"><view><view class="tiny">每日租金</view><view class="amount">NOK {{item.dailyNok === null ? '待定' : item.dailyNok}}</view><view class="tiny">押金 NOK {{item.depositNok === null ? '—' : item.depositNok}}</view></view><button class="btn btn-small" disabled="{{!item.available || item.dailyNok === null}}" data-id="{{item.id}}" bindtap="onAdd">加入购物车</button></view>
+    </view>
+  </view>
+  <view class="cart-float" bindtap="goCart"><text>购物车</text><text class="cart-badge">{{cartCount}}</text></view>
+  <view class="simulation">{{wechatMode ? '安全合成展示：价格、支付、退款及签署均为模拟；库存和订单由共用服务端裁决。' : '本机课程演示：价格、支付、退款及签署均为模拟；小程序正式接入须完成微信身份与合规配置。'}}</view>
+</view>

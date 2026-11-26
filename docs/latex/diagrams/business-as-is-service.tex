@@ -1,0 +1,15 @@
+\newcommand{\BSRAsIsRepair}{\BSRBizSeqFive{门店顾客\\执行者}{BSR 员工\\工人}{纸质维修单\\业务实体}{分包商\\工人}{待修装备\\业务实体}{%
+  \draw[bsrMessage] (3.225,-1.15) -- node[above,font=\tiny]{发现问题，填写纸单（EV-04）} (6.45,-1.15);
+  \draw[bsrMessage] (3.225,-2.25) -- node[above,font=\tiny]{纸单附实物，移至维修架（EV-04）} (12.9,-2.25);
+  \draw[bsrMessage] (9.675,-3.35) -- node[above,font=\tiny]{每周到访/带回工坊（EV-04）} (12.9,-3.35);
+  \draw[bsrUnknown] (9.675,-4.45) -- node[above,font=\tiny]{结果/再上架确认（待访谈）} (3.225,-4.45);
+  \node[bsrNote] at (6.45,-5.5) {旺季设备可能滞留一周以上。纸单流转可证实；修后安全验收责任未见案例描述。};
+}}
+
+\newcommand{\BSRAsIsTransfer}{\BSRBizSeq{顾客\\执行者}{门店员工\\工人}{实体装备\\业务实体}{门店/Excel\\业务实体}{%
+  \draw[bsrUnknown] (0,-1.15) -- node[above,font=\scriptsize]{偶有异店归还（EV-05）} (4.3,-1.15);
+  \draw[bsrUnknown] (4.3,-2.25) -- node[above,font=\scriptsize]{接收与记时（待访谈）} (8.6,-2.25);
+  \draw[bsrUnknown] (4.3,-3.35) -- node[above,font=\scriptsize]{调拨批准/记账（待访谈）} (12.9,-3.35);
+  \draw[bsrUnknown] (12.9,-4.45) -- node[above,font=\scriptsize]{运输和接收（待访谈）} (4.3,-4.45);
+  \node[bsrNote] at (6.45,-5.5) {案例只说明归还地点偶有不同及永久归属可变；现行调拨流程未描述。};
+}}

@@ -1,0 +1,30 @@
+{
+  "pages": [
+    "pages/catalog/index",
+    "pages/cart/index",
+    "pages/orders/index",
+    "pages/account/index",
+    "pages/order-detail/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "BSR 雪具租赁",
+    "navigationBarBackgroundColor": "#f2f6f9",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f2f6f9",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#6d8399",
+    "selectedColor": "#12375f",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/catalog/index", "text": "选装备" },
+      { "pagePath": "pages/cart/index", "text": "购物车" },
+      { "pagePath": "pages/orders/index", "text": "我的订单" },
+      { "pagePath": "pages/account/index", "text": "我的" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

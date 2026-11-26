@@ -1,0 +1,28 @@
+\subsection{5.1 建立数据层}
+\noindent 本层将分析类映射到关系模式，主键采用恒定内部 ID，`inventory\_no` 作为不可复用的单件业务键；姓名、邮箱、门店名和状态都不能作跨模块主键。数据字典和第 6 章 ERD 是\textbf{目标设计}，与当前 SQLite 差距见《现有目标数据差异》。
+
+\subsubsection{5.1.1 关系映射与完整性}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 概念关系 & \color{white}\bfseries 物理映射与约束 \\
+泛化 & 当前 `users.role` 单表存共同身份，`employee\_profiles` 作可选扩展；若后续拆顾客/技师子表，以 `user\_id` 同时为子表 PK/FK，先迁移历史授权。\\
+一对多 & 顾客 1:n 预约，预约 1:n 行，规格 1:n 实物，工单 1:n 事件；外键在 n 方，非空条件由业务决定。\\
+多对多 & 预约行与实体装备经 `preparation\_units`、`rental\_units` 两个时间化连接表拆成 1:n 与 n:1；后者记录借/实还时间和归还店。\\
+自反 & `categories.parent\_id` 指向本表 PK，允许顶级空值，但禁止自身/祖先成环；当前类别为文本，属于待迁移目标。\\
+值对象 & 租期、报价、超时费用可嵌入预约/单件字段或快照；是否独立建表由审计与并发需求决定，图中标“目标概念”而非冒称已存在。\\
+\end{BSRTable}
+
+\subsubsection{5.1.2 交易、时间与历史快照}
+\noindent 日期按 Europe/Oslo 解释：新租期从起租日 09:00 后至归还日 16:00 前。查询返回整个区间的可订物理单件数；创建预约、备货绑定和交付均在服务端重新核查，活跃准备单件唯一索引与事务共同防双占。单件未归还时继续占用未来区间；异店归还仅变当前门店，永久归属需调拨接收完成。
+
+\noindent 金额以整数 NOK 保存。每件新订单押金按该规格参考价值的 8\% 四舍五入，政策版本、日价、押金、超时费率和 120 分钟首租宽限在订单/合同中冻结；真实 BSR 商业批准前均标演示政策。技师费率按工单创建时冻结。旧单缺规则版本时不得以新规则自动追收或重算，进入人工核实。
+
+\subsubsection{5.1.3 数据访问方式与事务边界}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 访问方式 & \color{white}\bfseries 本系统适用边界 \\
+表入口（Table Gateway） & 对 `stores`、`categories`、价目等主数据提供受控列表和更新；不能让 UI 直接拼接 SQL。\\
+行入口（Row Gateway） & 简单员工档案或单件资料可按恒定 ID 加载/保存；必须检查版本和角色。\\
+数据对象（Data Object） & 将 `Reservation`、`Unit`、`DamageCase` 等行映射到领域对象，业务计算不放在 SQL 模板里。\\
+数据映射器（Data Mapper） & 合同/交接/结算等跨多表聚合由映射器在一事务中装载和持久化，领域层不依赖 SQLite 语句。\\
+\end{BSRTable}
+
+\noindent 重要命令使用事务和幂等引用：预约暂留、准备绑定、交付、逐件归还、结算与调拨接收若任何一步失败，业务状态不部分提交。迁移可重复执行且保留历史快照；触及实际运行数据前先备份并验证可恢复。SQLite 是本地演示现状，多门店生产部署需另测并发和容量。

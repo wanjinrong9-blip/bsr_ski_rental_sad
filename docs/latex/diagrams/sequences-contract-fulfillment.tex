@@ -1,0 +1,35 @@
+% S-UC05 当前合同版本与签署。
+\newcommand{\BSRSeqUCFive}{\BSRAnalysisSeqSix{顾客}{租赁专员}{ContractView}{ContractCtrl}{Contract}{PolicySnapshot}{%
+  \draw[bsrMessage] (0,-1) -- node[above,font=\tiny]{线上顾客发起} (5.6,-1);
+  \draw[bsrMessage] (2.8,-1.8) -- node[above,font=\tiny]{alt 现场开单} (5.6,-1.8);
+  \draw[bsrMessage] (5.6,-2.6) -- node[above,font=\tiny]{分配合同号/当前版} (8.4,-2.6);
+  \draw[bsrMessage] (8.4,-3.4) -- node[above,font=\tiny]{存条款/发起人与经办人} (11.2,-3.4);
+  \draw[bsrMessage] (8.4,-4.2) -- node[above,font=\tiny]{冻结 NOK 价目/规则} (14,-4.2);
+  \draw[bsrReturn] (5.6,-5) -- node[above,font=\tiny]{展示当前版供顾客核对} (0,-5);
+  \draw[bsrMessage] (0,-5.8) -- node[above,font=\tiny]{顾客本人电子确认} (5.6,-5.8);
+  \draw[bsrMessage] (2.8,-6.6) -- node[above,font=\tiny]{alt 纸质签署见证} (5.6,-6.6);
+  \draw[bsrUnknown] (8.4,-7.4) -- node[above,font=\tiny]{拒签/旧版回调不生效} (5.6,-7.4);
+  \node[bsrNote] at (11.2,-8.8) {线上本人确认与现场纸质见证二选一，均先于演示付款；合格签署仍待接入。};
+}}
+
+% S-UC06 本地签后演示付款、正式服务差异和幂等。
+\newcommand{\BSRSeqUCSix}{\BSRAnalysisSeq{顾客}{PaymentView}{PaymentCtrl}{PaymentEvent}{Preparation}{%
+  \draw[bsrMessage] (0,-1) -- node[above,font=\tiny]{确认 NOK 应付/合同版} (3.5,-1);
+  \draw[bsrMessage] (3.5,-2) -- node[above,font=\tiny]{先验当前版已签/暂留有效} (7,-2);
+  \draw[bsrMessage] (7,-3) -- node[above,font=\tiny]{验金额/版本/回执幂等} (10.5,-3);
+  \draw[bsrMessage] (7,-4) -- node[above,font=\tiny]{成功仅创建一份备货} (14,-4);
+  \draw[bsrReturn] (7,-5) -- node[above,font=\tiny]{待核实/成功/失败状态} (3.5,-5);
+  \draw[bsrUnknown] (7,-6) -- node[above,font=\tiny]{alt 重复回调：不重复扣款/任务} (10.5,-6);
+  \node[bsrNote] at (10.5,-7.8) {本地签后仅写演示流水；正式第三方付款、回执与对账仍是目标。};
+}}
+
+% S-UC07 具名备货、核码、逐件交付。
+\newcommand{\BSRSeqUCSeven}{\BSRAnalysisSeq{租赁专员}{PrepDesk}{FulfillmentCtrl}{PreparationUnit}{RentalUnit}{%
+  \draw[bsrMessage] (0,-1) -- node[above,font=\tiny]{接任务/选库存号} (3.5,-1);
+  \draw[bsrMessage] (3.5,-2) -- node[above,font=\tiny]{绑定并复查单件可用} (7,-2);
+  \draw[bsrMessage] (7,-3) -- node[above,font=\tiny]{记录尺码/外观/安全项} (10.5,-3);
+  \draw[bsrReturn] (7,-4) -- node[above,font=\tiny]{具名准备进度给顾客} (3.5,-4);
+  \draw[bsrMessage] (3.5,-5) -- node[above,font=\tiny]{核码/身份/当前签署版} (7,-5);
+  \draw[bsrMessage] (7,-6) -- node[above,font=\tiny]{逐件写借出/处理人} (14,-6);
+  \node[bsrNote] at (10.5,-7.8) {alt 码错、未签、安全失败、重复扫描均拒绝交付，保留原记录。};
+}}

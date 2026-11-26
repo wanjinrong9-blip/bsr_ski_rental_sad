@@ -1,0 +1,5 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[>=Latex,font=\small,s/.style={draw,rounded corners=4pt,minimum width=3cm,minimum height=1cm,align=center}]
+\node[s] (a) at (0,0) {当前可用\\AVAILABLE};\node[s] (r) at (5,0) {已交付\\RENTED};\node[s] (m) at (10,0) {维修隔离\\MAINTENANCE};\node[s] (t) at (0,-3.5) {调拨在途\\TRANSFER};\node[s] (x) at (10,-3.5) {已报废\\RETIRED};
+\draw[->] (a) to[bend left=16] node[above,font=\scriptsize]{交付}(r);\draw[->] (r) to[bend left=16] node[below,font=\scriptsize]{归还无损}(a);\draw[->] (r)--node[above,font=\scriptsize]{损坏归还}(m);\draw[->] (a.north)--++(0,1.6)-|node[pos=.3,above,font=\scriptsize]{可用单件登记故障}(m.north);\draw[->] (m.south)--++(0,-1.25)-|node[pos=.3,below,font=\scriptsize]{经理验收通过}(a.south);
+\draw[->] (a) to[bend left=18] node[right,font=\scriptsize]{发出}(t);\draw[->] (t) to[bend left=18] node[left,font=\scriptsize]{接收至新门店}(a);\draw[->] (m)--node[right,font=\scriptsize]{经理确认报废}(x);
+\node[font=\scriptsize,align=left,text width=11cm] at (5,-5.2) {未来预约占用按规格和时间区间计算，不额外把单件改为 RESERVED。\\当前归还中的 CLEANING 检查结果会恢复 AVAILABLE；独立清洁隔离为待完善目标。};\end{tikzpicture}}

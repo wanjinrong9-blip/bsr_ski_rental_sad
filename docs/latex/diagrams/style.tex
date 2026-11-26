@@ -1,0 +1,113 @@
+% 007 模型图共通样式；需在主文档已载入 TikZ、xcolor 后 input。
+\tikzset{
+  bsrActor/.style={draw=Navy,fill=white,line width=.8pt,rounded corners=1pt,align=center,minimum width=23mm,minimum height=8mm,font=\small},
+  bsrWorker/.style={draw=Teal,fill=IceLight,line width=.8pt,rounded corners=1.2mm,align=center,minimum width=26mm,minimum height=8mm,font=\small},
+  bsrSystem/.style={draw=Teal,fill=Glacier!45,line width=1pt,rounded corners=1.2mm,align=center,minimum width=28mm,minimum height=8mm,font=\small\bfseries},
+  bsrEntity/.style={draw=Muted,fill=white,line width=.7pt,align=center,minimum width=26mm,minimum height=8mm,font=\small},
+  bsrNote/.style={draw=Amber!85!Ink,fill=GoldPale,rounded corners=1mm,align=left,font=\scriptsize,text width=45mm,inner sep=3pt},
+  bsrMessage/.style={-{Latex[length=2mm]},draw=Navy,line width=.75pt},
+  bsrUnknown/.style={-{Latex[length=1.7mm]},draw=Amber!75!Ink,dashed,line width=.7pt},
+  bsrReturn/.style={-{Latex[length=1.7mm]},draw=Muted,dashed,line width=.6pt},
+  bsrState/.style={draw=Teal,fill=IceLight,rounded corners=2mm,line width=.8pt,align=center,font=\small,minimum height=8mm},
+  bsrClass/.style={draw=Navy,fill=white,line width=.8pt,rectangle split,rectangle split parts=3,align=left,font=\scriptsize,inner sep=3pt},
+  bsrER/.style={draw=Teal,fill=white,line width=.8pt,rectangle split,rectangle split parts=2,align=left,font=\scriptsize,inner sep=3pt}
+}
+
+% 业务序列图沿用课程课件的图例：执行者=小人，业务工人=圈中小人，
+% 业务实体=空圆圈；工人与实体的右下斜线用于区分业务建模对象。
+% 名称独立放在图标下方，以免首条消息压住图标或标题。
+\newcommand{\BSRBizActor}[2]{%
+  \begin{scope}[shift={(#1,0)}]
+    \draw[Navy,line width=.85pt] (0,.72) circle[radius=1.2mm];
+    \draw[Navy,line width=.85pt] (0,.56)--(0,.19) (-.22,.43)--(.22,.43)
+      (0,.19)--(-.18,-.08) (0,.19)--(.18,-.08);
+    \node[anchor=north,align=center,text width=2.9cm,font=\scriptsize] at (0,-.28) {#2};
+  \end{scope}%
+}
+\newcommand{\BSRBizWorker}[2]{%
+  \begin{scope}[shift={(#1,0)}]
+    \draw[Teal,line width=.9pt,fill=IceLight] (0,.4) circle[radius=4.4mm];
+    \draw[Teal,line width=.75pt] (0,.65) circle[radius=1mm];
+    \draw[Teal,line width=.75pt] (0,.52)--(0,.27) (-.15,.41)--(.15,.41)
+      (0,.27)--(-.13,.1) (0,.27)--(.13,.1);
+    \draw[Teal,line width=.9pt] (.13,-.13)--(.37,.12);
+    \node[anchor=north,align=center,text width=2.9cm,font=\scriptsize] at (0,-.28) {#2};
+  \end{scope}%
+}
+\newcommand{\BSRBizEntity}[2]{%
+  \begin{scope}[shift={(#1,0)}]
+    \draw[Muted,line width=.9pt,fill=white] (0,.4) circle[radius=4.4mm];
+    \draw[Muted,line width=.9pt] (.13,-.13)--(.37,.12);
+    \node[anchor=north,align=center,text width=2.9cm,font=\scriptsize] at (0,-.28) {#2};
+  \end{scope}%
+}
+
+% 四泳道业务序列图骨架：动作由第五参数给出；虚线表示待访谈/未证实。
+\newcommand{\BSRBizSeq}[5]{%
+\begin{tikzpicture}[x=1cm,y=.75cm]
+  \BSRBizActor{0}{#1}
+  \BSRBizWorker{4.3}{#2}
+  \BSRBizEntity{8.6}{#3}
+  \BSRBizEntity{12.9}{#4}
+  \foreach \xx in {0,4.3,8.6,12.9} {\draw[Muted,densely dotted,line width=.45pt] (\xx,-1.28) -- (\xx,-7.75);}
+  \begin{scope}[yshift=-1cm]#5\end{scope}
+\end{tikzpicture}%
+}
+
+% 五泳道仅用于现状维修：分包商是业务工人，装备是独立业务实体。
+\newcommand{\BSRBizSeqFive}[6]{%
+\begin{tikzpicture}[x=1cm,y=.75cm]
+  \BSRBizActor{0}{#1}
+  \BSRBizWorker{3.225}{#2}
+  \BSRBizEntity{6.45}{#3}
+  \BSRBizWorker{9.675}{#4}
+  \BSRBizEntity{12.9}{#5}
+  \foreach \xx in {0,3.225,6.45,9.675,12.9} {\draw[Muted,densely dotted,line width=.45pt] (\xx,-1.28) -- (\xx,-7.75);}
+  \begin{scope}[yshift=-1cm]#6\end{scope}
+\end{tikzpicture}%
+}
+
+% 分模块三段式 UML 类框：id、x、y、名称、属性、操作。
+\newcommand{\BSRClassCard}[6]{%
+  \node[bsrClass,text width=3.45cm] (#1) at (#2,#3)
+  {\centering\bfseries #4\nodepart{second}\raggedright #5\nodepart{third}\raggedright #6};%
+}
+\newcommand{\BSRERCard}[5]{%
+  \node[bsrER,text width=3.65cm] (#1) at (#2,#3)
+  {\centering\bfseries #4\nodepart{second}\raggedright #5};%
+}
+
+% 分析序列：执行者 + 边界类 + 控制类 + 两个实体类。
+\newcommand{\BSRAnalysisSeq}[6]{%
+\begin{tikzpicture}[x=1cm,y=.75cm]
+  \node[bsrActor] at (0,0) {#1};
+  \node[bsrWorker] at (3.5,0) {\texttt{<<boundary>>}\\#2};
+  \node[bsrSystem] at (7,0) {\texttt{<<control>>}\\#3};
+  \node[bsrEntity] at (10.5,0) {\texttt{<<entity>>}\\#4};
+  \node[bsrEntity] at (14,0) {\texttt{<<entity>>}\\#5};
+  \foreach \xx in {0,3.5,7,10.5,14} {\draw[Muted,densely dotted,line width=.45pt] (\xx,-.75) -- (\xx,-8.0);}
+  \begin{scope}[yshift=-.55cm]#6\end{scope}
+\end{tikzpicture}%
+}
+
+% 双执行者用例单列两个岗位，避免将顾客/员工或技师/经理混作同一责任人。
+\newcommand{\BSRAnalysisSeqSix}[7]{%
+\begin{tikzpicture}[x=1cm,y=.75cm]
+  \node[bsrActor,minimum width=20mm,font=\scriptsize] at (0,0) {#1};
+  \node[bsrActor,minimum width=20mm,font=\scriptsize] at (2.8,0) {#2};
+  \node[bsrWorker,minimum width=22mm,font=\scriptsize] at (5.6,0) {\texttt{<<boundary>>}\\#3};
+  \node[bsrSystem,minimum width=22mm,font=\scriptsize] at (8.4,0) {\texttt{<<control>>}\\#4};
+  \node[bsrEntity,minimum width=22mm,font=\scriptsize] at (11.2,0) {\texttt{<<entity>>}\\#5};
+  \node[bsrEntity,minimum width=22mm,font=\scriptsize] at (14,0) {\texttt{<<entity>>}\\#6};
+  \foreach \xx in {0,2.8,5.6,8.4,11.2,14} {\draw[Muted,densely dotted,line width=.45pt] (\xx,-.75) -- (\xx,-9.8);}
+  \begin{scope}[yshift=-.55cm]#7\end{scope}
+\end{tikzpicture}%
+}
+
+\newcommand{\BSRStyleSample}{\BSRBizSeq{顾客\\业务执行者}{租赁专员\\业务工人}{BSR 系统\\业务实体}{物理单件\\业务实体}{%
+  \draw[bsrMessage] (0,-1.1) -- node[above,font=\scriptsize]{选择租期与尺码} (8.6,-1.1);
+  \draw[bsrMessage] (8.6,-2.1) -- node[above,font=\scriptsize]{分派备货} (4.3,-2.1);
+  \draw[bsrMessage] (4.3,-3.1) -- node[above,font=\scriptsize]{现场核验} (12.9,-3.1);
+  \draw[bsrReturn] (8.6,-4.1) -- node[above,font=\scriptsize]{准备进度} (0,-4.1);
+  \node[bsrNote] at (6.45,-5.5) {图例：实线为请求/实物动作；虚线为返回或通知。日期与数量由系统核验，实物安全由员工确认。};
+}}

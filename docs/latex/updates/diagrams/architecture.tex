@@ -1,0 +1,7 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[>=Latex,font=\small,b/.style={draw,rounded corners=3pt,align=center,minimum height=1.3cm}]
+\node[b,text width=15cm,fill=IceLight] (ui) at (0,0) {表示层 public/app.js 与 workplace.js\\顾客购物车\quad 经理待办与每日排班\quad 维修看板\quad 上下班打卡};
+\node[b,text width=15cm] (api) at (0,-2.3) {HTTP 路由与应用协调 src/server.mjs\\会话与角色校验\quad 输入验证\quad 授权查询\quad SSE 变更推送};
+\node[b,text width=4.5cm] (r) at (-5.2,-4.8) {domain.mjs\\预约 取还 押金与调拨规则};\node[b,text width=4.5cm] (m) at (0,-4.8) {maintenance.mjs\\工单迁移 安全检查 经理验收};\node[b,text width=4.5cm] (w) at (5.2,-4.8) {workforce.mjs\\班次 打卡与每日到岗投影};
+\node[b,text width=15cm,fill=IceLight] (db) at (0,-7.3) {SQLite 持久化 db.mjs\\业务表\quad 唯一键与外键\quad 事务\quad 库存变更触发器\quad 审计与迁移};
+\draw[<->] (ui)--node[right,font=\scriptsize]{JSON 查询与命令；独立标签页会话}(api);\draw[->] (api)--(r);\draw[->] (api)--(m);\draw[->] (api)--(w);\draw[->] (r)--(db);\draw[->] (m)--(db);\draw[->] (w)--(db);
+\node[font=\scriptsize,align=left] at (0,-8.65) {当前实现是本地模块化应用，不宣称已经部署缓存、消息队列、对象存储或独立微服务。\\未来接入支付、通知与汇率时，通过适配器扩展，并保留领域不变量和验收链。};\end{tikzpicture}}

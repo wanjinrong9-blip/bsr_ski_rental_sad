@@ -1,0 +1,187 @@
+% BSR 滑雪租赁系统设计需求文档 · LaTeX 排版版
+% 内容基线：019 正式 AppID 与备案状态校核（2026-11-26）；版式与内容分离。
+\documentclass[UTF8,a4paper,11pt,fontset=windows]{ctexart}
+
+\usepackage[left=24mm,right=22mm,top=25mm,bottom=23mm,headheight=23pt]{geometry}
+\usepackage{xcolor,graphicx,longtable,booktabs,array,calc,colortbl}
+\usepackage{caption,etoolbox,titlesec,fancyhdr,hyperref,bookmark,placeins}
+\usepackage{xurl}
+\usepackage{enumitem}
+\usepackage{needspace}
+\usepackage{tikz,tocloft}
+\usetikzlibrary{calc,arrows.meta,positioning,shapes.multipart,shapes.geometric,fit}
+\usepackage[most]{tcolorbox}
+
+\definecolor{Navy}{HTML}{476F7D}
+\definecolor{TableHead}{HTML}{3E7782}
+\definecolor{Teal}{HTML}{2C7D85}
+\definecolor{Glacier}{HTML}{D4ECEB}
+\definecolor{Amber}{HTML}{EBC997}
+\definecolor{GoldPale}{HTML}{FAF3E9}
+\definecolor{Ink}{HTML}{2C4148}
+\definecolor{Muted}{HTML}{6D8588}
+\definecolor{IceLight}{HTML}{EDF5F4}
+\definecolor{Rule}{HTML}{C5D8D8}
+
+\hypersetup{
+  unicode=true,
+  colorlinks=true,
+  linkcolor=Navy,
+  urlcolor=Teal,
+  pdfauthor={万锦融},
+  pdftitle={BSR滑雪租赁系统设计需求文档},
+  pdfsubject={系统分析与设计课程项目 · 设计需求文档}
+}
+
+\setcounter{secnumdepth}{0}
+\setcounter{tocdepth}{2}
+\renewcommand{\contentsname}{目\quad 录}
+\setlength{\cftbeforesecskip}{0pt}
+\renewcommand{\cftsecfont}{\bfseries\color{Navy}}
+\renewcommand{\cftsecpagefont}{\bfseries\color{Teal}}
+\renewcommand{\cftsubsecfont}{\color{Muted}}
+\renewcommand{\cftsubsecpagefont}{\color{Muted}}
+\renewcommand{\cfttoctitlefont}{\LARGE\bfseries\color{Navy}}
+\renewcommand{\cftaftertoctitle}{\par\vspace{3mm}{\color{Teal}\rule{\textwidth}{1.5pt}}\par\vspace{2mm}}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{4.5pt}
+\setlength{\emergencystretch}{3em}
+\renewcommand{\arraystretch}{1.24}
+\setlength{\tabcolsep}{4pt}
+\arrayrulecolor{Rule}
+\newcounter{none} % Pandoc 的无编号表格需要此计数器
+\setlist[itemize]{topsep=3pt,itemsep=2pt,parsep=0pt,leftmargin=2em}
+\captionsetup[figure]{labelformat=empty,font={small,color=Muted},justification=centering,skip=8pt}
+\captionsetup[table]{font={small,color=Muted}}
+
+\titleformat{\section}{\LARGE\bfseries\color{Navy}}{}{0pt}{}[\vspace{3pt}{\color{Teal}\titlerule[1.3pt]}]
+\titlespacing*{\section}{0pt}{14pt}{17pt}
+\titleformat{\subsection}{\large\bfseries\color{Navy}}{}{0pt}{\color{Teal}\rule{3pt}{13pt}\hspace{8pt}}
+\titlespacing*{\subsection}{0pt}{21pt}{8pt}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{Teal}}{}{0pt}{}
+\titlespacing*{\subsubsection}{0pt}{14pt}{5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\bfseries\color{Navy} BSR\hspace{7pt}\color{Teal}\rule{2pt}{9pt}\hspace{7pt}\color{Muted}\nouppercase{\leftmark}}
+\fancyhead[R]{\small\color{Muted} DESIGN REQUIREMENTS}
+\fancyfoot[L]{\small\color{Muted} 万锦融 \quad / \quad 信管2402}
+\fancyfoot[R]{\small\bfseries\color{Teal}\thepage}
+\renewcommand{\headrulewidth}{0.35pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{Rule}\leaders\hrule height \headrulewidth\hfill}}
+\makeatletter\let\ps@plain\ps@fancy\makeatother
+
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+
+\newcommand{\BSRKeyPoint}[3]{%
+  \begin{tcolorbox}[enhanced,breakable,colback=IceLight,colframe=IceLight,
+    boxrule=0pt,sharp corners,borderline west={3pt}{0pt}{Teal},
+    left=5mm,right=4mm,top=3mm,bottom=3mm,before skip=6pt,after skip=6pt]
+  {\color{Teal}\bfseries #1}\hfill{\color{Navy}\bfseries #2}\par
+  \vspace{2pt}{\color{Ink}\small #3}
+  \end{tcolorbox}%
+}
+
+\newcommand{\BSRFlowStep}[3]{%
+  \begingroup\setlength{\fboxsep}{0pt}%
+  \colorbox{Navy}{\parbox[c][21mm][c]{28mm}{\centering
+    {\color{Amber}\scriptsize\bfseries #1}\par
+    {\color{white}\small\bfseries #2}\par
+    {\color{Glacier}\scriptsize #3}}}%
+  \endgroup
+}
+
+\newcommand{\BSRChapter}[3]{%
+  \clearpage
+  \refstepcounter{section}\phantomsection
+  \addcontentsline{toc}{section}{第 \number\numexpr#1\relax 章\quad #2}%
+  \markboth{第 \number\numexpr#1\relax 章\quad #2}{}%
+  \noindent\begingroup\setlength{\fboxsep}{0pt}%
+  \colorbox{Navy}{\parbox{\textwidth}{%
+    \vspace*{7mm}
+    \hspace*{9mm}{\color{Glacier}\small\bfseries SYSTEM ANALYSIS / CHAPTER}\hfill
+    {\color{Amber}\fontsize{27}{30}\selectfont\bfseries #1}\hspace*{9mm}\par
+    \vspace{1mm}
+    \hspace*{9mm}{\color{white}\fontsize{25}{33}\selectfont\bfseries #2}\par
+    \vspace{3mm}
+    \hspace*{9mm}\parbox{\dimexpr\textwidth-18mm\relax}{\color{Glacier}\small #3}\par
+    \vspace*{7mm}%
+  }}\endgroup\par
+  \vspace{7mm}\suppressfloats[t]%
+}
+\newenvironment{BSRFields}{\small\begin{longtable}{@{}>{\bfseries\color{Teal}\raggedright\arraybackslash}p{.20\linewidth}>{\raggedright\arraybackslash}p{\dimexpr.80\linewidth-2\tabcolsep\relax}@{}}\toprule\endhead\bottomrule\endlastfoot}{\end{longtable}\normalsize}
+\newenvironment{BSRTable}{\small\begin{longtable}{@{}>{\raggedright\arraybackslash}p{.20\linewidth}>{\raggedright\arraybackslash}p{\dimexpr.80\linewidth-2\tabcolsep\relax}@{}}\toprule\endhead\bottomrule\endlastfoot}{\end{longtable}\normalsize}
+\newenvironment{BSRUsecase}[1]{\small\begin{longtable}{@{}>{\bfseries\color{Teal}\raggedright\arraybackslash}p{.20\linewidth}>{\raggedright\arraybackslash}p{\dimexpr.80\linewidth-2\tabcolsep\relax}@{}}\toprule\rowcolor{TableHead}\color{white}用例编号 & \color{white}\bfseries #1\\\midrule\endhead\bottomrule\endlastfoot}{\end{longtable}\normalsize}
+\newcommand{\BSRStatus}[1]{\begin{tcolorbox}[breakable,colback=GoldPale,colframe=GoldPale,boxrule=0pt,borderline west={2pt}{0pt}{Amber},left=3mm,right=3mm,top=2mm,bottom=2mm]\small\textbf{当前实现边界：}#1\end{tcolorbox}}
+\newcommand{\BSRDiagram}[3]{\begin{figure}[htbp]\centering\input{updates/diagrams/#1.tex}\caption{#2}\label{#3}\end{figure}\FloatBarrier}
+\newcommand{\BSRNewFigure}[3]{\begin{figure}[htbp]\centering\resizebox{.98\linewidth}{!}{#1}\caption{#2}\label{#3}\end{figure}\FloatBarrier}
+\newcommand{\BSRAppendix}[2]{%
+  \clearpage\phantomsection
+  \addcontentsline{toc}{section}{附录 #1\quad #2}%
+  \markboth{附录 #1\quad #2}{}%
+  \noindent\begin{tcolorbox}[colback=IceLight,colframe=IceLight,boxrule=0pt,
+    borderline west={4pt}{0pt}{Teal},left=6mm,right=6mm,top=5mm,bottom=5mm]
+    {\color{Teal}\small\bfseries DESIGN REQUIREMENTS / APPENDIX #1}\par\vspace{1.5mm}
+    {\color{Navy}\LARGE\bfseries #2}
+  \end{tcolorbox}\vspace{3mm}
+}
+
+\begin{document}
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[Navy] (current page.south west) rectangle (current page.north east);
+  \fill[white] (current page.north west) rectangle ([yshift=-56mm]current page.north east);
+  \fill[Teal] ([yshift=-56mm]current page.north west) rectangle ([yshift=-59mm]current page.north east);
+  \fill[Glacier!35!Navy] (current page.south west) -- ([yshift=42mm]current page.south west)
+    -- ([xshift=70mm,yshift=92mm]current page.south west)
+    -- ([xshift=120mm,yshift=46mm]current page.south west)
+    -- ([xshift=169mm,yshift=108mm]current page.south west)
+    -- ([yshift=62mm]current page.south east) -- (current page.south east) -- cycle;
+  \fill[Teal!68!Navy] (current page.south west) -- ([yshift=24mm]current page.south west)
+    -- ([xshift=55mm,yshift=58mm]current page.south west)
+    -- ([xshift=105mm,yshift=29mm]current page.south west)
+    -- ([xshift=152mm,yshift=69mm]current page.south west)
+    -- ([yshift=36mm]current page.south east) -- (current page.south east) -- cycle;
+  \fill[white,opacity=.92,rounded corners=1.5mm]
+    ([xshift=18mm,yshift=23mm]current page.south west) rectangle
+    ([xshift=130mm,yshift=70mm]current page.south west);
+  \draw[Glacier,opacity=.45,line width=.7pt] ([xshift=70mm,yshift=92mm]current page.south west)
+    -- ([xshift=120mm,yshift=46mm]current page.south west)
+    -- ([xshift=169mm,yshift=108mm]current page.south west);
+  \node[anchor=north east,text=Navy,font=\small\bfseries] at
+    ([xshift=-24mm,yshift=-27mm]current page.north east) {COURSE PROJECT / 2026};
+\end{tikzpicture}
+\noindent\includegraphics[width=76mm]{media/image1.png}\par
+\vspace*{33mm}
+\noindent{\color{Glacier}\small\bfseries SYSTEM ANALYSIS AND DESIGN}\par
+\vspace{5mm}
+\noindent{\color{white}\fontsize{53}{60}\selectfont\bfseries BSR}\par
+\vspace{3mm}
+\noindent{\color{white}\fontsize{31}{41}\selectfont\bfseries 滑雪租赁系统}\par
+\vspace{2mm}
+\noindent{\color{Glacier}\fontsize{23}{32}\selectfont\bfseries 设计需求文档}\par
+\vspace{9mm}
+\noindent{\color{Amber}\rule{35mm}{2.5pt}}\par
+\vspace{5mm}
+\noindent{\color{white}\large 从业务事实到可验证的系统设计}\par
+\vfill
+\noindent{\color{Teal}\small\bfseries DOCUMENT BASELINE \quad / \quad 4.13}\par
+\vspace{3mm}
+\noindent{\color{Ink}\bfseries 万锦融\quad ·\quad 信管2402\quad ·\quad 系统分析与设计}\par
+\vspace{3mm}
+\noindent{\color{Muted}\small 2026 年 11 月 26 日\quad /\quad 小程序状态校核版}\par
+\vspace{8mm}
+\end{titlepage}
+\hypersetup{pageanchor=true}
+\color{Ink}
+\input{overview.tex}
+\clearpage
+\markboth{目录}{}
+{\small\tableofcontents}\thispagestyle{fancy}
+\input{body.tex}
+\end{document}

@@ -1,0 +1,228 @@
+\FloatBarrier
+\BSRChapter{01}{线上调研}{证据优先 / 现状、竞品与范围}\label{ux7b2c-1-ux7ae0-ux7ebfux4e0aux8c03ux7814}
+
+\subsection{1.1 项目背景}
+
+BSR 自 1961 年起在挪威 Skardalen 滑雪度假村经营高端装备日租业务。度假村计划在山另一侧开设第二家租赁点，并要求 BSR 在一个月内提交扩张方案。现有 Excel 工作簿每次只允许一人可靠操作，客户、装备、合同和维修信息还混杂在纸面流程中，无法支撑两店并行、线上预约和跨店库存管理。
+
+新系统采用 B S 架构，为顾客提供响应式网页和移动端 H5，为店员、维修分包商、门店经理和系统管理员提供分角色工作台。第一阶段的业务主线是顾客线上选择装备和取货日期，系统按日期筛选库存并展示租金、押金和归还时间；支付成功后生成一次性取货码；顾客到店与店员共同验货并取走装备；归还时逐件验收；无异常订单自动发起押金原路退回。
+
+\subsection{1.2 资料来源及采用方式}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.1874}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.6125}}@{}}
+\toprule\noalign{}\rowcolor{TableHead}
+\begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{资料}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{作用}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{本设计采用内容}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+BSR 案例材料 & 业务事实 & 客户、装备、合同、逐件借还、员工、维修分包商、历史费率、门店与排班要求 \\
+老师课件 系统分析与设计 & 方法和图形规范 & 愿景、业务执行者、业务用例、业务序列图、系统用例规约、边界控制实体类、分析序列图、状态机和分析到设计的映射 \\
+QuickBooks 与 Shopify ERD & 数据图版式 & 表级主外键、模块分组、关键业务对象与交易对象分离；本文件按模块拆分 ERD，避免一张总图无法阅读 \\
+Spec Driven AI Engineering 教材 & 规格驱动方法 & 需求编号、可测试验收条件、规格到任务和测试的追踪、架构和数据决策留痕 \\
+B 企业实习生系统材料 & 文档组织参考 & 现状分析、角色需求、用例、类设计、数据库设计和非功能需求的规范化章节组织 \\
+KADA 学生案例 & 交付物边界 & SRS SDD STD UI 流程和数据库报告分工；本文件将需求和设计建立同一追踪链 \\
+OpenLMIS & 库存与履约参考 & 库存收发、实物盘点、调整、库存现有量、交易历史、订单履约和交付凭证；用于设计库存流水和状态审计 \\
+ERPNext & 企业模块参考 & 会计、订单、库存、资产、人员和多模块集中管理；用于界定 BSR 的模块边界与集中数据 \\
+Open Mercato & 规格优先参考 & 规格、数据模型、API、UI、迁移、成功指标、未决问题和变更日志共同维护 \\
+FoodInsight & 边界与隐私参考 & 前端、后端、设备侧职责清楚，数据最小化和本地处理原则；用于审计与个人数据最小化 \\
+Konquer 与 Hayami & 同类租赁流程参考 & 线上选择日期和装备、到场即取、二维码或确认码、提前调配、尺寸信息、移动端操作和归还处理 \\
+\end{longtable}
+}
+
+\subsubsection{1.2.1 需求获取计划与证据等级}
+
+课程案例和公开网站仅能证明已记录的现状或提供设计启发，不等于 BSR 已批准新流程。以下方法用于把初步推断转化为可验证需求；在未完成访谈和现场观察前，标记为``待确认''的政策、指标与界面方案均为设计建议。
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1499}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2813}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3187}}@{}}
+\toprule\noalign{}\rowcolor{TableHead}
+\begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{获取方法}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{适合核对的问题}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{优点与局限}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{本项目动作与证据}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+文档研究 & 现有合同、工作簿、费率、维修单、排班 & 成本低，可追溯；材料可能过时或遗漏例外。 & 建立字段与流程证据清单；已阅读案例，原始业务单据待 BSR 提供。 \\
+现场观察和试操作 & 取货排队、逐件验货、跨店归还、盘点 & 能发现隐性步骤；旺季与淡季差异大。 & 分别观察两店高峰及平峰，记录实际动作、耗时和异常；目前未开展。 \\
+半结构化访谈 & 老板目标、店员痛点、财务退款、分包商维修 & 可追问冲突与原因；受个人记忆和立场影响。 & 按执行者访谈并回放流程图确认；目前未开展。 \\
+顾客问卷与原型测试 & 筛选维度、价格透明、移动端下单、取货码 & 覆盖面较广；自报偏好未必代表真实行为。 & 用真实任务测试规格筛选和订单确认；目前未开展。 \\
+竞品调研 & 日期筛选、尺码、到店领取和退押金说明 & 便于发现常见模式；不代表 BSR 的政策。 & 只借鉴交互和分类，不复制价格或商业规则。 \\
+现有系统与数据核查 & Excel 字段、重复顾客、库存唯一编号、历史合同 & 能发现真实数据约束；不能替代业务解释。 & 上线前导出样本做字段映射、缺失值与重复检查；目前未获取。 \\
+\end{longtable}
+}
+
+\subsubsection{1.2.2 需求确认与冲突处理}
+
+每条需求记录来源、提出人、证据、优先级、状态、影响对象和批准人。顾客希望灵活取消、财务希望控制损失、店员希望快速交付等目标可能冲突；先展示成本、风险和体验影响，再由老板及对应业务负责人批准版本化政策。未批准的金额、时限和绩效指标不得当作已生效运营规则。
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2312}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1875}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3563}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2250}}@{}}
+\toprule\noalign{}\rowcolor{TableHead}
+\begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{利益冲突}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{涉及涉众}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{拟议平衡办法}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{决定与证据}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+顾客希望临时取消，门店需要保留旺季供给 & 顾客／门店经理／财务 & 以取货时间为界设置可配置阶梯，确认页提前展示费用；取消后即时释放库存 & 由 Ole 与财务批准政策版本；访谈和历史爽约率待收集 \\
+顾客希望快速取货，店员必须保证安全验货 & 顾客／店员／门店经理 & 线上预填资料与支付，现场仍逐件核对外观、功能和附件 & 门店试操作计时并记录交付异常 \\
+顾客希望立即退押金，财务必须核对争议费用 & 顾客／财务／经理 & 无异常自动发起退款；损坏或逾期需先形成依据并经阈值审批 & 财务确认扣费表和人工复核阈值 \\
+分包商需要任务信息，顾客资料应最小披露 & 分包商／顾客／管理员 & 只开放被分配工单和装备故障，不开放无关顾客身份 & 权限原型与越权测试记录 \\
+\end{longtable}
+}
+
+\subsubsection{1.2.3 雪具租赁价格调研}
+
+BSR 案例发生在挪威，顾客端原型以挪威克朗（NOK）为计价币种。以下是截至 2026 年 10 月 22 日可查的挪威租赁商 2025／26 雪季一日公开价，属于 2026 年参考样本，不是 BSR 的已批准价目。不同套餐的雪板、雪鞋、雪杖、头盔包含范围不同，不能只比较金额；部分商家尚未确认 2026／27 雪季价格。中国市场人民币价格仅用于跨市场观察，不直接换算为 BSR 售价。
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1937}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3751}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1562}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2750}}@{}}
+\toprule\noalign{}\rowcolor{TableHead}
+\begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{公开价目来源}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{一日产品或套餐}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{价格 NOK}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{比较说明}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Røldal 滑雪中心［14］ & 成人双板＋雪鞋＋雪杖；单板＋雪鞋 & 400；470 & 头盔另列 50；二日双板套装 630，不能简单以日价乘二。 \\
+Furutangen［15］ & 高山／越野完整装备；单租雪板／雪鞋／雪杖 & 420；265／200／50 & 页面明确标注为 2025／26 价，2026／27 尚未确认。 \\
+Sirdal Fjellpark［16］ & 成人标准完整装备；儿童标准；高阶完整装备 & 460；350；600 & 标准完整装备包含板、鞋、盔、杖；可选装备保障 80／日。 \\
+Norefjell［17］ & 成人标准双板套装；成人单板套装；高端双板套装 & 550；650；920 & 套餐包含头盔；单租雪鞋 270、头盔或雪镜 140，装备保障 55。 \\
+\end{longtable}
+}
+
+由上述不同门店的可比项目归纳，成人基础板靴套餐约 NOK 400---650／日，进阶或高端套餐约 NOK 600---920／日，儿童标准套装约 NOK 330---350／日；单租雪板约 NOK 265---370／日，雪鞋约 NOK 150---270／日，头盔约 NOK 50---140／日。该区间只反映所列样本和套餐差异，不代表市场最低价或 BSR 承诺价。押金没有可靠的 BSR 已批准金额，不能从租金或其他门店的保障费推算。
+
+\textbf{备注：}本方案按 BSR 所在的挪威市场研究和设计租赁价格，以上参考价的计量单位均为挪威克朗（NOK），不是人民币元（CNY）。挪威与国内雪具租赁价格存在差异，不能把表内数值读作人民币金额，也不能直接套用国内价目。BSR 实际租金和押金仍须由业务方批准。
+
+\subsection{1.3 设计结论}
+
+\begin{itemize}
+\item
+  预约按装备规格记录所需数量，门店备货和交付时再逐件绑定库存编号。案例中每件实物均有唯一库存编号；即使合同将同款雪杖合并显示为数量，借还、验收与维修仍逐件追踪。
+\item
+  可用库存必须按门店和租期区间计算，不能只看当前在库数量。库存占用、已确认预约、已借出、维修、隔离和调拨中的数量均不可再次出售。
+\item
+  订单必须保存价格快照。后续价格或押金政策调整不能改变已确认订单、已签合同或历史账单。
+\item
+  顾客端展示本门店、本取还日期、所选规格与租期对应的已批准价格；多日套餐须按政策表计算，不以一日价直接乘天数。租金、押金和可能产生的逾期费用要分别说明；仅在业务方批准提供可选保障服务时另列该项费用。
+\item
+  取货码仅用于定位和核验订单，不替代身份确认、电子签署和现场验货。取货成功后立即失效，禁止重复使用。
+\item
+  押金自动退款不是简单的定时任务。只有全部租赁项目已归还、逐件验收完成、逾期和损坏费用已确定、无待处理争议且支付记录可用时，系统才可自动退款。
+\item
+  付款、退款、通知和库存变更必须可重试且幂等。重复回调不得产生重复合同、重复扣款或重复退款。
+\end{itemize}
+
+\subsection{1.4 系统范围}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.1874}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.8126}}@{}}
+\toprule\noalign{}\rowcolor{TableHead}
+\begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{范围类别}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{内容}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+目标第一阶段范围 & 顾客账号与量体资料；装备分类和筛选；按日期可用库存；预约；定位推荐展示币种与当地参考换算价；NOK 计价、支付和押金原路退款（真实接口待接入）；取货码；到店验货取货；合同和项目变更；归还验收；逾期损坏费用；押金自动退款；多店库存与调拨；维修；排班；报表；权限和审计。 \\
+第一阶段不包含 & 境外门店本地币种结算、按浏览者国籍差别定价、酒店配送、雪场缆车票、课程预约、装备销售、电商营销、保险理赔、面部识别、自助柜硬件控制和 RFID 自动通道。接口和数据结构应预留扩展位置，但本期不承诺实现。 \\
+外部依赖 & 第三方支付服务、短信或电子邮件服务、二维码扫描设备或摄像头。系统不保存银行卡号等支付介质信息。 \\
+运营确认项 & 本地演示按每件装备参考价值的 8\% 收押金；该比例、取消阶梯、爽约处理、逾期费率、损坏扣费表、退款到账承诺和跨店归还费用由 BSR 在上线前确认，系统按版本化政策配置。 \\
+\end{longtable}
+}
+
+\input{updates/baseline.tex}
+
+\subsection{1.5 术语}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.8000}}@{}}
+\toprule\noalign{}\rowcolor{TableHead}
+\begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{术语}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\color{white}\bfseries\centering
+\textbf{定义}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+装备款式 & 品牌和型号层面的商品描述，例如 Head XTC 滑雪板。 \\
+装备规格 & 可供顾客选择的尺码、长度、颜色或款式组合；基准价只供目录展示，实际应付以适用价格政策版本为准。 \\
+装备单件 & 带唯一库存编号的物理装备，记录状态和所在门店。 \\
+库存占用 & 顾客提交预约到完成支付之间，对指定门店和租期的短时保留。 \\
+预约订单 & 顾客选定门店、租期、装备规格并支付前后形成的业务单据。 \\
+正式报价与参考换算价 & 正式报价是取货门店已批准政策给出的可结算金额；参考换算价是按汇率展示的当地货币估算额，不构成支付承诺。 \\
+租赁合同 & 顾客取货时电子签署并由店员确认交付后生效的合同。 \\
+取货码 & 与已确认预约一一对应的一次性二维码或数字码，用于到店快速调单。 \\
+押金账户 & 汇总一笔预约的押金收取、扣减、可退和退款状态的业务对象。 \\
+\end{longtable}
+}
+
+\FloatBarrier
+\BSRChapter{02}{业务建模}{证据可追溯的现状与待确认的改进蓝图}\label{chap:business}
+\input{updates/chapter2.tex}
+
+\BSRChapter{03}{需求}{以执行者价值定义系统能力与验收边界}\label{chap:requirements}
+\input{updates/chapter3.tex}
+
+\BSRChapter{04}{分析}{按模块追溯静态结构、动态协作与状态守卫}\label{chap:analysis}
+\input{updates/chapter4.tex}
+
+\BSRChapter{05}{设计}{把分析模型落实为数据、领域与表示层}\label{chap:design}
+\input{updates/chapter5.tex}
+\BSRChapter{06}{数据层 ERD 图集}{六组可独立核对的关系图与约束}\label{chap:erd}
+\input{updates/chapter6.tex}
+\input{updates/appendices.tex}

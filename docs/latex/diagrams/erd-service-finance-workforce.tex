@@ -1,0 +1,47 @@
+% ER-SERV 归还事实、鉴定证据、维修和安全验收。
+\newcommand{\BSRERService}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRERCard{inspection}{0}{0}{inspections}{PK id\newline FK reservation\_id,unit\_id\newline UQ reservation+unit}
+  \BSRERCard{case}{5.2}{0}{damage\_cases}{PK id; UQ/FK inspection\_id\newline FK assessor\_id\newline grade,status,version}
+  \BSRERCard{photo}{10.4}{0}{damage\_photos}{PK id; FK case\_id\newline part,image BLOB NN\newline FK uploaded\_by}
+  \BSRERCard{repair}{0}{-4}{maintenance}{PK id; FK unit\_id\newline FK contractor\_id\newline rate\_id,rate 快照}
+  \BSRERCard{rates}{5.2}{-4}{contractor\_rates}{PK id; FK contractor\_id\newline effective\_from,hourly\_nok\newline UQ contractor/date}
+  \BSRERCard{accept}{10.4}{-4}{safety\_acceptances 目标}{PK id; FK maintenance\_id\newline FK reviewer\_id\newline decision,reviewed\_at}
+  \draw[Navy] (inspection) -- node[above,font=\tiny,fill=white]{1:0..1} (case);
+  \draw[Navy] (case) -- node[above,font=\tiny,fill=white]{1:n 证据} (photo);
+  \draw[Navy] (case) -- node[left,font=\tiny,fill=white]{0:1 工单} (repair);
+  \draw[Navy] (rates) -- node[above,font=\tiny,fill=white]{1:n} (repair);
+  \draw[Navy] (repair.south) -- ++(0,-.55) -| node[pos=.76,below,font=\tiny,fill=white]{1:n 验收轮次} (accept.south);
+  \node[bsrNote] at (5.2,-7.2) {当前 `maintenance\_events` 保存验收事实；目标表须保留轮次。照片按案件对象授权，不能放公开目录。};
+\end{tikzpicture}}
+
+% ER-FIN 押金、超时、损坏和资金/补差流水。
+\newcommand{\BSRERFinance}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRERCard{runit}{0}{0}{rental\_units}{PK item\_id+unit\_id\newline late\_minutes/fee\_nok\newline 逐件实还冻结}
+  \BSRERCard{case}{5.2}{0}{damage\_cases}{PK id\newline grade,fee\_nok\newline manager approved\_by}
+  \BSRERCard{settle}{10.4}{0}{damage\_settlements}{PK/FK reservation\_id\newline damage/late/total NOK\newline deduct/refund/due NOK}
+  \BSRERCard{payments}{0}{-4}{payments}{PK id; FK reservation\_id\newline type,amount\_nok,status\newline UQ idempotency\_key}
+  \BSRERCard{contacts}{5.2}{-4}{damage\_contacts}{PK id; FK reservation\_id\newline FK actor\_id\newline channel,outcome,time}
+  \BSRERCard{receipts}{10.4}{-4}{damage\_receipts}{PK id; FK reservation\_id\newline amount\_nok,reference\newline UQ reservation/reference}
+  \draw[Navy] (runit.north) -- ++(0,.55) -| node[pos=.75,above,font=\tiny,fill=white]{n:1 超时} (settle.north);
+  \draw[Navy] (case) -- node[above,font=\tiny,fill=white]{n:1} (settle);
+  \draw[Navy] (settle) -- node[sloped,above,font=\tiny,fill=white]{1:n 资金事件} (payments);
+  \draw[Navy] (settle) -- node[sloped,above,font=\tiny,fill=white]{1:n 沟通} (contacts);
+  \draw[Navy] (settle) -- node[right,font=\tiny,fill=white]{1:n 补差凭证} (receipts);
+  \node[bsrNote] at (5.2,-7.2) {费用=逐件超时+核定损坏；抵扣不超过押金；争议或回执不明不得标已到账。};
+\end{tikzpicture}}
+
+% ER-STAFF 角色单表、档案扩展、排班/打卡、提醒与审计。
+\newcommand{\BSRERWorkforce}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRERCard{users}{0}{0}{users}{PK id; UQ email\newline CK role 枚举\newline FK store\_id}
+  \BSRERCard{profiles}{5.2}{0}{employee\_profiles}{PK/FK user\_id\newline UQ employee\_no\newline job\_title,qualification}
+  \BSRERCard{shifts}{10.4}{0}{shifts}{PK id; FK user/store\_id\newline work\_date,start/end\newline UQ user+date}
+  \BSRERCard{punch}{0}{-4}{attendance}{PK id; FK user\_id\newline clock\_in/clock\_out\newline UQ user+work\_date}
+  \BSRERCard{alerts}{5.2}{-4}{order\_alert\_reads}{PK user\_id+reservation\_id\newline read\_at NN\newline 未解决看业务状态}
+  \BSRERCard{audit}{10.4}{-4}{audit\_log}{PK id; FK actor\_id\newline action,target\_type/id\newline detail\_json,created\_at}
+  \draw[Navy] (users) -- node[above,font=\tiny,fill=white]{1:0..1 扩展} (profiles);
+  \draw[Navy] (users.north) -- ++(0,.55) -| node[pos=.72,above,font=\tiny,fill=white]{1:n 计划} (shifts.north);
+  \draw[Navy] (users) -- node[left,font=\tiny,fill=white]{1:n 实际} (punch);
+  \draw[Navy] (users) -- node[sloped,above,font=\tiny,fill=white]{1:n 本人已读} (alerts);
+  \draw[Navy] (users) -- node[sloped,above,font=\tiny,fill=white]{1:n 操作} (audit);
+  \node[bsrNote] at (5.2,-7.2) {当前单表 role；目标子类表需迁移。打卡不等于排班，已读提醒不等于订单闭环。};
+\end{tikzpicture}}

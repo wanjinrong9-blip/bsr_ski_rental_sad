@@ -1,0 +1,15 @@
+{
+  "name": "bsr-ski-rental",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "BSR 滑雪租赁系统本地预览版",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "backup": "node tools/backup-verify.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

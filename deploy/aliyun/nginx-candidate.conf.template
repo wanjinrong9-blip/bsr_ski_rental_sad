@@ -1,0 +1,34 @@
+# Template only: do not enable until domain, certificate, data and access gates pass.
+# The only public listener is Nginx HTTPS. Node stays on 127.0.0.1:4174.
+server {
+    listen 443 ssl;
+    server_name __BSR_DOMAIN__;
+    ssl_certificate /etc/bsr/tls/fullchain.pem;
+    ssl_certificate_key /etc/bsr/tls/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    # $http_host is the original Host; $host may silently fall back to server_name.
+    if ($http_host != "__BSR_DOMAIN__") { return 421; }
+    client_max_body_size 10m;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy same-origin always;
+
+    location / {
+        proxy_pass http://127.0.0.1:4174;
+        proxy_http_version 1.1;
+        proxy_set_header Host __BSR_DOMAIN__;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-BSR-Client-IP $remote_addr;
+        # /etc/bsr/proxy-secret.conf contains one proxy_set_header line.
+        include /etc/bsr/proxy-secret.conf;
+        proxy_set_header X-Forwarded-For "";
+        proxy_set_header Forwarded "";
+        proxy_set_header X-Real-IP "";
+        proxy_set_header X-Forwarded-Host "";
+        proxy_set_header Connection "";
+        proxy_buffering off;
+        proxy_connect_timeout 5s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 3600s;
+    }
+}

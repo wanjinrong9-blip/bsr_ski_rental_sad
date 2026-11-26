@@ -1,0 +1,37 @@
+% C-CONT 合同版本、备货和逐件履约。
+\newcommand{\BSRClassContract}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRClassCard{contract}{0}{0}{Contract}{id；合同号；版本；签署状态}{issue()；signCurrent()}
+  \BSRClassCard{line}{5.1}{0}{ContractLine}{规格；数量；NOK 快照}{freeze()；verifyTotal()}
+  \BSRClassCard{adjust}{10.2}{0}{ContractAdjustment}{原/新版；差额；同意}{preview()；commit()}
+  \BSRClassCard{prep}{0}{-4.2}{Preparation}{reservationId；指派人；状态}{assign()；markReady()}
+  \BSRClassCard{prepu}{5.1}{-4.2}{PreparationUnit}{订单行；unitId；检查}{bind()；safetyCheck()}
+  \BSRClassCard{rentalu}{10.2}{-4.2}{RentalUnit}{订单行；unitId；借/还时刻}{handover()；receive()}
+  \draw[Navy,line width=.7pt,{Diamond[fill=Navy,length=2.5mm,width=2.2mm]}-] (contract) -- node[above,font=\tiny,fill=white]{组合 1:n} (line);
+  % 合同至调整版本的关联走上方，不穿过中间的 ContractLine。
+  \coordinate (adjustRouteL) at ([yshift=7mm]contract.north);
+  \coordinate (adjustRouteR) at ([yshift=7mm]adjust.north);
+  \draw[Navy,line width=.7pt] (contract.north) -- (adjustRouteL) -- node[midway,above,font=\tiny,fill=white]{1:n 版本调整} (adjustRouteR) -- (adjust.north);
+  \draw[Navy,line width=.7pt,{Diamond[fill=Navy,length=2.5mm,width=2.2mm]}-] (prep) -- node[above,font=\tiny,fill=white]{组合 1:n} (prepu);
+  \draw[Navy,line width=.7pt] (line) -- node[right,font=\tiny,fill=white]{1:n 单件} (prepu);
+  \draw[Navy,line width=.7pt] (prepu) -- node[above,font=\tiny,fill=white]{1:1 交付} (rentalu);
+  \node[bsrNote] at (5.1,-7.2) {来源：UC-05～09。预约行与实物为时间化 m:n；当前签署版本是交付守卫。};
+\end{tikzpicture}}
+
+% C-SERV 归还事实、受损鉴定、维修与安全验收。
+\newcommand{\BSRClassDamage}{\begin{tikzpicture}[x=1cm,y=1cm]
+  \BSRClassCard{inspection}{0}{0}{Inspection}{unitId；事实分类；实还时刻}{recordFact()；isolate()}
+  \BSRClassCard{damage}{5.1}{0}{DamageCase}{等级；状态；24h 截止}{assess()；requestReview()}
+  \BSRClassCard{photo}{10.2}{0}{DamagePhoto}{部位；受控图片；上传人}{attach()；authorizeRead()}
+  \BSRClassCard{repair}{0}{-4.2}{MaintenanceOrder}{unitId；技师；费率快照}{diagnose()；submit()}
+  \BSRClassCard{rate}{5.1}{-4.2}{ContractorRate}{技师；生效日；小时 NOK}{selectAt()；snapshot()}
+  \BSRClassCard{safety}{10.2}{-4.2}{SafetyAcceptance}{工单；检查项；经理结论}{approve()；returnForFix()}
+  \draw[Navy,line width=.7pt] (inspection) -- node[above,font=\tiny,fill=white]{0:1 疑损} (damage);
+  \draw[Navy,line width=.7pt,{Diamond[fill=Navy,length=2.5mm,width=2.2mm]}-] (damage) -- node[above,font=\tiny,fill=white]{组合 1:n} (photo);
+  \draw[Navy,line width=.7pt] (damage) -- node[sloped,above,font=\tiny,fill=white]{0:1 维修} (repair);
+  \draw[Navy,line width=.7pt] (rate) -- node[above,font=\tiny,fill=white]{历史费率} (repair);
+  % 维修至安全验收的关联走下方，不穿过 ContractorRate。
+  \coordinate (safetyRouteL) at ([yshift=-6mm]repair.south);
+  \coordinate (safetyRouteR) at ([yshift=-6mm]safety.south);
+  \draw[Navy,line width=.7pt] (repair.south) -- (safetyRouteL) -- node[midway,above,font=\tiny,fill=white]{1:n 验收轮次} (safetyRouteR) -- (safety.south);
+  \node[bsrNote] at (5.1,-7.2) {来源：UC-09/10/12。专员记事实，技师初评，经理核费与安全；“修好”不等于“可租”。};
+\end{tikzpicture}}

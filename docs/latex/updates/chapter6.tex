@@ -1,0 +1,15 @@
+\noindent 本章按老师课件的 ERD 表达方式，将一组业务概念放在一张可读的关系图内。六组图与第 4 章六组类图逐组对应，基数、键和约束可与附录 C 复核。跨组引用以稳定 ID 连接，图中“目标”不代表本地数据库已创建。
+\input{updates/erd.tex}
+\input{updates/mini-019-erd.tex}
+\subsection*{交付边界与待确认事项}
+\addcontentsline{toc}{subsection}{交付边界与待确认事项}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 项目 & \color{white}\bfseries 当前状态 \\
+现状证据 & 案例明确 Excel 工作簿、纸质维修记录等；现场开单、归还交接细节仍需 BSR 访谈或观察。现状图中虚线代表待核实步骤。\\
+商业政策 & 8\% 参考价值押金、首单 2 小时宽限及等级扣费是本项目演示政策；正式费率、取消、赔偿和退款条款待 BSR 批准与版本化。\\
+外部接口 & 真实支付、银行退款、电子签署、汇率及通知服务为目标集成；本地演示不能作为资金到账证据。定位变更只更新参考展示币种，合同以挪威市场 NOK 冻结。\\
+生产验证 & 并发、容量、安全、灾备与第三方失败恢复尚需专门测试和组织验收；本地自动测试只证明对应演示路径。\\
+\end{BSRTable}
+\subsection*{参考资料与版本依据}
+\addcontentsline{toc}{subsection}{参考资料与版本依据}
+\noindent BSR 案例、课程课件与课程总结提供业务背景和建模方法；初版设计需求文档是历史版本；QuickBooks 与 Shopify ERD 是图面组织参考；参考论文只提供版式参考。公开系统用于功能与交互对照，不替代 BSR 组织事实。完整资料清单见附录 F；旧新用例语义对照见附录 E。

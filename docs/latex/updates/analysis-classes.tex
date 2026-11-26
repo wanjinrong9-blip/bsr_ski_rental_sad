@@ -1,0 +1,22 @@
+\subsection{4.1 分模块分析类图}
+\noindent 分析类由用例名词、字段和事件抽取；先核对账号/人员泛化，再标组合、关联与基数。每张图只表达一个模块，跨组类以稳定引用相连。图中 `CartLine` 等短暂对象不自动等于持久表；目标分析类与当前 `users.role` 等实现差异在数据设计章注明。
+\input{diagrams/classes-customer-inventory.tex}
+\input{diagrams/classes-contract-damage.tex}
+\input{diagrams/classes-finance-workforce.tex}
+\BSRNewFigure{\BSRClassCustomer}{C-CUST 顾客与预约分析类：UC-01～04，账号泛化、预约行与同意版本}{fig:c-cust}
+\BSRNewFigure{\BSRClassInventory}{C-BOOK 库存与门店分析类：UC-02/07/09/13，规格与物理单件分离}{fig:c-book}
+\BSRNewFigure{\BSRClassContract}{C-CONT 合同与逐件履约分析类：UC-05～09，版本与时间化连接}{fig:c-cont}
+\BSRNewFigure{\BSRClassDamage}{C-SERV 归还事实、受损鉴定与维修分析类：UC-09/10/12}{fig:c-serv}
+\BSRNewFigure{\BSRClassFinance}{C-FIN 费用、押金和资金事件分析类：UC-03/05/08/11}{fig:c-fin}
+\BSRNewFigure{\BSRClassWorkforce}{C-STAFF 人员、排班、提醒与审计分析类：UC-14/15}{fig:c-staff}
+\noindent C-MINI 仅增加微信身份绑定、一次性挑战和独立会话；顾客账号、购物车与订单仍引用已有 C-CUST/C-CONT 聚合。其余角色没有小程序工作台。
+\BSRDiagram{019-class-identity}{C-MINI 微信身份分析类：边界、控制、绑定与会话分离；UC-17/21}{fig:c-mini}
+
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 关系检查 & \color{white}\bfseries 类与用例来源、当前/目标差异 \\
+顾客/员工/技师泛化 & 共同身份、认证和审计抽为 `Account` / `WorkerIdentity`；目标分析可画子类，当前演示以 `users.role` 单表表达，不把子类当已建表。\\
+预约行与单件 & UC-02/04 的预约行先记规格和数量；UC-07/09 的准备单件、交接单件是时间化连接，允许同一单件在不重叠租期服务多张订单。\\
+合同与政策快照 & UC-05/11 的合同版本、NOK 分项、规则同意和技师费率要冻结旧值，后来改价不回写历史。\\
+受损/维修责任 & UC-10/12 中专员记录检查事实，技师初评和维修，经理复核费用与安全验收；技师点击提交不能直接使单件可租。\\
+人员计划与事实 & UC-14 的 `Shift` 是计划、`Punch` 是服务器记录的实际打卡；UC-15 的提醒已读与订单未解决是两个字段。\\
+\end{BSRTable}

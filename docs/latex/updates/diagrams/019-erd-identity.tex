@@ -1,0 +1,23 @@
+\resizebox{.98\linewidth}{!}{%
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\footnotesize,
+  tbl/.style={draw=Navy,fill=white,line width=.8pt,rectangle split,
+    rectangle split parts=2,rectangle split part fill={IceLight,white},
+    text width=4.05cm,inner sep=7pt,align=left}]
+  \node[tbl] (users) at (0,0) {\centering\bfseries users（顾客）
+    \nodepart{second}PK id\\role = customer\\账号状态／auth\_epoch\\两种会话归属同一 ID};
+  \node[tbl] (binding) at (5.8,0) {\centering\bfseries wechat\_bindings
+    \nodepart{second}PK id\\FK user\_id → users.id\\app\_id / openid\_digest\\bound\_at / unbound\_at\\活跃微信身份与顾客各唯一};
+  \node[tbl] (session) at (11.6,0) {\centering\bfseries mini\_sessions
+    \nodepart{second}PK token\_hash\\FK binding\_id → wechat\_bindings.id\\FK user\_id → users.id\\expires\_at / revoked\_at\\auth\_epoch};
+  \node[tbl] (challenge) at (0,-7.5) {\centering\bfseries mini\_login\_challenges
+    \nodepart{second}PK challenge\_hash\\app\_id / openid\_digest\\expires\_at / consumed\_at\\attempt\_count};
+  \node[tbl] (code) at (5.8,-7.5) {\centering\bfseries mini\_code\_uses
+    \nodepart{second}PK code\_digest\\app\_id / used\_at\\expires\_at\\临时码一次性使用};
+
+  \draw[->,Teal] (binding.west)--node[above,fill=white,inner sep=1pt]{N : 1}(users.east);
+  \draw[->,Teal] (session.west)--node[above,fill=white,inner sep=1pt]{N : 1}(binding.east);
+  \draw[->,Teal] (session.south)--(11.6,-3.70)
+    --node[above,fill=white,inner sep=1pt]{user\_id : N : 1}(0,-3.70)--(users.south);
+  \node[font=\footnotesize,text=Muted,align=center,text width=13.5cm] at (5.8,-10.55)
+    {箭头指向外键父表；一次性挑战和已用临时码没有指向顾客的外键，不能直接证明账号所有权。};
+\end{tikzpicture}}

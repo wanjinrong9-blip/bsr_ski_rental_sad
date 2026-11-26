@@ -1,0 +1,13 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[>=Latex,font=\small,t/.style={draw,rectangle split,rectangle split parts=2,rectangle split part fill={IceLight,white},text width=4.6cm,inner sep=8pt,align=left}]
+\node[t] (t0) at (0,0) {\centering\bfseries variants\nodepart{second}\scriptsize PK id\\ name / category / size\\ style / skill};
+\node[t] (t1) at (6,0) {\centering\bfseries units\nodepart{second}\scriptsize PK id / inventory\_\allowbreak{}no UQ\\ variant\_\allowbreak{}id FK / store\_\allowbreak{}id FK\\ status / condition\_\allowbreak{}note};
+\node[t] (t2) at (12,0) {\centering\bfseries stores\nodepart{second}\scriptsize PK id\\ name / address};
+\node[t] (t3) at (0,-6.3) {\centering\bfseries stock\_\allowbreak{}events\nodepart{second}\scriptsize PK id / unit\_\allowbreak{}id FK\\ from\_\allowbreak{}status / to\_\allowbreak{}status\\ from\_\allowbreak{}store\_\allowbreak{}id / to\_\allowbreak{}store\_\allowbreak{}id\\ note / created\_\allowbreak{}at};
+\node[t] (t4) at (6,-6.3) {\centering\bfseries transfers\nodepart{second}\scriptsize PK id / unit\_\allowbreak{}id FK\\ from\_\allowbreak{}store\_\allowbreak{}id FK / to\_\allowbreak{}store\_\allowbreak{}id FK\\ status / created\_\allowbreak{}by FK\\ created\_\allowbreak{}at / received\_\allowbreak{}at};
+\node[t] (t5) at (12,-6.3) {\centering\bfseries audit\_\allowbreak{}log\nodepart{second}\scriptsize PK id / actor\_\allowbreak{}id FK\\ action / target\_\allowbreak{}type / target\_\allowbreak{}id\\ detail\_\allowbreak{}json / created\_\allowbreak{}at};
+\draw[->] (t1)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=.7cm,align=center] {N : 1}(t0);
+\draw[->] (t1)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=.7cm,align=center] {N : 1}(t2);
+\draw[->] (t3)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=1.2cm,align=center] {N : 1}(t1);
+\draw[->] (t4)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=1.2cm,align=center] {N : 1}(t1);
+\draw[->] (t4)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=1.2cm,align=center] {来源/目标}(t2);
+\end{tikzpicture}}\par\smallskip{\scriptsize PK 主键；FK 已声明外键；UQ 唯一；虚线为查询对照或逻辑引用。}

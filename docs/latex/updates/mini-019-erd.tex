@@ -1,0 +1,12 @@
+\subsection{6.1 两客户端身份与报价关系补图}
+\noindent 本图只补充渠道身份和短时报价关系；顾客、门店、规格、物理单件及预约仍以本章六组 ERD 为准。活跃绑定采用部分唯一索引，历史解绑行仍留存；购物车版本与报价指纹用于防止另一端更新后误下旧单。
+\BSRDiagram{019-erd-identity}{ER-MINI-A 微信身份、一次性凭证与独立会话；PK/FK 及活跃唯一约束}{fig:er-mini-identity}
+\BSRDiagram{019-erd-commerce}{ER-MINI-B 共用顾客、购物车、报价与预约；版本及归属约束}{fig:er-mini-commerce}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 关系 / 约束 & \color{white}\bfseries 可检验的物理设计 \\
+顾客与绑定 & wechat\_bindings.user\_id 外键指向 users.id；同一 AppID 的活跃 OpenID 摘要唯一、活跃顾客唯一。解绑只填时间，不删除历史。\\
+绑定与小程序会话 & 1:n；mini\_sessions.binding\_id、user\_id 指向活跃关系。令牌仅保存摘要；账号认证纪元或绑定状态变化后拒绝旧令牌。\\
+顾客与购物车/报价 & customer\_carts.customer\_id 唯一，购物车行以 (cart\_id,variant\_id) 为复合主键；mini\_quotes.customer\_id 关联顾客，报价短期有效，指纹绑定完整输入。\\
+购物车与预约 & 购物车不是订单外键；经核价与库存事务后才创建 reservations.user\_id 所属的预约。历史订单保存独立政策/金额快照，购物车后续变化不回写。\\
+一次性凭证 & mini\_login\_challenges 和 mini\_code\_uses 用不可逆摘要与过期/消耗字段；不把临时码或平台会话密钥当持久业务键。\\
+\end{BSRTable}

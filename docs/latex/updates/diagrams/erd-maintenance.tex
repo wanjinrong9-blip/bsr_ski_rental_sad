@@ -1,0 +1,13 @@
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[>=Latex,font=\small,t/.style={draw,rectangle split,rectangle split parts=2,rectangle split part fill={IceLight,white},text width=4.6cm,inner sep=8pt,align=left}]
+\node[t] (t0) at (0,0) {\centering\bfseries users / 维修人员\nodepart{second}\scriptsize PK id\\ role=contractor\\ name / phone / email};
+\node[t] (t1) at (6,0) {\centering\bfseries maintenance\nodepart{second}\scriptsize PK id / unit\_\allowbreak{}id FK\\ contractor\_\allowbreak{}id FK / store\_\allowbreak{}id FK\\ issue / status / priority\\ due\_\allowbreak{}at / version / hours\\ diagnosis / result / parts\\ cost\_\allowbreak{}nok / checklist\_\allowbreak{}json\\ review\_\allowbreak{}note / completed\_\allowbreak{}at};
+\node[t] (t2) at (12,0) {\centering\bfseries units\nodepart{second}\scriptsize PK id / inventory\_\allowbreak{}no UQ\\ variant\_\allowbreak{}id FK / store\_\allowbreak{}id FK\\ status / condition\_\allowbreak{}note};
+\node[t] (t3) at (0,-6.3) {\centering\bfseries maintenance\_\allowbreak{}events\nodepart{second}\scriptsize PK id / maintenance\_\allowbreak{}id FK\\ actor\_\allowbreak{}id FK / event\\ from\_\allowbreak{}status nullable / to\_\allowbreak{}status\\ note / created\_\allowbreak{}at};
+\node[t] (t4) at (6,-6.3) {\centering\bfseries 安全检查 JSON 值对象\nodepart{second}\scriptsize appearance / fasteners\\ function / cleaning\\ 保存在 maintenance.checklist\_\allowbreak{}json\\ 不是独立表};
+\node[t] (t5) at (12,-6.3) {\centering\bfseries stores\nodepart{second}\scriptsize PK id\\ name / address};
+\draw[->] (t1)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=.7cm,align=center] {N : 0..1}(t0);
+\draw[->] (t1)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=.7cm,align=center] {N : 1}(t2);
+\draw[->] (t3)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=1.2cm,align=center] {N : 1}(t1);
+\draw[dashed,->] (t4)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=1.2cm,align=center] {值对象}(t1);
+\draw[->] (t2)--node[fill=white,inner sep=.5pt,font=\scriptsize,text width=1.2cm,align=center] {N : 1}(t5);
+\end{tikzpicture}}\par\smallskip{\scriptsize PK 主键；FK 已声明外键；UQ 唯一；虚线为查询对照或逻辑引用。}

@@ -1,0 +1,26 @@
+# Template only. Review paths, permissions and mount before installing.
+[Unit]
+Description=BSR candidate application (loopback behind Nginx)
+After=network-online.target local-fs.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=bsr
+Group=bsr
+WorkingDirectory=/opt/bsr/app
+EnvironmentFile=/etc/bsr/candidate.env
+ExecStartPre=/usr/bin/mountpoint -q /srv/bsr
+ExecStartPre=/usr/bin/test -r /srv/bsr/data/candidate.sqlite
+ExecStart=/usr/bin/node src/server.mjs
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/srv/bsr
+
+[Install]
+WantedBy=multi-user.target

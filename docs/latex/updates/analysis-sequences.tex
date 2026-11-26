@@ -1,0 +1,26 @@
+\clearpage
+\subsection{4.2 核心用例分析序列图}
+\noindent 每张图由执行者触发，消息依次进入边界类、控制类与领域实体；暖色虚线表示规约中的异常分支，\textbf{不代表未证实的业务现状}。UC-01/08/12～15 的扩展流程以规约及类/状态图追溯，以下九张聚焦库存、合同、交付、归还、鉴定与结算闭环。
+\input{diagrams/sequences-reservation.tex}
+\input{diagrams/sequences-contract-fulfillment.tex}
+\input{diagrams/sequences-return-settlement.tex}
+\BSRNewFigure{\BSRSeqUCTwo}{S-UC02 按日期段查询库存：整段可用量及结账前重核}{fig:s-uc02}
+\BSRNewFigure{\BSRSeqUCThree}{S-UC03 购物车透明报价：NOK 分项与旧报价失效}{fig:s-uc03}
+\BSRNewFigure{\BSRSeqUCFour}{S-UC04 阅读新规则并提交预约：同意版本、原子暂留与幂等}{fig:s-uc04}
+\BSRNewFigure{\BSRSeqUCFive}{S-UC05 当前合同版本的开具与签署：演示/正式服务边界}{fig:s-uc05}
+\BSRNewFigure{\BSRSeqUCSix}{S-UC06 付款确认与备货任务：签后演示付款、重复提交不重复入账}{fig:s-uc06}
+\BSRNewFigure{\BSRSeqUCSeven}{S-UC07 具名备货、核码和逐件交付：不安全或未签拒绝}{fig:s-uc07}
+\BSRNewFigure{\BSRSeqUCNine}{S-UC09 逐件异店归还：当前店变化、未归还件仍占用}{fig:s-uc09}
+\BSRNewFigure{\BSRSeqUCTen}{S-UC10 受损初评与经理复核：24 小时仅指初评反馈}{fig:s-uc10}
+\BSRNewFigure{\BSRSeqUCEleven}{S-UC11 超时/损坏/押金结算：争议与补差暂停最终结清}{fig:s-uc11}
+\noindent 两端下单不是独立交易路径：UC-19 从小程序边界调用已有购物车与预约聚合，服务端以报价指纹、版本和单件库存事务裁决；网页顾客使用同一领域规则。
+\BSRDiagram{019-sequence-booking}{S-UC19 小程序报价与预约：身份、共享购物车、有效报价及最后一件库存复核}{fig:s-uc19}
+
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 用例异常 & \color{white}\bfseries 序列中的责任与不变量 \\
+UC-02/04 库存过期 & `AvailabilityCtrl` 只展示查询结果；`ReservationCtrl` 原子再核库存并中止旧报价，不让页面数字直接承诺实物。\\
+UC-05/06 合同与支付 & 本地顾客自助确认或现场纸质见证当前版后才可演示付款；正式第三方付款待接入，重复请求不创建第二份备货。\\
+UC-07 安全与核码 & 专员检查实物；控制类校验取货码、本人和当前版签署，阻止重复扫描。\\
+UC-09 部分/异店归还 & 每件冻结自己的实还时刻，异店只改当前店；未还件仍占用且押金不结清。\\
+UC-10/11 证据与结算 & 技师提供对应部位照片，经理核费；正常磨损零收费，争议/未还/退款回执不明不得标完成。\\
+\end{BSRTable}
