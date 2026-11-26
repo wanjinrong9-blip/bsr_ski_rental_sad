@@ -32,6 +32,21 @@
 
 ## 已购实例的下一步核验顺序
 
+### 离线生成与校验系统盘配置（020）
+
+新增 `tools/render-showcase-system-disk.mjs`，无第三方依赖、网络调用或数据库操作。它从已审阅模板生成同一组 env、代理密钥 include 和 Nginx 配置；一个随机密钥同时写入前两份文件，避免手工填写不一致。仅允许 `bsrski.cn` 及其合法小写子域名；这只是范围检查，不证明备案、证书或域名解析已完成。
+
+在当前项目目录，用已有的仓库外私有父目录执行以下命令；示例目标目录必须尚不存在：
+
+```sh
+node tools/render-showcase-system-disk.mjs render --domain bsrski.cn --output-dir /var/lib/bsr-private/config-20261126
+node tools/render-showcase-system-disk.mjs check --domain bsrski.cn --output-dir /var/lib/bsr-private/config-20261126
+```
+
+命令不输出密钥，不覆盖目录，不启用服务，也不修改 DNS 或防火墙。输出是 `showcase-system-disk.env`、`proxy-secret-showcase.conf`、`nginx-showcase.conf` 三个私有文件；Linux/macOS 检查目录 0700 和文件 0600，Windows ACL 由操作员另行核验。新组使用独立随机密钥，不与候选实例共用。`check` 比对当前源码版本模板，拒绝文件缺失、多余文件、链接、残留占位符以及域名、密钥、监听和数据库路径的变更；应用模板升级后应重新生成并验收。
+
+这些含密钥的输出禁止提交 Git。目标 Ubuntu 上仍须核验权限、证书、`nginx -t`、systemd 配置、合成库、容量及异机恢复；本机检查不代替实际部署验收。[020 范围与证据](../../specs/020-system-disk-deploy-config/quickstart.md)。
+
 1. 核对 `bsrski.cn` 的网站 ICP 最新状态：此前控制台曾显示因“网站主办者冲突”退回，用户现告知域名仍在审核，本轮没有重新打开控制台确认。以阿里云和管局当前结果为准；小程序备案号已由用户提供，不能代替网站域名的备案。[轻量备案说明](https://help.aliyun.com/zh/simple-application-server/user-guide/apply-for-an-icp-filing-for-a-domain-name)
 2. 核验单系统盘的实际可用空间、内存与部署运行开销。选择 `/var/lib/bsr` 系统盘方案时，先配置**异机**备份目的地、执行 SQLite 一致性备份并在独立位置恢复验收；同盘 `backups/` 只作临时副本，不能单独防止整盘故障。若后续购置并挂载数据盘，才改用 `/srv/bsr` 版本。[轻量数据盘指南](https://help.aliyun.com/zh/simple-application-server/user-guide/attach-a-data-disk)
 3. 在目标 Ubuntu 上创建低权限服务用户、私有目录与独立**合成**数据库；填充系统盘环境文件，但保持 systemd 服务禁用。验证 Node 版本、systemd 沙箱、文件权限、单实例写入、备份/恢复及 2 GiB 资源余量。不得复制本机 `data/bsr.sqlite` 或演示凭据。
