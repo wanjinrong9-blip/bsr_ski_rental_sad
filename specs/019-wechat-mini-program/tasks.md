@@ -1,7 +1,7 @@
 # Tasks: 网页与微信小程序共享租赁业务
 
-**Input**: [spec.md](spec.md), [plan.md](plan.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/mini-web-api.md](contracts/mini-web-api.md), [quickstart.md](quickstart.md)  
-**Status**: 正式 AppID 已配置并在开发者工具本机项目详情核对；本机逻辑与隔离测试通过。真实微信身份交换、合法 HTTPS 域名、签发码及真机仍未完成，相关复合任务保留未验收。逐项证据见 [validation.md](validation.md)。
+**Input**: [spec.md](spec.md), [plan.md](plan.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/mini-web-api.md](contracts/mini-web-api.md), [quickstart.md](quickstart.md)
+**Status**: 正式 AppID 已配置并在开发者工具本机项目详情核对；本机逻辑与隔离测试通过。真实微信身份交换、合法 HTTPS 域名、签发码及真机仍未完成，相关复合任务保留未验收。逐项证据见 [validation.md](validation.md)。2026-11-26 本机调查、测试和取码工具任务收口后为 37/40；余 T015、T038、T039 须真实平台验收。
 **Tests**: Constitution V requires meaningful automated and two-client end-to-end checks. Real WeChat scan/login requires platform credentials and publication eligibility; no mock may be marked as that evidence.
 
 ## Phase 1: Baseline and dependency gate
@@ -9,7 +9,7 @@
 - [x] T001 Record 017/018 baseline, Node/browser totals and Web cart/API behavior in `specs/019-wechat-mini-program/validation.md`. Read-only snapshot of the live DEMO database records its logical digest and row counts without altering it. There is no persistent CANDIDATE database under `data/`; isolated old-CANDIDATE fixtures verify before/after logical equality instead of inventing a live digest.
 - [x] T002 Inventory Web customer navigation, catalogue, date availability, shared cart, quote, reservation, order, pickup-code and damage paths in `public/app.js`, `src/server.mjs` and domain modules; map each to 019 FR/SC in validation.
 - [x] T003 Check 018 SHOWCASE FR/SC and six-role browser completion. Isolated synthetic instances and local six-role business/recovery tests passed; keep public release and 019 cross-client acceptance separate. No public `Demo123!` fallback.
-- [ ] T004 Recheck official WeChat AppID, login, QR, domain, filing and review rules against platform documentation at integration time; record exact platform dependencies and current availability. 2026-11-25 已按官方文档重新核对开发者工具项目配置、网络请求域名、预览/上传与小程序码的边界；正式 AppID 与用户提供的小程序备案号已入项目，HTTPS 域名登记、真实微信登录和审核仍待实际平台核验，故复合任务保留未完成。
+- [x] T004 Recheck official WeChat AppID, login, QR, domain, filing and review rules against platform documentation at integration time; record exact dependencies and current availability. 2026-11-26 已复核官方取码/稳定令牌文档及既有网络、登录、发布规则；AppID、备案信息和未就绪条件已记录。此项是规则与依赖调查，真实账号/域名/手机验收仍由 T038/T039 关闭。
 
 ---
 
@@ -41,14 +41,14 @@
 
 ### Tests first
 
-- [ ] T013 [P] Write Web API tests for OFF/PAUSED/READY QR states, missing AppID, mismatched issuer, invalid image bytes, unsafe scene, private path leak and release switch in `test/019-mini-entry.test.mjs`. 本机状态、PNG 完整性、HMAC 人工批准、路径/场景及请求时到期守卫已测；真实微信签发者无法从本地 PNG 证明，仍待正式平台。
+- [x] T013 [P] Write local Web API boundary tests for OFF/PAUSED/READY, missing/mismatched AppID, invalid source field/receipt/image bytes, unsafe scene, path leakage and release switches in `test/019-mini-entry.test.mjs`. 六项本机测试已通过；测试中的合成图片不证明微信签发，真实供码与扫码仍保留 T015/T039。
 - [x] T014 [P] Add desktop and 390px browser assertions for the preparation card and a test-only verified QR fixture in `test/019-web-qr-browser.mjs`; do not call mock QR a real scan. 独立 SHOWCASE 合成夹具用本地 HMAC 签署 BSR 标志图片，明确**不是微信签发码**；OFF/PAUSED/READY 三态在 Chrome 桌面与 390px 通过，无全局横向溢出，小屏继续使用网页版按钮滚动后可操作。
 
 ### Implementation
 
 - [ ] T015 Add guarded `/api/mini-entry` and image response in `src/mini-api.mjs`; serve only verified platform-issued bytes when both code status and release flag allow, never user-specific token/PII. 当前路由在 `src/server.mjs`，OFF/PAUSED 不供码，READY 需私有人工批准凭据；这不是平台签发证明，故真实来源门槛未关闭。
 - [x] T016 Add Web mini-program card and scan instructions in `public/app.js` / styles, with visually distinct “筹备中” state and no fake QR or automatic cross-login. 本机代码与 OFF 状态接口测试已覆盖；正式扫码另见 T017/T039。
-- [ ] T017 Add private operator procedure/tool to generate or import official homepage Mini Program code only after AppID and WeChat API access exist; record AppID/environment/hash without exposing platform secrets. 已新增本地人工完整性签署工具；正式码获取和真实 AppID 核验需在平台可用时继续。
+- [x] T017 Implement the private official homepage-code acquisition tool and procedure: `tools/fetch-mini-code.mjs`, `createWechatMiniCodeAdapter`, and `contracts/official-code-setup.md`. 固定官方 HTTPS、release 首页/home 场景，限制时间/大小，拒绝错误及损坏图片，在仓库外保存图片和无密钥的来源记录。新增 7 项离线测试通过；未实际调用微信或获取正式码，真实来源与手机验收仍见 T015/T038/T039。
 - [x] T018 Validate T013/T014 and verify current local demo Web remains usable with mini entry off; record browser screenshots without secrets. `019-mini-entry.test.mjs` 的本机状态及请求时到期测试、`019-web-qr-browser.mjs` 的隔离浏览器三态通过；本机 DEMO 默认 OFF、图片路由 404，原网页入口可打开。合成截图仅保存于 Git 忽略的 `test-results/`，不含真实密钥；真实平台来源仍见 T017/T038/T039。
 
 **Checkpoint**: Web entry is visually complete but true scan remains an external-platform acceptance task until real QR and release eligibility exist.
@@ -104,7 +104,7 @@
 - [x] T035 [P] Run package-equivalent full Node tests, 017 proxy browser, 018 six-role browser, Web QR browser and two-client end-to-end; record exact counts, failures, DB integrity and mode isolation in `validation.md`. 最近完整 Node 220/220，2026-11-25 小程序原生 15/15；017/018 浏览器、019 两客户端与独立网页扫码三态脚本此前通过。OFF/PAUSED 无图片，合成 READY 图仅用于布局和路径测试；正式码与真机留给 T038/T039。当前 PowerShell 无 `npm` 命令，使用 `node --test test/*.test.mjs` 执行同一 package 测试脚本。
 - [x] T036 Update customer system use cases, use case specifications, modular class diagrams, sequence diagrams and requirement coverage for Mini/Web shared backend; preserve teacher PPT style and fix overlaps; do not add cloud preview logistics to core PDF. 4.12 六章 PDF、UC-16～21、U-MINI、C-MINI、S-UC19、ER-MINI-A/B、附录 J、requirement.txt 与系统规约/追溯矩阵已更新；91 页 A4 编译、图面目检通过，外部平台验收仍见 T038/T039。
 - [x] T037 Update README/operator notes for `mini-program/`, external AppID/domain/filing/review gates, secret handling and QR OFF behavior. Inspect `public/` and intended GitHub package for any secret, DB, token or personal attachment. 本地 Git 暂存包已审阅，禁入文件路径与定向私钥/令牌扫描均为 0；4.12 PDF 已纳入 `docs/`，见 `docs/Git发布包审阅.md`。实际上传前仍须复核，尚未设置远端或开放权限。
-- [ ] T038 **External platform gate**: With an actual user-owned AppID, lawful HTTPS domain and authorized test account, import project in official WeChat Developer Tools, verify build and authorized preview on a phone; record exact version and result. 2026-11-25 已在 Stable 2.02.2609250 项目详情核对正式 AppID，基础库 3.17.6 模拟器显示目录、购物车、订单/详情与个人页，所查页面编译错误及问题面板均为 0；没有执行微信“预览”上传、真机或 HTTPS 请求域名验收，故保留未完成。
+- [ ] T038 **External platform gate**: With the actual AppID, lawful HTTPS request domain and authorized test account, verify real WeChat login/binding and native phone behavior. 正式 AppID 模拟器与 0.1.1 开发包上传已完成；仍缺公网后端、合法请求域名、私有平台配置、审核专用账号和真机验收，不以本机或上传成功替代。
 - [ ] T039 **External scan gate**: After official platform-generated QR, applicable filing/review and user's release approval, scan site code in WeChat on real phones, check entry/login/binding/order sync and invalid scene; never mark local mock as this result.
 - [x] T040 Map each FR-001～015 and SC-001～007 to passing test/platform evidence or a named unresolved dependency in `validation.md`; missing platform and end-to-end gates remain explicitly open.
 

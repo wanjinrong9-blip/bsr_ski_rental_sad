@@ -14,6 +14,8 @@
 
 ## Platform prerequisites for real WeChat test
 
+The private homepage-code acquisition tool is implemented and tested offline. Its fixed official endpoints, environment fields, private output and stop conditions are in [official-code-setup.md](contracts/official-code-setup.md). No real platform request has been made, and the tool never enables the public Web entry.
+
 - The user has supplied Mini Program AppID `wx51ce51fc873371a6`, registered name `WJR同学的BSR系统分析设计作业`, and Mini Program filing number `湘ICP备2026056763号-1X`. The supplied filing screenshot lists service-content tag `生活服务-工具`; verify the actual account permissions and permitted service category separately in [WeChat Official Accounts Platform](https://mp.weixin.qq.com/). Manage AppSecret privately on the server. The public AppID is not an AppSecret.
 - Prepare a valid HTTPS domain for the same backend, complete the ICP requirement stated by WeChat for the legal request domain, add it to the Mini Program's domain list, and separately satisfy applicable website and Mini Program filing/review requirements. Hosting the server in Hong Kong does not by itself waive the Mini Program request-domain rule. Alibaba Cloud server selection alone does not create this domain or publish the Mini Program.
 - In a private environment, configure AppID/AppSecret and issue a platform-generated Mini Program code for the homepage. Never paste secrets into a chat, commit, screenshot or `public/` file. Review the code image and site release flag before enabling the Web card.

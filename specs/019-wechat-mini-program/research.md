@@ -1,6 +1,6 @@
 # Research and decisions: 微信小程序与网页互联
 
-**Date**: 2026-11-18  
+**Date**: 2026-11-18
 **Status (2026-11-25)**: 用户已提供正式 AppID `wx51ce51fc873371a6`、小程序名称 `WJR同学的BSR系统分析设计作业` 和小程序备案号 `湘ICP备2026056763号-1X`；开发者工具已显示该 AppID。`bsrski.cn` 的域名 ICP 仍在审核，真实平台登录、合法 HTTPS 请求域名、真机与发布尚未验收。本文件不是微信审核或上线结果。
 
 ## Architecture decision
@@ -37,3 +37,7 @@
 ## Dependency and evidence boundary
 
 018 的安全合成预览与六角色本机验证已完成；019 已在隔离实例验证 Web 与 Mini HTTP 客户端共享购物车、库存和订单，也在正式 AppID 的开发者工具模拟器编译运行。上述结果不证明真实微信平台登录、正式小程序码、手机扫码或公网业务。用户提供的小程序备案号与 `bsrski.cn` 域名 ICP 是两项不同条件；域名仍在审核，不能自动开放公网。
+
+## 2026-11-26 取码实现复核
+
+重新读取微信官方[稳定令牌](https://developers.weixin.qq.com/miniprogram/dev/server/API/mp-access-token/api_getstableaccesstoken.html)与[正式小程序码](https://developers.weixin.qq.com/miniprogram/dev/server/API/qrcode-link/qr-code/api_getunlimitedqrcode.html)文档，实施固定端点 POST、check_path=true、env_version=release。规则调查与本机工具已完成，不能据此推断实际平台资格或取码成功。接口未保证 PNG；本项目保留既有 PNG-only 入口，其他格式明确失败并待操作员处理。详细使用边界见 [official-code-setup.md](contracts/official-code-setup.md)。

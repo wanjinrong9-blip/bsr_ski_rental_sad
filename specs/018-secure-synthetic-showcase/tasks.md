@@ -1,7 +1,7 @@
 # Tasks: 安全合成数据全功能预览
 
-**Input**: [spec.md](spec.md), [plan.md](plan.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/showcase-contracts.md](contracts/showcase-contracts.md), [quickstart.md](quickstart.md)  
-**Status**: Phase 1–5 (T001–T038) passed isolated local verification. Phase 6 has a full 191/191 Node regression and all four local browser suites, including SHOWCASE desktop/390px booking, preparation and handoff. T041 stays open until a real repository/release package exists; the private-file scan of `public/` and `.gitignore` is recorded.  
+**Input**: [spec.md](spec.md), [plan.md](plan.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/showcase-contracts.md](contracts/showcase-contracts.md), [quickstart.md](quickstart.md)
+**Status**: Phase 1–5 (T001–T038) passed isolated local verification. Phase 6 has a full 191/191 Node regression and all four local browser suites, including SHOWCASE desktop/390px booking, preparation and handoff. T041 release-package audit is now complete after the authorized GitHub delivery; real cloud/platform acceptance remains separate in 019 and deployment records.
 **Tests**: Required by FR-014 and Constitution V; write failing tests before related implementation. All fixture paths must be temporary and private.
 
 ## Phase 1: Setup
@@ -110,9 +110,9 @@
 
 - [x] T039 [P] Run the `npm test` script through its equivalent `node --test test/*.test.mjs` (npm executable unavailable in this shell), plus 017, candidate and demo browser scripts; record exact totals and transient failures in `specs/018-secure-synthetic-showcase/validation.md`.
 - [x] T040 [P] Inspect login, customer cart/checkout, staff prep, technician damage, manager roster/settlement, owner summary and admin UI in desktop and 390px browser; attach only synthetic/redacted evidence to `specs/018-secure-synthetic-showcase/validation.md`.
-- [ ] T041 Confirm no private password, secret, backup, photo or DB file is inside `public/` or intended repository package; the `public/` scan passed, but no Git/release package exists yet for a final package audit.
+- [x] T041 Confirm the intended Git package excludes private credentials, runtime databases, backups, customer photos and private WeChat config. GitHub package was audited and uploaded on 2026-11-26; subsequent staged path and private-key/token marker checks returned zero forbidden files. The historical “no Git package yet” dependency is resolved; teaching credentials and test fixtures are synthetic, not private production credentials. See `docs/Git发布包审阅.md`.
 - [x] T042 Update local operator instructions and user-facing mode meaning in `README.md` and `specs/018-secure-synthetic-showcase/quickstart.md` without adding cloud preview to the core business design PDF.
-- [x] T043 Map every FR-001～014 and SC-001～006 to passing test/browser/backup evidence or a named unresolved gap in `specs/018-secure-synthetic-showcase/validation.md`; T041's eventual release-package audit remains an explicit open item.
+- [x] T043 Map every FR-001～014 and SC-001～006 to passing test/browser/backup evidence or a named unresolved gap in `specs/018-secure-synthetic-showcase/validation.md`; T041's release-package audit is complete; actual cloud/platform acceptance remains separately recorded.
 
 ## Dependencies
 

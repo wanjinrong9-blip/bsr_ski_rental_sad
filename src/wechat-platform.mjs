@@ -1,9 +1,11 @@
+import {createHash} from 'node:crypto';
+import {validateMiniCodeImage} from './mini-entry.mjs';
+
 /**
  * Server-only WeChat Mini Program adapter. Never import this file from public/
  * or mini-program/. WeChat session_key and AppSecret stay inside this boundary.
- * Official Mini Program code issuance is deliberately separate: it needs a
- * the registered public AppID and a private platform-issued access token.
- * The AppID is known; this server has not obtained the private token.
+ * Mini Program code issuance is an explicit private setup operation, separate
+ * from login. It never enables the website's public QR entry automatically.
  */
 export class WechatPlatformError extends Error {
   constructor(code,message,status=503){
@@ -95,4 +97,65 @@ export function createWechatCodeSessionAdapter(config,options={}){
     }finally{clearTimeout(timer);}
   }
   return Object.freeze({exchangeCode});
+}
+
+async function boundedImage(response) {
+  const maxBytes = 2 * 1024 * 1024;
+  if (Number(response.headers?.get('content-length')) > maxBytes || !response.body?.getReader)
+    throw new Error('image size');
+  const reader = response.body.getReader(), chunks = [];
+  let size = 0;
+  try {
+    for (;;) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > maxBytes) { await reader.cancel(); throw new Error('image size'); }
+      chunks.push(Buffer.from(value));
+    }
+  } finally { reader.releaseLock(); }
+  const bytes = Buffer.concat(chunks, size);
+  // Existing public entry accepts PNG only. JSON errors and other formats
+  // fail closed; do not silently convert or replace the platform image.
+  validateMiniCodeImage(bytes);
+  return bytes;
+}
+
+export function createWechatMiniCodeAdapter(config, options = {}) {
+  const {appId, appSecret} = readConfig(config);
+  if (options.fetchImpl !== undefined && process.env.NODE_ENV !== 'test')
+    throw error('WECHAT_TEST_ADAPTER_FORBIDDEN', '微信测试适配器只允许隔离测试使用', 503);
+  const fetchImpl = options.fetchImpl ?? globalThis.fetch;
+  const timeoutMs = options.timeoutMs ?? 5000;
+  if (typeof fetchImpl !== 'function' || !Number.isInteger(timeoutMs) || timeoutMs < 20 || timeoutMs > 10000)
+    throw error('WECHAT_CONFIG_INVALID', '微信小程序服务端配置无效', 503);
+  const page = 'pages/catalog/index', scene = 'home', envVersion = 'release';
+  async function obtainMiniCode() {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const request = {method: 'POST', redirect: 'error', cache: 'no-store',
+      signal: controller.signal, headers: {'Content-Type': 'application/json'}};
+    try {
+      const tokenResponse = await fetchImpl('https://api.weixin.qq.com/cgi-bin/stable_token',
+        {...request, body: JSON.stringify({grant_type: 'client_credential', appid: appId, secret: appSecret})});
+      if (!tokenResponse?.ok) throw new Error('platform token');
+      const token = await boundedJson(tokenResponse, 16384);
+      if ((token.errcode !== undefined && Number(token.errcode) !== 0) ||
+          typeof token.access_token !== 'string' || !/^[A-Za-z0-9_-]{16,512}$/.test(token.access_token) ||
+          !Number.isInteger(token.expires_in) || token.expires_in < 1 || token.expires_in > 7200)
+        throw new Error('platform token');
+      const endpoint = 'https://api.weixin.qq.com/wxa/getwxacodeunlimit';
+      const query = new URLSearchParams({access_token: token.access_token});
+      const response = await fetchImpl(`${endpoint}?${query}`, {...request,
+        body: JSON.stringify({page, scene, check_path: true, env_version: envVersion, width: 430})});
+      if (!response?.ok) throw new Error('platform image');
+      const bytes = await boundedImage(response);
+      return {bytes, provenance: {version: 1, source: 'wechat-api-request', appId, page, scene,
+        envVersion, endpoint, imageSha256: createHash('sha256').update(bytes).digest('hex'),
+        obtainedAt: new Date().toISOString()}};
+    } catch {
+      throw error('WECHAT_CODE_UNAVAILABLE', '微信小程序码获取失败；请在私有平台环境核对资格与发布状态', 503);
+    } finally { clearTimeout(timer); }
+  }
+  return Object.freeze({obtainMiniCode});
 }

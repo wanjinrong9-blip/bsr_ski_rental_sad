@@ -40,6 +40,7 @@ mini-program/                # 当前本机顾客端
   pages/catalog/, cart/, orders/, order-detail/, account/
   utils/, assets/, project.config.json
 src/wechat-platform.mjs      # 已建：服务端 code2Session 适配器
+tools/fetch-mini-code.mjs    # 已建：私有正式首页码获取；真实平台验收另行进行
 src/mini-entry.mjs           # 已建：网页码关闭/发布状态边界
 src/cart.mjs                 # 已建：两端共享购物车及版本控制
 src/mini-identity.mjs        # 已建：一次性 code、显式绑定、会话撤销
