@@ -1,12 +1,12 @@
 {
-  "description": "BSR 官方 AppID 的开发者工具本机演示；域名未就绪，不可上传发布",
+  "description": "BSR 课程开发版本；当前使用本机接口，正式请求域名与真机联调待完成",
   "miniprogramRoot": "./",
   "projectname": "WJR同学的BSR系统分析设计作业",
   "appid": "wx51ce51fc873371a6",
   "setting": {
     "urlCheck": false,
     "es6": true,
-    "minified": false,
+    "minified": true,
     "postcss": true,
     "enhance": true,
     "compileWorklet": false,
