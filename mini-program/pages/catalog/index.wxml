@@ -14,7 +14,7 @@
       <view class="field"><text class="field-label">起租日期 · 09:00 后</text><picker mode="date" value="{{pickupDate}}" start="{{minDate}}" bindchange="onPickupChange"><view class="field-control picker-text">{{pickupDate}}</view></picker></view>
       <view class="field"><text class="field-label">归还日期 · 16:00 前</text><picker mode="date" value="{{returnDate}}" start="{{pickupDate}}" bindchange="onReturnChange"><view class="field-control picker-text">{{returnDate}}</view></picker></view>
     </view>
-    <button class="btn" loading="{{searching}}" bindtap="onSearch">查询该日期段库存</button>
+    <button class="btn" loading="{{loading || searching}}" disabled="{{loading || searching}}" bindtap="onSearch">{{loginRequired ? '登录后查看库存' : '查询该日期段库存'}}</button>
     <view class="tiny booking-foot">金额以挪威克朗 NOK 记账；押金为每件装备参考价值的 8%。</view>
   </view>
 
@@ -27,7 +27,8 @@
     <view class="facet"><text class="facet-label">款式</text><picker mode="selector" range="{{styles}}" value="{{styleIndex}}" bindchange="onStyle"><view class="facet-value">{{style}}</view></picker></view>
   </view>
   <view class="loading" wx:if="{{loading}}">正在核对库存…</view>
-  <view class="notice notice-error" wx:elif="{{error}}">{{error}}</view>
+  <view class="notice notice-error" wx:elif="{{error}}"><view>{{error}}</view><button class="btn btn-ghost btn-small" bindtap="onReconnect" disabled="{{loading || searching}}">重新连接</button></view>
+  <view class="notice" wx:elif="{{loginRequired}}"><view>{{wechatMode ? '请先完成微信登录与顾客账号绑定，再查看所选租期的库存。' : '请先登录顾客账号，即可查看库存，并同步网页上的购物车与订单。'}}</view><button class="btn btn-ghost btn-small" bindtap="goAccount">前往登录</button></view>
   <view class="notice" wx:elif="{{!availabilityReady}}">租期或门店已更改，请先查询该日期段库存，再选择装备。</view>
   <view class="empty" wx:elif="{{!visibleItems.length}}"><view class="symbol">❄</view><view class="heading">此筛选暂无装备</view><view>试试其他分类或调整租期。</view></view>
   <view wx:else>
@@ -37,5 +38,5 @@
     </view>
   </view>
   <view class="cart-float" bindtap="goCart"><text>购物车</text><text class="cart-badge">{{cartCount}}</text></view>
-  <view class="simulation">{{wechatMode ? '安全合成展示：价格、支付、退款及签署均为模拟；库存和订单由共用服务端裁决。' : '本机课程演示：价格、支付、退款及签署均为模拟；小程序正式接入须完成微信身份与合规配置。'}}</view>
+  <view class="simulation">{{wechatMode || accountMode ? '云端课程体验：价格、支付、退款及签署均为模拟；库存和订单与网页共用服务端。' : '本机课程演示：手机体验须连接已配置微信合法域名的 HTTPS 服务。'}}</view>
 </view>

@@ -1,5 +1,5 @@
 {
-  "description": "BSR 0.1.2 顾客账号体验；4.14规约对齐，HTTPS共享库存和订单，微信身份绑定另验",
+  "description": "BSR 0.1.3 顾客账号体验；修复首页登录引导和连接重试，微信真机域名配置另验",
   "miniprogramRoot": "./",
   "projectname": "WJR同学的BSR系统分析设计作业",
   "appid": "wx51ce51fc873371a6",

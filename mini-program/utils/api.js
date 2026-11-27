@@ -1,4 +1,5 @@
 const config = require('./config');
+const { networkError } = require('./network-error');
 
 const localSessionKey = 'bsr-mini-local-session';
 const wechatSessionKey = 'bsr-mini-wechat-session';
@@ -141,7 +142,9 @@ function request(path, method = 'GET', data, extraHeaders = {}) {
       url: config.apiBase + path,
       method,
       data,
-      timeout: 12000,
+      // Temporary hosting can need longer to serve the first read after startup.
+      // Never automatically retry a booking/payment write with an uncertain outcome.
+      timeout: /\/bootstrap$/.test(path) ? 30000 : 12000,
       header: {
         'Content-Type': 'application/json',
         ...extraHeaders,
@@ -167,12 +170,7 @@ function request(path, method = 'GET', data, extraHeaders = {}) {
         reject(error);
       },
       fail(error) {
-        const wrapped = new Error(isWechatShowcase() || isAccountShowcase()
-          ? '网络连接失败。请检查微信网络和服务状态，稍后重试；未确认结果的预约可用原提交标识找回。'
-          : '无法连接本机 BSR 预览。请在电脑启动网页服务，并在微信开发者工具中关闭仅本机调试的域名校验。');
-        wrapped.network = true;
-        wrapped.cause = error;
-        reject(wrapped);
+        reject(networkError(error, !isWechatShowcase() && !isAccountShowcase()));
       }
     });
   });
@@ -300,7 +298,7 @@ function downloadDamagePhoto(photoId) {
         reject(new Error(response.statusCode === 404
           ? '照片不存在或无权查看' : '照片获取失败，请稍后重试'));
       },
-      fail() { reject(new Error('网络连接失败，鉴定照片未下载；请稍后重试')); }
+      fail(error) { reject(networkError(error, !isWechatShowcase() && !isAccountShowcase())); }
     });
   });
 }

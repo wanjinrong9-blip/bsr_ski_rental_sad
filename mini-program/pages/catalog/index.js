@@ -22,8 +22,8 @@ Page({
     pickupDate: '', returnDate: '', minDate: '', category: '全部', categories: ['全部'],
     size: ALL_SIZE, sizes: [ALL_SIZE], sizeIndex: 0,
     style: ALL_STYLE, styles: [ALL_STYLE], styleIndex: 0,
-    items: [], visibleItems: [], cartCount: 0, availabilityReady: false,
-    wechatMode: api.isWechatShowcase(), error: ''
+    items: [], visibleItems: [], cartCount: 0, availabilityReady: false, loginRequired: false,
+    wechatMode: api.isWechatShowcase(), accountMode: api.isAccountShowcase(), error: ''
   },
 
   async onShow() {
@@ -35,17 +35,18 @@ Page({
       minDate: booking.osloToday(),
       cartCount: app.globalData.cart.reduce((sum, line) => sum + line.qty, 0)
     });
-    try { await this.loadCatalog(); } catch (error) { errorBox(error); }
+    // Passive page loads use the inline error and retry action, without a blocking modal.
+    try { await this.loadCatalog(); } catch (_) { /* loadCatalog has set the error. */ }
   },
 
   async onPullDownRefresh() {
-    try { await this.loadCatalog(true); } catch (error) { errorBox(error); }
+    try { await this.loadCatalog(true); } catch (_) { /* Keep the retry action visible. */ }
     finally { wx.stopPullDownRefresh(); }
   },
 
   async loadCatalog(force = false) {
     const app = getApp();
-    this.setData({ loading: true, error: '' });
+    this.setData({ loading: true, error: '', loginRequired: false });
     try {
       const boot = await app.ensureBootstrap(force);
       if (app.globalData.user) await cartSync.loadRemote(app);
@@ -55,8 +56,8 @@ Page({
       this.setData({ stores, storeNames: stores.map(store => store.name), storeIndex: selected,
         pickupDate: window.pickupDate, returnDate: window.returnDate,
         cartCount: app.globalData.cart.reduce((sum, line) => sum + line.qty, 0) });
-      if (api.isWechatShowcase() && !app.globalData.user) {
-        this.setData({ availabilityReady: false, error: '请先到“我的”完成微信身份验证和顾客账号绑定，再查询库存。' });
+      if ((api.isWechatShowcase() || api.isAccountShowcase()) && !app.globalData.user) {
+        this.setData({ availabilityReady: false, loginRequired: true, items: [], visibleItems: [] });
         return;
       }
       if(window.expired){
@@ -84,7 +85,9 @@ Page({
   },
 
   async search() {
-    if (api.isWechatShowcase() && !getApp().globalData.user) throw new Error('请先到“我的”完成微信登录与顾客账号绑定');
+    if ((api.isWechatShowcase() || api.isAccountShowcase()) && !getApp().globalData.user) {
+      throw new Error(api.isWechatShowcase() ? '请先到“我的”完成微信登录与顾客账号绑定' : '请先登录顾客账号后查看库存');
+    }
     const store = this.data.stores[this.data.storeIndex];
     if (!store) throw new Error('当前没有可选门店');
     const window = booking.windowPayload(store.id, this.data.pickupDate, this.data.returnDate);
@@ -118,7 +121,14 @@ Page({
   },
 
   async onSearch() {
+    if (this.data.loading || this.data.searching) return;
+    if (!this.data.stores.length) return this.onReconnect();
+    if (this.data.loginRequired) return this.goAccount();
     try { await this.search(); } catch (error) { errorBox(error); }
+  },
+  async onReconnect() {
+    if (this.data.loading || this.data.searching) return;
+    try { await this.loadCatalog(true); } catch (_) { /* Inline error includes a safe diagnostic code. */ }
   },
   onCategory(event) {
     this.setData({ category: event.currentTarget.dataset.category, size: ALL_SIZE, style: ALL_STYLE });
@@ -151,5 +161,6 @@ Page({
       wx.showToast({ title: '已加入购物车', icon: 'success' });
     } catch (error) { errorBox(error); }
   },
-  goCart() { wx.switchTab({ url: '/pages/cart/index' }); }
+  goCart() { wx.switchTab({ url: '/pages/cart/index' }); },
+  goAccount() { wx.switchTab({ url: '/pages/account/index' }); }
 });
