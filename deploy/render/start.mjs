@@ -88,7 +88,7 @@ async function runApplication(){
 export async function startTemporaryPreview(env=process.env){
   const platformPort=env.PORT;
   for(const dir of ['/runtime/data','/runtime/backups',runtimeDirectory,
-      `${runtimeDirectory}/client_temp`,`${runtimeDirectory}/proxy_temp`]){
+      ...['client','proxy','fastcgi','uwsgi','scgi'].map(name=>`${runtimeDirectory}/${name}_temp`)]){
     mkdirSync(dir,{recursive:true,mode:0o700});
     chmodSync(dir,0o700);
   }

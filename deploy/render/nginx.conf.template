@@ -14,9 +14,13 @@ http {
     sendfile on;
     client_body_temp_path /runtime/nginx/client_temp;
     proxy_temp_path /runtime/nginx/proxy_temp;
+    fastcgi_temp_path /runtime/nginx/fastcgi_temp;
+    uwsgi_temp_path /runtime/nginx/uwsgi_temp;
+    scgi_temp_path /runtime/nginx/scgi_temp;
 
     server {
         listen 0.0.0.0:__PLATFORM_PORT__;
+        listen [::]:__PLATFORM_PORT__ ipv6only=on;
         server_name __PUBLIC_HOST__;
         if ($host != "__PUBLIC_HOST__") { return 421; }
         client_max_body_size 10m;
@@ -40,5 +44,27 @@ http {
             proxy_send_timeout 30s;
             proxy_read_timeout 3600s;
         }
+    }
+
+    # Railway probes use this Host over IPv6. Expose only the health endpoint;
+    # application requests must still use the assigned public hostname above.
+    server {
+        listen 0.0.0.0:__PLATFORM_PORT__;
+        listen [::]:__PLATFORM_PORT__;
+        server_name healthcheck.railway.app;
+        location = /api/health {
+            limit_except GET { deny all; }
+            proxy_pass http://127.0.0.1:4175;
+            proxy_set_header Host __PUBLIC_HOST__;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_set_header X-BSR-Proxy-Secret __PROXY_SECRET__;
+            proxy_set_header X-BSR-Client-IP $remote_addr;
+            proxy_set_header X-Forwarded-For "";
+            proxy_set_header Forwarded "";
+            proxy_set_header X-Real-IP "";
+            proxy_set_header X-Forwarded-Host "";
+            proxy_set_header Connection "";
+        }
+        location / { return 421; }
     }
 }

@@ -19,6 +19,13 @@ test('Railway uses its assigned HTTPS domain, isolated identities and platform p
     assert.equal(credentials.length,6);assert.equal(preflightRuntime(config).status,'ready');
     const proxy=renderNginxConfig({platformPort:8080,config});
     assert.match(proxy,/listen 0\.0\.0\.0:8080;/);
+    assert.match(proxy,/listen \[::\]:8080 ipv6only=on;/);
+    for(const name of ['client_body','proxy','fastcgi','uwsgi','scgi'])
+      assert.match(proxy,new RegExp(`${name}_temp_path /runtime/nginx/`));
+    const healthServer=proxy.slice(proxy.indexOf('server_name healthcheck.railway.app;'));
+    assert.match(healthServer,/location = \/api\/health/);
+    assert.match(healthServer,/location \/ \{ return 421; \}/);
+    assert.match(healthServer,/limit_except GET \{ deny all; \}/);
     assert.match(proxy,/proxy_set_header Host bsr-preview-production\.up\.railway\.app;/);
     assert.match(proxy,/proxy_pass http:\/\/127\.0\.0\.1:4175;/);
     const deployment=JSON.parse(readFileSync(new URL('../railway.json',import.meta.url),'utf8'));
