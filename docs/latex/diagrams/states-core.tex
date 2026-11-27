@@ -16,7 +16,7 @@
   \draw[bsrMessage] (renting) -- node[right,font=\tiny]{O5} (settle);
   \draw[bsrMessage] (settle) -- node[above,font=\tiny]{O6} (done);
   \draw[bsrMessage] (hold) -- node[right,font=\tiny]{O7} (cancel);
-  \draw[bsrMessage,dashed] (hold) to[out=220,in=50] node[above,font=\tiny]{O8} (expired);
+  \draw[bsrMessage] (hold) to[out=220,in=50] node[above,font=\tiny]{O8：读取时判定} (expired);
 \end{tikzpicture}}
 
 \newcommand{\BSRStateUnit}{\begin{tikzpicture}[x=1cm,y=1cm]

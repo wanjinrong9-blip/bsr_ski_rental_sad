@@ -6,8 +6,9 @@
   bsrEntity/.style={draw=Muted,fill=white,line width=.7pt,align=center,minimum width=26mm,minimum height=8mm,font=\small},
   bsrNote/.style={draw=Amber!85!Ink,fill=GoldPale,rounded corners=1mm,align=left,font=\scriptsize,text width=45mm,inner sep=3pt},
   bsrMessage/.style={-{Latex[length=2mm]},draw=Navy,line width=.75pt},
-  bsrUnknown/.style={-{Latex[length=1.7mm]},draw=Amber!75!Ink,dashed,line width=.7pt},
-  bsrReturn/.style={-{Latex[length=1.7mm]},draw=Muted,dashed,line width=.6pt},
+  bsrNotify/.style={-{Straight Barb[length=2mm]},draw=Teal,line width=.75pt},
+  bsrAlternative/.style={-{Latex[length=1.7mm]},draw=Amber!75!Ink,line width=.7pt},
+  bsrReturn/.style={-{Straight Barb[length=1.7mm]},draw=Muted,dashed,line width=.6pt},
   bsrState/.style={draw=Teal,fill=IceLight,rounded corners=2mm,line width=.8pt,align=center,font=\small,minimum height=8mm},
   bsrClass/.style={draw=Navy,fill=white,line width=.8pt,rectangle split,rectangle split parts=3,align=left,font=\scriptsize,inner sep=3pt},
   bsrER/.style={draw=Teal,fill=white,line width=.8pt,rectangle split,rectangle split parts=2,align=left,font=\scriptsize,inner sep=3pt}
@@ -42,28 +43,30 @@
   \end{scope}%
 }
 
-% 四泳道业务序列图骨架：动作由第五参数给出；虚线表示待访谈/未证实。
-\newcommand{\BSRBizSeq}[5]{%
+% 业务序列：参与者图标、生命线横坐标、消息、图底纵坐标。
+% 生命线只放人或软件等有责任能力的系统；纸单、装备均为消息参数。
+\newcommand{\BSRBizDiagram}[4]{%
 \begin{tikzpicture}[x=1cm,y=.75cm]
-  \BSRBizActor{0}{#1}
-  \BSRBizWorker{4.3}{#2}
-  \BSRBizEntity{8.6}{#3}
-  \BSRBizEntity{12.9}{#4}
-  \foreach \xx in {0,4.3,8.6,12.9} {\draw[Muted,densely dotted,line width=.45pt] (\xx,-1.28) -- (\xx,-7.75);}
-  \begin{scope}[yshift=-1cm]#5\end{scope}
+  \path[use as bounding box] (-1.55,1) rectangle (14.45,{#4-.7});
+  #1
+  \foreach \xx in {#2} {\draw[Muted,dashed,line width=.45pt] (\xx,-1.28) -- (\xx,{#4-.5});}
+  \begin{scope}[yshift=-5mm]#3\end{scope}
 \end{tikzpicture}%
 }
 
-% 五泳道仅用于现状维修：分包商是业务工人，装备是独立业务实体。
-\newcommand{\BSRBizSeqFive}[6]{%
-\begin{tikzpicture}[x=1cm,y=.75cm]
-  \BSRBizActor{0}{#1}
-  \BSRBizWorker{3.225}{#2}
-  \BSRBizEntity{6.45}{#3}
-  \BSRBizWorker{9.675}{#4}
-  \BSRBizEntity{12.9}{#5}
-  \foreach \xx in {0,3.225,6.45,9.675,12.9} {\draw[Muted,densely dotted,line width=.45pt] (\xx,-1.28) -- (\xx,-7.75);}
-  \begin{scope}[yshift=-1cm]#6\end{scope}
+% 人员自调用表达检查、搬运等本人承担的职责；右端参与者用左侧文字。
+\newcommand{\BSRBizSelf}[3]{%
+  \draw[bsrMessage] (#1,#2) -- ({#1+.55},#2) -- ({#1+.55},{#2-.35}) -- (#1,{#2-.35});
+  \node[anchor=south west,align=left,text width=3.55cm,font=\scriptsize,fill=white,inner sep=1pt] at ({#1+.12},{#2+.05}) {#3};%
+}
+\newcommand{\BSRBizSelfLeft}[3]{%
+  \draw[bsrMessage] (#1,#2) -- ({#1-.55},#2) -- ({#1-.55},{#2-.35}) -- (#1,{#2-.35});
+  \node[anchor=south east,align=right,text width=3.55cm,font=\scriptsize,fill=white,inner sep=1pt] at ({#1-.12},{#2+.05}) {#3};%
+}
+\newcommand{\BSRBizEvidenceCard}[2]{%
+\begin{tikzpicture}
+  \node[draw=Amber!85!Ink,fill=GoldPale,rounded corners=1mm,align=left,text width=13cm,inner sep=5mm,font=\small]
+  {\textbf{#1}\\[2mm]#2};
 \end{tikzpicture}%
 }
 
@@ -104,10 +107,14 @@
 \end{tikzpicture}%
 }
 
-\newcommand{\BSRStyleSample}{\BSRBizSeq{顾客\\业务执行者}{租赁专员\\业务工人}{BSR 系统\\业务实体}{物理单件\\业务实体}{%
-  \draw[bsrMessage] (0,-1.1) -- node[above,font=\scriptsize]{选择租期与尺码} (8.6,-1.1);
-  \draw[bsrMessage] (8.6,-2.1) -- node[above,font=\scriptsize]{分派备货} (4.3,-2.1);
-  \draw[bsrMessage] (4.3,-3.1) -- node[above,font=\scriptsize]{现场核验} (12.9,-3.1);
-  \draw[bsrReturn] (8.6,-4.1) -- node[above,font=\scriptsize]{准备进度} (0,-4.1);
-  \node[bsrNote] at (6.45,-5.5) {图例：实线为请求/实物动作；虚线为返回或通知。日期与数量由系统核验，实物安全由员工确认。};
-}}
+\newcommand{\BSRStyleSample}{\BSRBizDiagram{%
+  \BSRBizActor{0}{顾客\\业务执行者}
+  \BSRBizWorker{6.45}{租赁专员\\业务工人}
+  \BSRBizEntity{12.9}{BSR 系统\\业务实体}
+}{0,6.45,12.9}{%
+  \draw[bsrMessage] (0,-1.8) -- node[above,font=\scriptsize]{办理取货（订单、身份）} (6.45,-1.8);
+  \BSRBizSelf{6.45}{-2.9}{检查待交付装备（实物）}
+  \draw[bsrMessage] (6.45,-4) -- node[above,font=\scriptsize]{核验交付资格（订单）} (12.9,-4);
+  \draw[bsrReturn] (12.9,-5) -- node[above,font=\scriptsize]{核验结果} (6.45,-5);
+  \draw[bsrNotify] (12.9,-6) -- node[above,font=\scriptsize]{通知订单进度} (0,-6);
+}{-6.8}}

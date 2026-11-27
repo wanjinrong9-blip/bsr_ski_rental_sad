@@ -1,17 +1,18 @@
-% BSR 对外业务价值图；椭圆表示业务用例，不是页面菜单。
+% 研究对象为 BSR 组织；内部作业是业务用例的实现，不单列为顾客用例。
 \newcommand{\BSRBusinessCases}{%
 \begin{tikzpicture}[x=1cm,y=1cm]
-  \draw[Teal,line width=.8pt,rounded corners=2mm,fill=IceLight] (2.1,-.5) rectangle (12.5,-7.3);
+  \draw[Teal,line width=.8pt,rounded corners=2mm,fill=IceLight] (2.1,-.5) rectangle (12.5,-5.2);
   \node[anchor=north west,font=\small\bfseries,text=Navy] at (2.4,-.7) {BSR 滑雪租赁业务边界};
-  \node[bsrActor] (customer) at (0,-3.0) {顾客\\外部执行者};
-  \node[bsrActor] (resort) at (14.6,-3.0) {度假村\\外部涉众};
-  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=5cm,minimum height=.8cm] (rent) at (7.3,-1.7) {B-CASE-01 租赁合适装备};
-  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=5cm,minimum height=.8cm] (hand) at (7.3,-2.8) {B-CASE-02 到店逐件交付};
-  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=5cm,minimum height=.8cm] (return) at (7.3,-3.9) {B-CASE-03 接收逐件归还};
-  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=5cm,minimum height=.8cm] (maint) at (7.3,-5.0) {B-CASE-04 维护安全装备};
-  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=5cm,minimum height=.8cm] (cross) at (7.3,-6.1) {B-CASE-05 提供跨店服务};
-  \foreach \x in {rent,hand,return,maint,cross} {\draw[Navy,line width=.7pt] (customer.east) -- (\x.west);}
-  \draw[Navy,line width=.7pt] (resort.west) -- (maint.east);
-  \draw[Navy,line width=.7pt] (resort.west) -- (cross.east);
+  \begin{scope}[shift={(0,-1.8)}]\BSRBizActor{0}{顾客\\外部业务执行者}\end{scope}
+  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm,minimum height=1cm] (rent) at (7.3,-1.9) {BU-01 租到合适、安全的装备};
+  \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm,minimum height=1cm] (settle) at (7.3,-3.5) {BU-02 归还装备并取得结算};
+  \draw[Navy,line width=.7pt] (.3,-1.35) -- (rent.west);
+  \draw[Navy,line width=.7pt] (.3,-1.35) -- (settle.west);
+  \draw[Teal,line width=.7pt] (9.8,-2.22) -- (10.2,-1.95);
+  \draw[Teal,line width=.7pt] (9.8,-3.82) -- (10.2,-3.55);
+  \node[align=center,text width=9.4cm,font=\scriptsize,text=Muted] at (7.3,-4.65) {内部维修、备货与调拨支撑上述价值，属于业务用例的实现。};
+  \node[draw=Muted,fill=white,rounded corners=1mm,align=left,text width=12cm,font=\scriptsize,inner sep=3mm] at (6.3,-6.1)
+    {经营负责人：组织内部关键涉众，参与批准愿景与政策。\\
+     度假村：组织外部关键涉众；现有证据未确立其直接业务交互，故不连接业务用例。};
 \end{tikzpicture}%
 }

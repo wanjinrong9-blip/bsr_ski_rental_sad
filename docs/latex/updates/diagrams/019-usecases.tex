@@ -11,10 +11,6 @@
   \draw[Navy,line width=.9pt] (15.4,-1.48)--(15.4,-1.95)
     (15.13,-1.67)--(15.67,-1.67) (15.4,-1.95)--(15.17,-2.27) (15.4,-1.95)--(15.63,-2.27);
   \node[below,align=center,text width=2.5cm] at (15.4,-2.37) {微信平台\\外部系统执行者};
-  \draw[Navy,line width=.9pt] (15.4,-5.75) circle (.13);
-  \draw[Navy,line width=.9pt] (15.4,-5.88)--(15.4,-6.35)
-    (15.13,-6.07)--(15.67,-6.07) (15.4,-6.35)--(15.17,-6.67) (15.4,-6.35)--(15.63,-6.67);
-  \node[below,align=center,text width=2.9cm] at (15.4,-6.77) {门店租赁专员\\网页端业务工人};
   \node[draw=Navy,fill=white,ellipse,minimum width=7.6cm,minimum height=.9cm,align=center] (entry) at (6.5,-.58) {UC-16 查看受控小程序入口};
   \node[draw=Navy,fill=white,ellipse,minimum width=7.6cm,minimum height=.9cm,align=center] (login) at (6.5,-1.9) {UC-17 验证微信身份并绑定顾客};
   \node[draw=Navy,fill=white,ellipse,minimum width=7.6cm,minimum height=.9cm,align=center] (cart) at (6.5,-3.22) {UC-18 按日期管理共享购物车};
@@ -23,6 +19,6 @@
   \node[draw=Navy,fill=white,ellipse,minimum width=7.6cm,minimum height=.9cm,align=center] (revoke) at (6.5,-7.18) {UC-21 退出与解除微信绑定};
   \foreach \uc in {entry,login,cart,book,track,revoke}{\draw[Navy,line width=.65pt] (-2.22,-3.12)--(\uc.west);}
   \draw[Teal,line width=.7pt] (15.13,-1.67)--(login.east);
-  \draw[Teal,line width=.7pt] (15.13,-6.07)--(track.east);
+  % 专员更新履约是 UC-07/09 的独立交互，不参与顾客 UC-20 查询。
   \node[font=\scriptsize,text=Muted,align=center] at (6.5,-7.91) {扫码仅打开客户端；账号权限由独立会话与顾客 ID 裁决};
 \end{tikzpicture}}

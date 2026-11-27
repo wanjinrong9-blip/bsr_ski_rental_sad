@@ -1,6 +1,6 @@
 \clearpage
 \subsection{4.2 核心用例分析序列图}
-\noindent 每张图由执行者触发，消息依次进入边界类、控制类与领域实体；暖色虚线表示规约中的异常分支，\textbf{不代表未证实的业务现状}。UC-01/08/12～15 的扩展流程以规约及类/状态图追溯，以下九张聚焦库存、合同、交付、归还、鉴定与结算闭环。
+\noindent 每张图由执行者触发，消息进入边界类、控制类与领域实体。横向实线表示请求，横向虚线表示返回，纵向虚线表示生命线；暖色实线和方括号守卫标出规约的异常处理摘要，颜色不改变消息语义。这些图是分析责任协作摘要，异常摘要不表示基本流程执行后必然再执行；完整分支按用例编号与扩展步骤追溯。分析对象可包含订单等领域对象，不能把这种抽象级别搬入第 2 章业务序列。以下九张聚焦库存、合同、交付、归还、鉴定与结算闭环。
 \input{diagrams/sequences-reservation.tex}
 \input{diagrams/sequences-contract-fulfillment.tex}
 \input{diagrams/sequences-return-settlement.tex}

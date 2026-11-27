@@ -8,28 +8,45 @@
 \input{updates/business.tex}
 
 \subsection{2.3 现状业务序列图}
-\noindent 下列图的实线只承载案例明确的动作，暖色虚线表示尚无访谈/现场观察支持的候选步骤。现状图是要向 BSR 验证的工作底稿，不能反推为已发生的线上预约或自动退款。
-\BSRNewFigure{\BSRAsIsBooking}{B-ASIS-01 现场开单现状：仅 Excel 工作簿用途有 EV-01 证据，其余待访谈}{fig:b-asis-01}
-\BSRNewFigure{\BSRAsIsHandover}{B-ASIS-02 装备交付现状：顺序与职责待访谈（EV-02）}{fig:b-asis-02}
-\BSRNewFigure{\BSRAsIsReturn}{B-ASIS-03 逐件与异店归还现状：异店现象有 EV-03 证据，处理步骤待访谈}{fig:b-asis-03}
-\BSRNewFigure{\BSRAsIsRepair}{B-ASIS-04 装备维修现状：纸单和定期分包商有 EV-04 证据}{fig:b-asis-04}
-\BSRNewFigure{\BSRAsIsTransfer}{B-ASIS-05 跨店转移现状：异店归还/归属可变有 EV-05 证据，调拨手续待访谈}{fig:b-asis-05}
+\noindent 下表限定现状图能够表达的事实。图中没有箭头的步骤不能据此视为未发生；它们只是缺少证据。B-ASIS-02 和 B-ASIS-05 为明确标注的说明卡，保留图号用于追踪，不冒充完整业务序列。
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 证据及可支持的现状 & \color{white}\bfseries 图示范围与待核问题 \\
+EV-01：Excel 管理客户、装备、合同，单人可靠操作 & B-ASIS-01 仅画员工使用 Excel 的事实片段；开单、签署、付款和交付顺序待观察。\\
+EV-02：逐件借出时间是案例数据要求 & B-ASIS-02 为证据空缺卡；取货核验、检查与岗位分工尚无现行步骤证据。\\
+EV-03：装备偶有异店归还 & B-ASIS-03 只概括顾客向接收员工办理异店归还；不补画检验、退款或记账顺序。\\
+EV-04：员工填纸维修单附装备，置维修架；分包商每周到访取修 & B-ASIS-04 仅画上述人员职责片段；结果反馈、修后安全验收和再上架责任待核。\\
+EV-05：当前所在店与永久归属可不同，永久归属允许变化 & B-ASIS-05 为数据需求说明卡；未据此虚构永久调拨的审批、运输和接收流程。\\
+\end{BSRTable}
+\BSRNewFigure{\BSRAsIsBooking}{B-ASIS-01 员工使用 Excel 管理业务信息的现状事实片段（EV-01）}{fig:b-asis-01}
+\BSRNewFigure{\BSRAsIsHandover}{B-ASIS-02 装备交付的现状证据空缺说明，非序列图（EV-02）}{fig:b-asis-02}
+\BSRNewFigure{\BSRAsIsReturn}{B-ASIS-03 异店归还现象的概括业务交互（EV-03）}{fig:b-asis-03}
+\BSRNewFigure{\BSRAsIsRepair}{B-ASIS-04 纸单与分包商取修的现状事实片段（EV-04）}{fig:b-asis-04}
+\BSRNewFigure{\BSRAsIsTransfer}{B-ASIS-05 门店归属数据需求说明，非调拨序列图（EV-05）}{fig:b-asis-05}
 
 \subsection{2.4 改进业务序列图}
-\noindent 改进图是供 BSR 审阅的业务蓝图。系统把纸面/口头传递变为共享信息流，自动核验日期段库存、合同/政策版本、逐件计费和责任提醒；拣货、交接、搬运及安全验收保留人员责任。\textbf{蓝图未获 BSR 签字，不代表现行制度。}
+\noindent 改进图是供 BSR 审阅的业务蓝图。系统把纸面/口头传递变为共享信息流，自动核验日期段库存、合同/政策版本、逐件计费和责任提醒；拣货、交接、搬运及安全验收保留人员责任。预约先形成有限期暂留，顾客本人确认当前合同并完成本地模拟付款后才生成备货任务。\textbf{蓝图未获 BSR 确认，不代表现行制度；模拟付款不表示真实银行到账。}
 \BSRNewFigure{\BSRToBeBooking}{B-TOBE-01 日期段预约与透明报价：目标蓝图，政策待 BSR 确认}{fig:b-tobe-01}
 \BSRNewFigure{\BSRToBeHandover}{B-TOBE-02 具名备货、核码与逐件交付：目标蓝图}{fig:b-tobe-02}
 \BSRNewFigure{\BSRToBeReturn}{B-TOBE-03 逐件异店归还与异常分流：目标蓝图}{fig:b-tobe-03}
-\BSRNewFigure{\BSRToBeRepair}{B-TOBE-04 受损初评、维修与经理安全验收：目标蓝图}{fig:b-tobe-04}
+\subsubsection*{归还、初评与结算的责任边界}
+\begin{BSRTable}
+\rowcolor{TableHead}\color{white}\bfseries 事件或分支 & \color{white}\bfseries 责任人、可见结果及后续约束 \\
+接收本次归还 & 接收专员核对实物并记录库存号、服务器实还时刻及实际接收店；顾客可查询本批回执。未归还单件继续占用。\\
+发现疑似损坏 & 专员先隔离单件并登记事实；受派技师在发现后 24 小时内提交部位照片、程度与初评依据，经理复核费用。初评及时不表示维修已完成。\\
+正常磨损或无损 & 经相应检查与复核记录，全部租赁项目归还、无争议且费用已核定后，系统按冻结政策发起可退押金；仅显示演示退款状态。\\
+损坏费超过押金 & 原订单责任门店安排专员联系顾客补差，留存联系与处理记录；经理按授权核定费用。不能自动从其他渠道扣取差额。\\
+部分归还、争议或回执不明 & 系统保留未结项目及当前处理人。实际接收门店与原费用结算责任门店分别记录，不能因异店收货自动转移合同和押金责任。\\
+\end{BSRTable}
+\BSRNewFigure{\BSRToBeRepair}{B-TOBE-04 受损初评、维修与经理分别履责的安全验收：目标蓝图}{fig:b-tobe-04}
 \BSRNewFigure{\BSRToBeTransfer}{B-TOBE-05 跨店库存转移与接收：目标蓝图}{fig:b-tobe-05}
 
 \subsubsection{2.4.1 蓝图问题与自动化边界}
 \begin{BSRTable}
 \rowcolor{TableHead}\color{white}\bfseries 原有问题/来源 & \color{white}\bfseries 改进及人工作业 \\
 Excel 工作簿单人可靠操作（EV-01） & 顾客、两店员工读取同一服务端预约与库存事实；服务端按租期二次核量，员工仍需现场确认实物。\\
-纸质维修单可能滞留（EV-04） & 电子工单与指派提醒缩短信息等待；技师提交后仍由经理实物验收。\\
+纸质维修单可能滞留（EV-04） & 电子工单与指派提醒缩短信息等待；24 小时目标仅指初评反馈，技师提交后仍由经理实物验收，通过后才恢复可租。\\
 异店归还与归属变更（EV-03/05） & 分开保存当前所在店与永久归属店；跨店运输和接收不能由系统虚拟完成。\\
 押金、损坏和超时规则（设计需求） & 客户下单前知悉 NOK 分项与版本；受损费用需技师证据和经理复核，争议时暂停结清。\\
 \end{BSRTable}
 \subsubsection{2.4.2 网页与小程序共用的目标信息流}
-\noindent 顾客无论从网页还是微信小程序进入，均向同一 BSR 服务端查询日期段库存、维护本人购物车并提交报价与预约；小程序首次使用须经过微信临时身份交换和现有顾客账号的显式验证绑定。服务端以同一顾客 ID、同一门店单件和同一订单进行核价与履约。租赁专员在网页端具名备货、验货交付和接收，技师/经理在网页端完成鉴定与复核；顾客两个客户端按本人权限看同一进度。正式微信扫码、支付与组织政策仍待外部条件和 BSR 确认。本段是改进蓝图，不是案例中的现状事实。
+\noindent 顾客无论从网页还是微信小程序进入，均向同一 BSR 服务端查询日期段库存、维护本人购物车并申请有限期暂留；小程序首次使用须经过微信临时身份交换和现有顾客账号的显式验证绑定。顾客本人确认当前合同版本、模拟付款成功后，服务端才将同一订单交给门店备货。租赁专员在网页端具名备货、验货交付和接收；技师记录鉴定与维修证据，经理独立复核并实物安全验收；顾客两个客户端按本人权限看同一进度。正式微信扫码、支付与组织政策仍待外部条件和 BSR 确认。本段是改进蓝图，不是案例中的现状事实。

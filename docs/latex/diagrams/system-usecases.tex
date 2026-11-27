@@ -1,8 +1,17 @@
 % 系统边界内按主执行者分组；跨组协作见现行 UC 规约。
+\newcommand{\BSRSystemActor}[4]{%
+  \coordinate (#1) at (#2,#3);
+  \begin{scope}[shift={(#2,#3)}]
+    \draw[Navy,line width=.8pt] (0,.45) circle[radius=1.4mm];
+    \draw[Navy,line width=.8pt] (0,.3)--(0,-.12) (-.24,.12)--(.24,.12)
+      (0,-.12)--(-.2,-.43) (0,-.12)--(.2,-.43);
+    \node[anchor=north,align=center,text width=2.5cm,font=\small] at (0,-.55) {#4};
+  \end{scope}%
+}
 \newcommand{\BSRUsecaseCustomer}{\begin{tikzpicture}[x=1cm,y=1cm]
   \draw[Teal,fill=IceLight,rounded corners=2mm] (2,-.4) rectangle (12,-5.9);
   \node[anchor=north west,font=\small\bfseries,text=Navy] at (2.3,-.6) {BSR 系统 / 顾客边界};
-  \node[bsrActor] (actor) at (0,-3.1) {顾客};
+  \BSRSystemActor{actor}{0}{-3.1}{顾客}
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u1) at (7,-1.5) {UC-01 建立与查询本人档案};
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u2) at (7,-2.6) {UC-02 查询日期段剩余装备};
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u3) at (7,-3.7) {UC-03 管理购物车与透明报价};
@@ -13,8 +22,8 @@
 \newcommand{\BSRUsecaseStore}{\begin{tikzpicture}[x=1cm,y=1cm]
   \draw[Teal,fill=IceLight,rounded corners=2mm] (2,-.4) rectangle (12,-8.1);
   \node[anchor=north west,font=\small\bfseries,text=Navy] at (2.3,-.6) {BSR 系统 / 门店履约边界};
-  \node[bsrActor] (actor) at (0,-4.2) {租赁专员\\主执行者};
-  \node[bsrActor] (guest) at (14,-4.2) {顾客\\协执行者};
+  \BSRSystemActor{actor}{0}{-4.2}{租赁专员}
+  \BSRSystemActor{guest}{14}{-4.2}{顾客}
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u5) at (7,-1.6) {UC-05 开具/变更/签当前合同};
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u6) at (7,-2.7) {UC-06 确认付款并生成备货};
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u7) at (7,-3.8) {UC-07 准备/核码/逐件交付};
@@ -22,29 +31,32 @@
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u9) at (7,-6.0) {UC-09 逐件归还与跨店接收};
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u11) at (7,-7.1) {UC-11 结算超时/损坏/押金};
   \foreach \u in {u5,u6,u7,u8,u9,u11} {\draw[Navy,line width=.7pt] (actor.east) -- (\u.west);}
-  \foreach \u in {u5,u7,u9,u11} {\draw[Muted,dashed,line width=.5pt] (guest.west) -- (\u.east);}
-  \node[bsrNote,anchor=north west] at (12.4,-6.6) {目标：合格签署/第三方支付；本地仅纸质见证与演示付款。};
+  \foreach \u in {u5,u11} {\draw[Navy,line width=.7pt] (guest.west) -- (\u.east);}
+  \node[align=left,font=\scriptsize,text width=10.5cm,text=Muted] at (7,-8.8) {顾客在 UC-05 本人确认、UC-11 主动查询/提出异议时与系统交互；现场交接或被动看进度不自动成为系统协执行者。经理的结算复核见规约。};
 \end{tikzpicture}}
 
 \newcommand{\BSRUsecaseService}{\begin{tikzpicture}[x=1cm,y=1cm]
   \draw[Teal,fill=IceLight,rounded corners=2mm] (2,-.4) rectangle (12,-4.2);
   \node[anchor=north west,font=\small\bfseries,text=Navy] at (2.3,-.6) {BSR 系统 / 装备安全边界};
-  \node[bsrActor] (tech) at (0,-2.4) {装备检修技师};
-  \node[bsrActor] (mgr) at (14,-2.4) {门店经理};
+  \BSRSystemActor{tech}{0}{-2.4}{装备检修技师}
+  \BSRSystemActor{mgr}{14}{-2.4}{门店经理}
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u10) at (7,-1.6) {UC-10 24h 初评/照片/经理复核};
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u12) at (7,-3.0) {UC-12 维修处理与安全验收};
   \draw[Navy] (tech.east) -- (u10.west); \draw[Navy] (tech.east) -- (u12.west);
-  \draw[Muted,dashed] (mgr.west) -- (u10.east); \draw[Muted,dashed] (mgr.west) -- (u12.east);
+  \draw[Navy] (mgr.west) -- (u10.east); \draw[Navy] (mgr.west) -- (u12.east);
 \end{tikzpicture}}
 
 \newcommand{\BSRUsecaseManagement}{\begin{tikzpicture}[x=1cm,y=1cm]
   \draw[Teal,fill=IceLight,rounded corners=2mm] (2,-.4) rectangle (12,-5.2);
   \node[anchor=north west,font=\small\bfseries,text=Navy] at (2.3,-.6) {BSR 系统 / 经营与治理边界};
-  \node[bsrActor] (mgr) at (0,-2.8) {门店运营经理};
-  \node[bsrActor] (owner) at (14,-2.8) {经营负责人\\权限管理员};
+  \BSRSystemActor{mgr}{0}{-2.8}{门店运营经理}
+  \BSRSystemActor{owner}{14}{-1.6}{经营负责人}
+  \BSRSystemActor{admin}{14}{-4.1}{权限管理员}
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u13) at (7,-1.6) {UC-13 门店/采购/跨店调拨};
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u14) at (7,-2.8) {UC-14 排班/打卡/年度业绩};
   \node[draw=Teal,fill=white,ellipse,align=center,minimum width=6.4cm] (u15) at (7,-4.0) {UC-15 提醒/权限/审计};
   \draw[Navy] (mgr.east) -- (u13.west); \draw[Navy] (mgr.east) -- (u14.west); \draw[Navy] (mgr.east) -- (u15.west);
-  \draw[Muted,dashed] (owner.west) -- (u14.east); \draw[Muted,dashed] (owner.west) -- (u15.east);
+  \draw[Navy] (owner.west) -- (u14.east); \draw[Navy] (owner.west) -- (u15.east);
+  \draw[Navy] (admin.west) -- (u15.east);
+  \node[align=left,font=\scriptsize,text width=10.5cm,text=Muted] at (7,-6.0) {此为管理功能视图；所有非顾客角色的本人打卡与最小范围提醒见 UC-14/15。相同用例中的权限仍依角色与对象裁决，不表示获得全部子功能。};
 \end{tikzpicture}}

@@ -1,24 +1,18 @@
-% 三张现状业务序列：虚线是尚未得到案例/访谈证明的顺序，不能当作事实。
-\newcommand{\BSRAsIsBooking}{\BSRBizSeq{顾客\\执行者}{租赁员工\\工人}{Excel 工作簿\\业务实体}{纸合同\\业务实体}{%
-  \draw[bsrUnknown] (0,-1.15) -- node[above,font=\scriptsize]{到店提出需求（待访谈）} (4.3,-1.15);
-  \draw[bsrUnknown] (4.3,-2.2) -- node[above,font=\scriptsize]{查客户/设备/合同（EV-01；顺序待访谈）} (8.6,-2.2);
-  \draw[bsrUnknown] (4.3,-3.25) -- node[above,font=\scriptsize]{填写或打印合同（待访谈）} (12.9,-3.25);
-  \draw[bsrUnknown] (12.9,-4.3) -- node[above,font=\scriptsize]{签署/付款顺序（待访谈）} (0,-4.3);
-  \node[bsrNote] at (6.45,-5.5) {案例仅证实 Excel 管理客户、装备、合同且单人可靠操作；具体开单动作需现场观察。};
-}}
+% 仅表达案例可支持的事实片段；缺证据处使用说明卡，不补造业务顺序。
+\newcommand{\BSRAsIsBooking}{\BSRBizDiagram{%
+  \BSRBizWorker{0}{BSR 员工\\业务工人}
+  \BSRBizEntity{12.9}{Excel 软件\\业务实体}
+}{0,12.9}{%
+  \draw[bsrMessage] (0,-1.8) -- node[above,font=\scriptsize]{管理客户、装备和合同信息（工作簿）} (12.9,-1.8);
+}{-2.6}}
 
-\newcommand{\BSRAsIsHandover}{\BSRBizSeq{顾客\\执行者}{租赁员工\\工人}{装备\\业务实体}{合同/记录\\业务实体}{%
-  \draw[bsrUnknown] (0,-1.2) -- node[above,font=\scriptsize]{到店取货（待访谈）} (4.3,-1.2);
-  \draw[bsrUnknown] (4.3,-2.3) -- node[above,font=\scriptsize]{拣货/尺码核对（待访谈）} (8.6,-2.3);
-  \draw[bsrUnknown] (4.3,-3.4) -- node[above,font=\scriptsize]{借出时间登记（待访谈）} (12.9,-3.4);
-  \draw[bsrUnknown] (4.3,-4.5) -- node[above,font=\scriptsize]{交付与验货（待访谈）} (0,-4.5);
-  \node[bsrNote] at (6.45,-5.5) {案例提出逐件借出时间为数据要求；未给出现行交付步骤。此图是访谈提纲。};
-}}
+\newcommand{\BSRAsIsHandover}{\BSRBizEvidenceCard{B-ASIS-02 / EV-02：现状证据空缺}{%
+案例要求逐件保存借出时间，但未提供现行取货、核身份、检查和交付的步骤与岗位分工。\\[1mm]
+本卡为证据空缺说明，\textbf{不是业务序列图}；取得现场观察或访谈记录后再绘制现状协作。}}
 
-\newcommand{\BSRAsIsReturn}{\BSRBizSeq{顾客\\执行者}{接收员工\\工人}{装备\\业务实体}{门店记录\\业务实体}{%
-  \draw[bsrUnknown] (0,-1.2) -- node[above,font=\scriptsize]{交回实物（EV-03；步骤待访谈）} (4.3,-1.2);
-  \draw[bsrUnknown] (4.3,-2.3) -- node[above,font=\scriptsize]{查归属/所在店（待访谈）} (12.9,-2.3);
-  \draw[bsrUnknown] (4.3,-3.4) -- node[above,font=\scriptsize]{检查/清洁/记时（待访谈）} (8.6,-3.4);
-  \draw[bsrUnknown] (4.3,-4.5) -- node[above,font=\scriptsize]{押金处理（待访谈）} (0,-4.5);
-  \node[bsrNote] at (6.45,-5.5) {案例证实偶有异店归还；没有提供当前逐件登记、检验与退款顺序。};
-}}
+\newcommand{\BSRAsIsReturn}{\BSRBizDiagram{%
+  \BSRBizActor{0}{顾客\\业务执行者}
+  \BSRBizWorker{12.9}{接收员工\\业务工人}
+}{0,12.9}{%
+  \draw[bsrMessage] (0,-1.8) -- node[above,font=\scriptsize]{受理异店归还（装备）} (12.9,-1.8);
+}{-2.6}}

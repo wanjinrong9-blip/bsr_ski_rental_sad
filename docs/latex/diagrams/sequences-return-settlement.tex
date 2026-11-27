@@ -5,7 +5,7 @@
   \draw[bsrMessage] (7,-3) -- node[above,font=\tiny]{冻结服务器实还/检查事实} (10.5,-3);
   \draw[bsrMessage] (7,-4) -- node[above,font=\tiny]{异店只更新当前店} (14,-4);
   \draw[bsrReturn] (7,-5) -- node[above,font=\tiny]{同步已还/未还/负责人} (3.5,-5);
-  \draw[bsrUnknown] (7,-6) -- node[above,font=\tiny]{alt 已还/不属于订单：拒绝} (3.5,-6);
+  \draw[bsrAlternative] (7,-6) -- node[above,font=\tiny]{[分支] 已还/不属于订单：拒绝} (3.5,-6);
   \node[bsrNote] at (10.5,-7.8) {只冻结该件的超时费；未还件仍占库存，疑损件转 UC-10。};
 }}
 
@@ -19,7 +19,7 @@
   \draw[bsrMessage] (2.8,-5) -- node[above,font=\tiny]{审实物与计价依据} (5.6,-5);
   \draw[bsrMessage] (5.6,-5.8) -- node[above,font=\tiny]{核定或退回补证} (8.4,-5.8);
   \draw[bsrMessage] (8.4,-6.6) -- node[above,font=\tiny]{存经理结论与历史版} (11.2,-6.6);
-  \draw[bsrUnknown] (8.4,-7.4) -- node[above,font=\tiny]{缺证据/争议：不核费} (11.2,-7.4);
+  \draw[bsrAlternative] (8.4,-7.4) -- node[above,font=\tiny]{缺证据/争议：不核费} (11.2,-7.4);
   \node[bsrNote] at (11.2,-8.8) {24 小时仅指初评反馈；正常磨损零费。技师不能替经理核费或安全验收。};
 }}
 
@@ -33,6 +33,6 @@
   \draw[bsrReturn] (5.6,-5) -- node[above,font=\tiny]{顾客查明细与证据} (0,-5);
   \draw[bsrMessage] (0,-5.8) -- node[above,font=\tiny]{有异议时提出争议} (5.6,-5.8);
   \draw[bsrMessage] (2.8,-6.6) -- node[above,font=\tiny]{复核/安排联系补差} (5.6,-6.6);
-  \draw[bsrUnknown] (8.4,-7.4) -- node[above,font=\tiny]{未还/争议/回执不明：暂停} (14,-7.4);
+  \draw[bsrAlternative] (8.4,-7.4) -- node[above,font=\tiny]{未还/争议/回执不明：暂停} (14,-7.4);
   \node[bsrNote] at (11.2,-8.8) {无争议才发起退款；超押金由专员联系补差。演示回执不得写成真实到账。};
 }}
