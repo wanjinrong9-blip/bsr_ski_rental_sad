@@ -5,6 +5,7 @@ import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {consent} from './damage-helpers.mjs';
+import {orderWorkflow} from '../src/order-workflow.mjs';
 
 const temp=mkdtempSync(join(tmpdir(),'bsr-signpay-'));
 process.env.NODE_ENV='test';
@@ -31,6 +32,13 @@ test('顾客本人先签当前合同，才可登记一组演示付款',async()=>
  assert.equal(db.prepare('SELECT created_by FROM reservations WHERE id=?').get(id).created_by,null,'自助合同不能伪计员工开单');
  r=await request(`/api/reservations/${id}/pay`,'POST',{},customer);assert.equal(r.status,409);
  const signed=await request(`/api/contracts/${contract.data.id}/sign`,'POST',{name:'测试顾客',accepted:true,snapshotHash:contract.data.snapshot_hash},customer);assert.equal(signed.status,200,JSON.stringify(signed.data));
+ const ownOrder=(await request(`/api/reservations/${id}`,'GET',undefined,customer)).data;
+ const signedStep=ownOrder.workflow.steps.find(step=>step.key==='CONTRACT');
+ assert.equal(signedStep.handler.id,1);assert.equal(signedStep.at,signed.data.signed_at);
+ assert.match(signedStep.label,/顾客本人/);
+ const techFlow=orderWorkflow(db,{role:'contractor'},db.prepare('SELECT * FROM reservations WHERE id=?').get(id));
+ const techContract=techFlow.steps.find(step=>step.key==='CONTRACT');
+ assert.match(techContract.handler.name,/隐去个人信息/);assert.equal(techContract.handler.id,undefined);
  const paid=await request(`/api/reservations/${id}/pay`,'POST',{},customer);assert.equal(paid.status,200,JSON.stringify(paid.data));assert.equal(paid.data.status,'CONFIRMED');
  assert.equal(db.prepare('SELECT COUNT(*) n FROM payments WHERE reservation_id=?').get(id).n,2);
  assert.equal(db.prepare('SELECT status FROM preparations WHERE reservation_id=?').get(id).status,'QUEUED');
@@ -86,6 +94,11 @@ test('现场纸质见证先于付款，员工开单与自助发起分别归属',
  assert.equal((await request(`/api/operations/reservations/${id}/pay`,'POST',payment,staff)).status,409);
  const signed=await request(`/api/contracts/${c.id}/sign`,'POST',{name:'现场签付顾客',accepted:true,snapshotHash:c.snapshot_hash,paperSigned:true,note:'自动化演示：已见证纸质签署并归档'},staff);
  assert.equal(signed.status,200,JSON.stringify(signed.data));
+ const signedOrder=(await request(`/api/reservations/${id}`,'GET',undefined,staff)).data;
+ const signedStep=signedOrder.workflow.steps.find(step=>step.key==='CONTRACT');
+ assert.equal(signedStep.handler.id,signed.data.signed_by);
+ assert.equal(signedStep.handler.id,2);assert.match(signedStep.label,/纸质签署见证/);
+ assert.equal(signedStep.at,signed.data.signed_at);
  assert.equal((await request(`/api/operations/reservations/${id}/pay`,'POST',payment,staff)).status,200);
  assert.equal(db.prepare('SELECT created_by FROM reservations WHERE id=?').get(id).created_by,2);
  const year=Number(new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Oslo',year:'numeric'}).format(new Date()));

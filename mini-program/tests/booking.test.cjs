@@ -34,6 +34,10 @@ test('cart enforces quantity and preserves an idempotent reservation payload', (
 });
 
 test('local API accepts the configured official AppID only in Developer Tools', () => {
+  const configId=require.resolve('../utils/config'),apiId=require.resolve('../utils/api');
+  const originalConfig=require.cache[configId],originalApi=require.cache[apiId];
+  require.cache[configId]={id:configId,filename:configId,loaded:true,exports:{mode:'local-demo',apiBase:'http://127.0.0.1:4173',devtoolsAppId:'wx51ce51fc873371a6'}};
+  delete require.cache[apiId];
   const api = require('../utils/api');
   const config = require('../utils/config');
   const project = require('../project.config.json');
@@ -50,4 +54,6 @@ test('local API accepts the configured official AppID only in Developer Tools', 
   global.wx = { getAccountInfoSync: () => ({ miniProgram: { appId: 'wx-real-account' } }) };
   assert.throws(api.assertLocalDemo, /当前 AppID/);
   delete global.wx;
+  if(originalConfig)require.cache[configId]=originalConfig;else delete require.cache[configId];
+  if(originalApi)require.cache[apiId]=originalApi;else delete require.cache[apiId];
 });

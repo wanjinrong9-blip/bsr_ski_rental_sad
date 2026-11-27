@@ -83,6 +83,7 @@ test('native account requires explicit binding consent and clears an expired cha
   const messages=[];
   const restoreApi=replaceModule('../mini-program/utils/api.js',{
     isWechatShowcase:()=>true,
+    isAccountShowcase:()=>false,
     wechatLogin:async()=>({status:'needs_binding',challenge:'c'.repeat(64),
       expiresAt:'2026-12-01T09:00:00Z'}),
     bindWechat:async()=>{

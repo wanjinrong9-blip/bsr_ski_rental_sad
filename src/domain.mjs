@@ -5,6 +5,7 @@ import {depositFor,depositRule} from './catalog-upgrade.mjs';
 import {customerProfile,skillLevels,freezeRate} from './master-data.mjs';
 import {rentalPolicy,isFirstEffectiveRental,lateCharge,rentalLateSummary} from './rental-policy.mjs';
 import {isShowcaseSource,simulated} from './simulation.mjs';
+import {hasActiveDamageDispute} from './damage-dispute.mjs';
 
 export class DomainError extends Error {
   constructor(message, status = 400) { super(message); this.status = status; }
@@ -324,7 +325,7 @@ export function approveRefund(db, managerId, id) {
     const count=db.prepare("SELECT COUNT(*) AS n FROM inspections WHERE reservation_id=? AND condition='DAMAGED'").get(id).n;
     must(count>0&&cases.length===count&&cases.every(c=>c.status==='APPROVED'),'必须逐件完成照片鉴定和经理复核，不能直接扣款或退款',409);
     const contact=db.prepare('SELECT outcome FROM damage_contacts WHERE reservation_id=? ORDER BY id DESC LIMIT 1').get(id);
-    must(contact?.outcome!=='DISPUTED','顾客已提出异议，请先沟通解决并记录确认结果',409);
+    must(!hasActiveDamageDispute(db,id),'顾客已提出异议，请先沟通解决并记录确认结果',409);
     const consent=db.prepare('SELECT 1 FROM damage_consents WHERE reservation_id=?').get(id);
     must(consent||contact?.outcome==='REACHED','历史订单没有新规则同意记录，须先联系顾客协商并记录确认结果',409);
     const damageFee = db.prepare('SELECT COALESCE(SUM(fee_nok),0) AS total FROM inspections WHERE reservation_id=?').get(id).total;

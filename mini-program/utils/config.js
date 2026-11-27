@@ -1,9 +1,8 @@
-// The public official AppID identifies the Developer Tools project; it is not
-// an AppSecret. Local demo remains limited to this computer's simulator.
-// Real-device/release configuration requires an approved HTTPS request domain,
-// private server credentials and the separate SHOWCASE identity path.
+// Invite-only customer-account experience. This does not claim wx.login or
+// WeChat identity binding; those remain in the separate wechat-showcase mode.
 module.exports = Object.freeze({
-  mode: 'local-demo',
-  apiBase: 'http://127.0.0.1:4173',
+  mode: 'account-showcase',
+  apiBase: 'https://bsr-temporary-preview-production.up.railway.app',
+  appId: 'wx51ce51fc873371a6',
   devtoolsAppId: 'wx51ce51fc873371a6'
 });

@@ -35,6 +35,8 @@ test('secure mode maps only customer routes and rejects Web password login', () 
   assert.equal(api.mapPath('/api/catalog?storeId=1'), '/api/mini/catalog?storeId=1');
   assert.equal(api.mapPath('/api/reservations/17/contracts'), '/api/mini/reservations/17/contracts');
   assert.equal(api.mapPath('/api/contracts/2/sign'), '/api/mini/contracts/2/sign');
+  assert.equal(api.mapPath('/api/reservations/17/damage/dispute'), '/api/mini/reservations/17/damage/dispute');
+  assert.throws(() => api.mapPath('/api/reservations/17/damage/contact'), /不提供/);
   assert.throws(() => api.mapPath('/api/auth/login'), /不提供/);
   assert.throws(() => api.mapPath('/api/auth/register'), /不提供/);
   assert.throws(() => api.mapPath('https://other.example/api/mini/me'), /路径无效/);

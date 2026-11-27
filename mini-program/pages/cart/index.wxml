@@ -5,6 +5,7 @@
   <view class="simulation">{{wechatMode ? '安全合成展示' : '本机课程演示'}} · NOK 记账 · 无真实支付或有效电子签署</view>
 
   <view class="loading" wx:if="{{loading}}">正在核对当前租期的库存与报价…</view>
+  <view class="card" wx:elif="{{loadError}}"><view class="notice notice-error">{{loadError}}</view><button class="btn btn-ghost" bindtap="retryLoad">重新同步购物车</button></view>
   <view class="empty" wx:elif="{{!lines.length}}"><view class="symbol">◇</view><view class="heading">装备还没有加入购物车</view><view>先选取还日期，再查看该日期段的可用数量。</view><button class="btn" wx:if="{{wechatMode && !user}}" bindtap="goAccount">先验证微信身份</button><button class="btn" wx:else bindtap="goCatalog">去挑选装备</button></view>
   <view wx:else>
     <view class="card cart-line" wx:for="{{lines}}" wx:key="variantId">
@@ -18,12 +19,14 @@
     <view class="notice notice-error" wx:if="{{quoteError}}">{{quoteError}}。请调整数量或租期后重新核对。</view>
     <view class="card quote-card" wx:if="{{quote}}"><view class="card-title">当前报价 · NOK</view><view class="price-row"><text>装备租金</text><text class="price-value">NOK {{quote.rentNok}}</text></view><view class="price-row"><text>可退押金 · 参考价值的 8%</text><text class="price-value">NOK {{quote.depositNok}}</text></view><view class="line"></view><view class="price-row total"><text>合计</text><text class="price-value">NOK {{quote.totalNok}}</text></view><view class="tiny">本报价仅供此租期核对，提交时服务端会再次检查库存与价目。</view></view>
     <view class="card"><view class="card-title">预约前确认</view>
+      <view wx:if="{{user}}"><view class="field-label">合同资料</view><view class="notice {{profileIssues.length ? 'notice-warn' : ''}}">{{profileIssues.length ? '请先完善以下资料，再创建预约：' : '合同所需资料已填写；本次预约会保存资料快照。'}}<view wx:for="{{profileIssues}}" wx:key="key">{{item.message}}</view></view><button class="btn btn-ghost" bindtap="goAccount">{{profileIssues.length ? '去我的补全资料' : '核对个人资料'}}</button></view>
       <view class="field"><text class="field-label">本次滑雪水平 · 必选</text><picker mode="selector" range="{{skills}}" value="{{skillIndex}}" bindchange="onSkill"><view class="field-control picker-text {{skillIndex < 0 ? 'placeholder' : ''}}">{{skillIndex < 0 ? '请选择' : skills[skillIndex]}}</view></picker><view class="tiny">用于门店准备适合你这次滑行的装备。</view></view>
       <view class="policy-summary"><text>超时、受损与押金规则</text><text class="pill">{{policy.version || '待加载'}}</text></view>
       <view class="muted">首次有效租赁可免费超时两小时；维修技师对受损设备在归还后 24 小时内反馈鉴定。严重受损超出押金的部分由员工联系说明，不自动追加扣款。</view>
       <button class="btn btn-ghost" bindtap="openPolicy">阅读完整规则并确认</button>
       <view class="notice {{accepted ? '' : 'notice-warn'}}">{{accepted ? '已读完并同意当前规则' : '请阅读完整规则至末尾，再主动勾选同意'}}</view>
     </view>
+    <view class="notice notice-error" wx:if="{{checkoutError}}">{{checkoutError}}</view>
     <button class="btn checkout" disabled="{{submitting || !quote || !accepted || skillIndex < 0}}" loading="{{submitting}}" bindtap="onCheckout">{{user ? '确认预约并暂留装备' : '先登录顾客账号'}}</button>
     <button wx:if="{{pending}}" class="btn btn-ghost retry" disabled="{{submitting}}" bindtap="onRetry">找回上次预约提交</button>
   </view>

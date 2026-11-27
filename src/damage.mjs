@@ -2,6 +2,7 @@ import {DomainError,transaction} from './domain.mjs';
 import {audit,notify} from './db.mjs';
 import {damagePolicy} from './damage-policy.mjs';
 import {orderWorkflow} from './order-workflow.mjs';
+import {hasActiveDamageDispute} from './damage-dispute.mjs';
 const need=(ok,message,status=400)=>{if(!ok)throw new DomainError(message,status);};
 const time=()=>new Date().toISOString();
 const money=value=>{const n=Number(value);need(Number.isSafeInteger(n)&&n>=0&&n<=1000000,'金额须为 0–1,000,000 的整数 NOK');return n;};
@@ -43,7 +44,7 @@ export function damageOrder(db,user,id){
   need(order&&user&&(user.role==='customer'?order.user_id===user.id:['staff','manager'].includes(user.role)&&user.store_id===order.store_id),'订单不存在或无权访问',404);
   const ids=db.prepare('SELECT id FROM damage_cases WHERE reservation_id=? ORDER BY id').all(id);
   const consent=db.prepare('SELECT policy_version,accepted_at FROM damage_consents WHERE reservation_id=?').get(id)||null;
-  return {consent,cases:ids.map(r=>damageCase(db,user,r.id)),settlement:db.prepare('SELECT * FROM damage_settlements WHERE reservation_id=?').get(id)||null,
+  return {consent,disputeActive:hasActiveDamageDispute(db,id),cases:ids.map(r=>damageCase(db,user,r.id)),settlement:db.prepare('SELECT * FROM damage_settlements WHERE reservation_id=?').get(id)||null,
     contacts:db.prepare(`SELECT c.*,u.name AS actor_name FROM damage_contacts c JOIN users u ON u.id=c.actor_id WHERE reservation_id=? ORDER BY c.id`).all(id),
     receipts:db.prepare('SELECT id,amount_nok,reference,created_at FROM damage_receipts WHERE reservation_id=? ORDER BY id').all(id)};
 }
@@ -124,6 +125,34 @@ export function damagePhoto(db,user,id){
   const photo=db.prepare('SELECT * FROM damage_photos WHERE id=?').get(id);need(photo,'图片不存在',404);access(db,user,photo.case_id);return photo;
 }
 
+export function submitCustomerDamageDispute(db,user,id,input={}){
+  return transaction(db,()=>{
+    need(user?.role==='customer','仅顾客本人可提出账单异议',403);
+    const order=db.prepare('SELECT * FROM reservations WHERE id=?').get(id);
+    need(order&&order.user_id===user.id,'订单不存在或无权访问',404);
+    const note=text(input?.note,5,2000,'异议说明'),requestKey=input?.requestKey;
+    need(typeof requestKey==='string'&&/^[A-Za-z0-9._:-]{10,100}$/.test(requestKey),'异议提交标识须为10–100位字母、数字或 . _ : -');
+    const prior=db.prepare(`SELECT json_extract(detail_json,'$.note') AS note FROM audit_log
+      WHERE action='CUSTOMER_DAMAGE_DISPUTED' AND actor_id=? AND target_type='reservation'
+        AND target_id=? AND json_extract(detail_json,'$.requestKey')=? ORDER BY id LIMIT 1`)
+      .get(user.id,id,requestKey);
+    if(prior){
+      need(prior.note===note,'同一异议提交标识已用于不同内容，请重新提交',409);
+      return {ok:true,duplicate:true,damage:damageOrder(db,user,id)};
+    }
+    need(['REVIEW','SETTLEMENT'].includes(order.status),'仅受损复核或待补差订单可提出异议，已完成结算不会自动重开',409);
+    need(db.prepare('SELECT 1 FROM damage_cases WHERE reservation_id=? LIMIT 1').get(id),'订单没有受损鉴定记录，不能通过此入口提出异议',409);
+    db.prepare(`INSERT INTO damage_contacts(reservation_id,actor_id,channel,outcome,note,created_at)
+      VALUES(?,?,'CUSTOMER_PORTAL','DISPUTED',?,?)`).run(id,user.id,note,time());
+    db.prepare("UPDATE damage_settlements SET status='DISPUTED',version=version+1 WHERE reservation_id=? AND status<>'SETTLED'").run(id);
+    audit(db,user.id,'CUSTOMER_DAMAGE_DISPUTED','reservation',id,{requestKey,note});
+    for(const employee of db.prepare("SELECT id FROM users WHERE store_id=? AND role IN ('staff','manager')").all(order.store_id))
+      notify(db,employee.id,'顾客本人提出结算异议',`订单 ${order.code}：${note}。请保留证据、联系核对；异议解决前暂停最终结清。`);
+    notify(db,user.id,'本人结算异议已记录',`订单 ${order.code}：${note}。已通知原门店，异议解决前暂停最终结清。`);
+    return {ok:true,duplicate:false,damage:damageOrder(db,user,id)};
+  });
+}
+
 export function contactDamageCustomer(db,user,id,input){
   return transaction(db,()=>{
     need(['staff','manager'].includes(user?.role),'仅门店人员可登记联系结果',403);
@@ -131,7 +160,7 @@ export function contactDamageCustomer(db,user,id,input){
     need(['PHONE','EMAIL','IN_PERSON'].includes(input.channel)&&['REACHED','NO_ANSWER','DISPUTED'].includes(input.outcome),'联系渠道或结果无效');
     const note=text(input.note,5,2000,'沟通说明');
     db.prepare('INSERT INTO damage_contacts(reservation_id,actor_id,channel,outcome,note,created_at) VALUES(?,?,?,?,?,?)').run(id,user.id,input.channel,input.outcome,note,time());
-    const status=input.outcome==='DISPUTED'?'DISPUTED':input.outcome==='REACHED'?'CONTACTED':'AWAITING_CONTACT';
+    const status=hasActiveDamageDispute(db,id)?'DISPUTED':input.outcome==='REACHED'?'CONTACTED':'AWAITING_CONTACT';
     db.prepare("UPDATE damage_settlements SET status=?,version=version+1 WHERE reservation_id=? AND status<>'SETTLED'").run(status,id);
     audit(db,user.id,'DAMAGE_CUSTOMER_CONTACT','reservation',id,{channel:input.channel,outcome:input.outcome,note});
     notify(db,order.user_id,'损坏结算沟通记录',`订单 ${order.code}：${note}。可在订单中查看完整鉴定及补差明细。`);
@@ -148,6 +177,7 @@ export function recordDamageSupplement(db,user,id,input){
     if(existing){need(existing.amount_nok===amount,'同一凭证已登记不同金额',409);return {ok:true,duplicate:true,damage:damageOrder(db,user,id)};}
     need(input.confirmed===true,'请确认已联系顾客并核实演示补差凭证');
     need(input.version===settlement.version,'补差记录已更新，请重新打开订单',409);
+    need(!hasActiveDamageDispute(db,id),'顾客已提出异议，请先沟通解决并记录确认结果',409);
     need(settlement.status==='CONTACTED','须先联系顾客确认；未接通或存在异议时不能结清',409);
     need(amount<=settlement.supplement_nok-settlement.paid_nok,'登记金额不能超过剩余补差',409);
     const paid=settlement.paid_nok+amount,done=paid===settlement.supplement_nok;

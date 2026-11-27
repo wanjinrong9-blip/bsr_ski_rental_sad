@@ -151,6 +151,10 @@ test('本地网站 OFF 状态不返回图片并保持原网页可用',async()=>{
     const entry=await fetch(base+'/api/mini-entry');
     assert.equal(entry.status,200);
     assert.deepEqual(await entry.json(),{status:'off',qrUrl:null});
+    const boot=await (await fetch(base+'/api/bootstrap')).json();
+    assert.equal(boot.releaseInfo.miniExperience.access,'MEMBERS_ENABLED');
+    assert.equal(boot.releaseInfo.miniBackend.configured,false);
+    assert.equal(boot.releaseInfo.officialMiniEntry.status,'off');
     assert.equal((await fetch(base+'/api/mini-entry/code')).status,404);
     const page=await fetch(base+'/#/mini');
     assert.equal(page.status,200);

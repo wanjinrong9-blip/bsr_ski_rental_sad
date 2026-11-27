@@ -5,10 +5,19 @@ export function createDamageUI(ctx){
   const synthetic=()=>state.boot?.synthetic===true;
   const simulationLabel=()=>synthetic()?'课程合成模拟 · 无真实收付款或顾客联系':'本地演示 · 无真实收付款';
   const cache=new Map(),pending=new Set();let current=null;
+  const disputeDrafts=new Map(),disputeBusy=new WeakSet();
+  function disputeForm(o){
+    if(state.user?.role!=='customer'||!['REVIEW','SETTLEMENT'].includes(o.status)||!o.damage?.cases?.length)return '';
+    if(o.damage.disputeActive)return '<div class="banner warn"><div><b>费用异议已记录 · 暂缓结清</b><p>原门店将联系核对依据。未接通不会自动解除争议，可在下方查看处理记录。</p></div></div>';
+    const key=state.user.id+':'+o.id;
+    if(!disputeDrafts.has(key))disputeDrafts.set(key,{requestKey:crypto.randomUUID(),note:'',uncertain:false});
+    const draft=disputeDrafts.get(key);
+    return `<form data-form="damage-customer-dispute" class="form-grid damage-contact"><input type="hidden" name="id" value="${o.id}"><input type="hidden" name="requestKey" value="${esc(draft.requestKey)}"><div class="field wide"><label>对受损责任或费用有异议？</label><textarea name="note" minlength="5" maxlength="2000" required ${draft.uncertain?'readonly':''} placeholder="说明有异议的部位、金额与原因，至少5字">${esc(draft.note)}</textarea></div><p class="small muted wide">提交后通知原门店并暂停最终结清；不会自动重开已完成订单，也不代表退款到账。</p><p class="small muted wide" data-dispute-result>${draft.uncertain?'提交结果待确认，请保留内容并重试找回同一记录。':''}</p><button class="btn secondary small">${draft.uncertain?'核对上次提交结果':'提交本人费用异议'}</button></form>`;
+  }
   const worker=()=>state.user&&['staff','manager','contractor'].includes(state.user.role);
   const flag=()=>worker()&&state.damageCases.some(c=>c.status!=='APPROVED')?'<span class="order-alert-mark" aria-label="有待处理损坏鉴定">!</span>':'';
   async function load(){if(!worker()){state.damageCases=[];return;}const id=state.user.id,data=await api('/api/damage-cases');if(state.user?.id===id)state.damageCases=data;}
-  function reset(){for(const url of cache.values())URL.revokeObjectURL(url);cache.clear();pending.clear();current=null;state.damageCases=[];state.damageConsent=null;}
+  function reset(){disputeDrafts.clear();for(const url of cache.values())URL.revokeObjectURL(url);cache.clear();pending.clear();current=null;state.damageCases=[];state.damageConsent=null;}
   function photos(c){return `<div class="damage-photo-grid">${c.photos.map(p=>`<button type="button" class="damage-photo" data-damage-view-photo="${p.id}" data-damage-photo-case="${c.id}"><img data-damage-photo="${p.id}" alt="${esc(p.part+'：'+p.caption)}"><span><b>${esc(p.part)}</b>${esc(p.caption)}</span></button>`).join('')||'<div class="damage-photo-empty">尚未上传鉴定照片。提交前至少需要一张对应部位照片。</div>'}</div>`;}
   function facts(c){return `<dl class="damage-facts"><div><dt>受损等级</dt><dd>${grade(c.grade)}</dd></div><div><dt>受损部位</dt><dd>${esc(c.part||'待记录')}</dd></div><div><dt>鉴定依据</dt><dd>${esc(c.diagnosis||'等待技师检查')}</dd></div><div><dt>工时 / 材料</dt><dd>${nok(c.labor_nok)} / ${nok(c.parts_nok)}</dd></div><div><dt>折旧后重置估值</dt><dd>${nok(c.replacement_nok)}</dd></div><div><dt>估值依据</dt><dd>${esc(c.value_basis||'未收费或待补充')}</dd></div><div><dt>${c.status==='APPROVED'?'核定损坏费用':'建议损坏费用'}</dt><dd>${c.grade?nok(c.fee_nok):'尚未确定'}</dd></div></dl>`;}
   function page(){
@@ -43,13 +52,13 @@ export function createDamageUI(ctx){
     const consent=d.consent?`<p class="damage-consent-record">${icon('check')} 已同意损坏规则 ${esc(d.consent.policy_version)} · ${dateText(d.consent.accepted_at)}</p>`:'<p class="damage-consent-record">历史订单未记录本版电子同意，不自动追溯适用新规则。</p>';
     if(!d.cases.length&&!d.settlement)return consent;
     const s=d.settlement,staff=['staff','manager'].includes(state.user?.role),remaining=s?Math.max(0,s.supplement_nok-s.paid_nok):0;
-    return `${consent}<section class="damage-order-section"><div class="section-title"><div><div class="kicker">FEES & SETTLEMENT</div><h3>${d.cases.length?'损坏鉴定与费用结算':'超时费与押金结算'}</h3></div><span class="small muted">NOK · ${simulationLabel()}</span></div>
+    return `${disputeForm(o)}${consent}<section class="damage-order-section"><div class="section-title"><div><div class="kicker">FEES & SETTLEMENT</div><h3>${d.cases.length?'损坏鉴定与费用结算':'超时费与押金结算'}</h3></div><span class="small muted">NOK · ${simulationLabel()}</span></div>
       ${synthetic()?`<div class="banner warn">${icon('info')}<div>本页为课程合成情景：费用、押金抵扣、退款和补差仅作模拟记账；“联系顾客”仅登记虚构沟通事件，不会发短信、邮件或拨打电话。</div></div>`:''}
       ${d.cases.map(c=>`<div class="damage-order-case"><div><b>${esc(c.inventory_no)} · ${grade(c.grade)}</b><p>${statuses[c.status]} · 照片 ${c.photos.length} 张 · ${c.grade?nok(c.fee_nok):'金额待鉴定'}</p></div><button class="btn secondary small" data-damage-case="${c.id}">查看照片与鉴定</button></div>`).join('')}
       ${s?`<div class="damage-settlement-grid">${[['核定损坏费',s.damage_fee_nok],['核定超时费',s.late_fee_nok],['费用合计',s.total_fee_nok],['抵扣押金',s.deducted_nok],['可退押金',s.refund_nok],['需补差合计',s.supplement_nok],['已登记补差',s.paid_nok],['剩余补差',remaining]].map(([label,value])=>`<div><span>${label}</span><b>${nok(value)}</b></div>`).join('')}</div><div class="banner ${remaining?'warn':''}">${icon('info')}<div>${s.status==='DISPUTED'?'顾客提出异议，暂停结清，需继续沟通。':remaining?'费用超过押金，员工须先联系顾客说明并登记核实后的补差凭证；系统不会自动追加扣款。':'费用及押金已完成演示结算。'}</div></div>`:'<div class="banner warn">'+icon('info')+'<div>损坏费用尚未完成核定，押金暂不结算。必须逐件提交照片、完成鉴定并经经理复核，不能按前台估计直接扣款。</div></div>'}
       ${staff&&['REVIEW','SETTLEMENT'].includes(o.status)?`<div class="damage-note"><b>${synthetic()?'虚构顾客资料（仅门店工作人员可见）':'顾客联系信息（仅门店工作人员可见）'}</b><br>${esc(o.customerContact?.name||o.customer_name)} · 电话：${esc(o.customerContact?.phone||'未填写，请现场核实')} · 邮箱：${esc(o.customerContact?.email||'未填写')}</div><form data-form="damage-contact" class="form-grid damage-contact"><input type="hidden" name="id" value="${o.id}"><div class="field"><label>${synthetic()?'模拟联系渠道':'联系顾客的渠道'}</label><select name="channel"><option value="PHONE">电话</option><option value="EMAIL">电子邮件</option><option value="IN_PERSON">当面沟通</option></select></div><div class="field"><label>沟通结果</label><select name="outcome"><option value="REACHED">${synthetic()?'模拟已联系并确认':'已联系并确认沟通结果'}</option><option value="NO_ANSWER">${synthetic()?'模拟未联系成功，继续跟进':'未联系成功，继续跟进'}</option><option value="DISPUTED">${synthetic()?'模拟顾客有异议，暂缓结清':'顾客有异议，暂缓结清'}</option></select></div><div class="field wide"><label>${synthetic()?'模拟沟通说明（演示顾客可见）':'沟通说明（顾客可见，请写清时间、依据与金额）'}</label><textarea name="note" minlength="5" maxlength="2000" required></textarea></div><button class="btn secondary small">${synthetic()?'保存模拟联系记录':'保存联系记录'}</button></form>`:''}
       ${staff&&remaining&&s.status!=='SETTLED'?`<form data-form="damage-supplement" class="form-grid damage-contact"><input type="hidden" name="id" value="${o.id}"><input type="hidden" name="version" value="${s.version}"><div class="field"><label>本次已核实补差 · NOK</label><input name="amountNok" type="number" min="1" max="${remaining}" value="${remaining}" step="1" required></div><div class="field"><label>核实凭证 / 演示流水号</label><input name="reference" minlength="3" maxlength="100" required placeholder="如 DEMO-SUP-0001"></div><label class="damage-check wide"><input type="checkbox" name="confirmed" required><span>${synthetic()?'我已核对虚构联系记录与模拟补差凭证；没有真实联系、收款或自动扣款。':'我已联系顾客并核对补差凭证。本次仅登记演示结果，不执行自动扣款。'}</span></label><button class="btn small" ${s.status==='CONTACTED'?'':'disabled'}>${synthetic()?'登记模拟补差':'登记核实补差'}</button><p class="small muted wide">未联系成功或存在异议时不能登记。可分次登记，全部补齐后订单才自动结清。</p></form>`:''}
-      <details class="damage-history"><summary>联系及补差记录 · ${d.contacts.length+d.receipts.length} 条</summary>${d.contacts.map(c=>`<div><b>${{REACHED:'已联系确认',NO_ANSWER:'未联系成功',DISPUTED:'顾客提出异议'}[c.outcome]}</b><span>${esc(c.actor_name)} · ${{PHONE:'电话',EMAIL:'邮件',IN_PERSON:'当面'}[c.channel]} · ${dateText(c.created_at)}</span><p>${esc(c.note)}</p></div>`).join('')}${d.receipts.map(r=>`<div><b>补差演示登记 ${nok(r.amount_nok)}</b><span>${esc(r.reference)} · ${dateText(r.created_at)}</span></div>`).join('')}</details></section>`;
+      <details class="damage-history"><summary>联系及补差记录 · ${d.contacts.length+d.receipts.length} 条</summary>${d.contacts.map(c=>`<div><b>${{REACHED:'已联系确认',NO_ANSWER:'未联系成功',DISPUTED:'顾客提出异议'}[c.outcome]}</b><span>${esc(c.actor_name)} · ${{PHONE:'电话',EMAIL:'邮件',IN_PERSON:'当面',CUSTOMER_PORTAL:'顾客在线提交'}[c.channel]} · ${dateText(c.created_at)}</span><p>${esc(c.note)}</p></div>`).join('')}${d.receipts.map(r=>`<div><b>补差演示登记 ${nok(r.amount_nok)}</b><span>${esc(r.reference)} · ${dateText(r.created_at)}</span></div>`).join('')}</details></section>`;
   }
   function orderSummary(o){
     const d=o.damage;if(!d?.cases?.length&&!d?.settlement)return '';
@@ -92,6 +101,23 @@ export function createDamageUI(ctx){
     if(kind==='damage-consent'){if(document.querySelector('[data-damage-policy-scroll]')?.dataset.read!=='true'||!form.elements.accepted.checked)throw new Error('请阅读到末尾并主动勾选同意');state.damageConsent={version:state.boot.damagePolicy.version,accepted:true,readToEnd:true};await ctx.cartModal();return true;}
     if(kind==='damage-search'){state.damageSearch=String(fields.query||'').trim();state.dirtyForm=false;render();return true;}
     const id=Number(fields.id);fields.version=Number(fields.version);
+    if(kind==='damage-customer-dispute'){
+      if(disputeBusy.has(form))return true;
+      const key=state.user.id+':'+id,draft=disputeDrafts.get(key);
+      if(!draft||draft.requestKey!==fields.requestKey)throw new Error('请重新打开订单后提交');
+      draft.note=String(fields.note||'').trim();
+      if(draft.note.length<5||draft.note.length>2000)throw new Error('异议说明须为5–2000字');
+      disputeBusy.add(form);const button=form.querySelector('button');button.disabled=true;
+      try{
+        await api(`/api/reservations/${id}/damage/dispute`,'POST',{requestKey:draft.requestKey,note:draft.note});
+        disputeDrafts.delete(key);ctx.orderModal(await api(`/api/reservations/${id}`));toast('本人异议已保存，原门店将联系核对');
+      }catch(error){
+        draft.uncertain=!error.status;form.elements.note.readOnly=draft.uncertain;
+        form.querySelector('[data-dispute-result]').textContent=draft.uncertain?'提交结果待确认，请重试核对同一记录。':error.message;
+        throw error;
+      }finally{disputeBusy.delete(form);button.disabled=false;}
+      return true;
+    }
     if(kind==='damage-photo'){
       if(synthetic()&&!form.elements.syntheticPhoto?.checked)throw new Error('课程演示仅允许上传虚构装备的受损示意图，请先确认素材来源');
       const evaluation=document.querySelector('[data-form=damage-assessment]'),draft=evaluation?Object.fromEntries(new FormData(evaluation)):null;

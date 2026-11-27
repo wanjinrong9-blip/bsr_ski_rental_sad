@@ -5,6 +5,7 @@ import { createDamageUI } from './damage.js';
 import {jobs,createServiceUI} from './service-ui.js';
 import {createFulfillmentUI} from './fulfillment.js';
 import {readSubmission,pendingSubmission,clearSubmission} from './submit-intent.js';
+import {miniExperienceStatus} from './mini-experience.js';
 const $ = (s, root=document) => root.querySelector(s);
 const $$ = (s, root=document) => [...root.querySelectorAll(s)];
 const esc = value => String(value??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -371,11 +372,12 @@ function servicePage(){if(isShowcase()&&!canBook())return `${pageHead('SHOWCASE 
   <div class="grid-2" style="margin-top:19px"><div class="card pad"><h3>费用与货币</h3><p class="muted">${isShowcase()?'虚构挪威门店只以 NOK 示例价模拟记账；每张订单冻结报价快照，新政策不回写旧单。':'BSR 首期以挪威门店批准的 NOK 价目结算。所在地币种仅供参考换算；已确认订单保留报价快照，不因定位、汇率或新政策而改变。'}</p><div class="banner">${icon('wallet')}<div>${isShowcase()?'合成预览不发生真实收款、退款或有效电子签署；上线前还须取得 BSR 政策批准并接入合格服务。':'演示版支付和退款不会发生真实资金划转；上线前须接入支付机构并完成对账、退款幂等和争议处理验证。'}</div></div></div><div class="card pad"><h3>门店服务</h3>${state.boot.stores.map(s=>`<div class="key-value"><div><b>${esc(s.name)}</b><div class="small muted">${esc(s.address)}</div></div><div class="tag">${esc(s.open_hours)}</div></div>`).join('')}</div></div>`;}
 function miniPage(){
   const published=state.miniEntry?.status==='ready'&&state.miniEntry?.qrUrl;
+  const experience=miniExperienceStatus(state.boot?.releaseInfo);
   const code=published?`<img src="${esc(state.miniEntry.qrUrl)}" alt="BSR 微信小程序扫码图片" width="220" height="220">`:
     `<div class="mini-peak" aria-hidden="true"><svg viewBox="0 0 220 180"><path d="M5 150 69 54l34 47 36-70 76 119" fill="none" stroke="currentColor" stroke-width="8" stroke-linejoin="round"/><path d="M34 151h156" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></div><strong>发布后显示小程序码</strong>`;
-  return `${pageHead('BSR ON WECHAT','雪地出发，掌上安排。','网页与微信小程序将共用门店库存和预约记录；在小程序完成账号关联后，可查看同一顾客订单。')}
-    <section class="mini-entry-card"><div class="mini-entry-copy"><div class="kicker">TWO WAYS TO RENT</div><h2>选好租期，<br>再去雪场。</h2><p>小程序将支持按日期查看剩余装备、管理购物车和预约、查看备货及取还进度。网页仍提供完整服务，员工继续在工作台处理同一笔订单。</p><div class="mini-entry-points"><span>01 · 同一库存</span><span>02 · 同一订单</span><span>03 · 进度同步</span></div><div class="mini-entry-actions">${published?'<span class="mini-live-tag">已开放微信扫码</span>':'<span class="mini-pending-tag">小程序筹备中</span>'}<button class="btn secondary" data-route="catalog">继续使用网页版 ${icon('arrow')}</button></div></div>
-      <div class="mini-code-panel"><div class="mini-code-frame ${published?'is-live':''}">${code}</div><p>${published?'打开微信扫一扫，即可进入 BSR 小程序。':'当前尚无已发布的小程序码；此图案仅为页面装饰，不能扫码。'}</p></div></section>`;
+  return `${pageHead('BSR ON WECHAT','雪地出发，掌上安排。','网页与微信小程序共用业务规则；关联同一顾客后，可查看同一库存、购物车与订单。')}
+    <section class="mini-entry-card"><div class="mini-entry-copy"><div class="kicker">TWO WAYS TO RENT</div><h2>选好租期，<br>再去雪场。</h2><p>小程序提供日期库存、购物车、合同确认和订单进度。网页员工处理同一笔订单，顾客可查看具名备货、取还与鉴定结果。</p><div class="mini-entry-points"><span>01 · 同一库存</span><span>02 · 同一订单</span><span>03 · 进度同步</span></div><div class="mini-entry-actions">${published?'<span class="mini-live-tag">已开放正式扫码入口</span>':`<span class="mini-pending-tag">${esc(experience.label)}</span>`}<button class="btn secondary" data-route="catalog">继续使用网页版 ${icon('arrow')}</button></div><p class="small muted">${esc(experience.description)}</p><p class="small muted">${esc(experience.connection)}</p></div>
+      <div class="mini-code-panel"><div class="mini-code-frame ${published?'is-live':''}">${code}</div><p>${published?'打开微信扫一扫，即可进入 BSR 小程序。':experience.enabled?'体验成员请使用已分享的体验码；本区域装饰不是体验码。':'当前尚无已发布的小程序码；此图案仅为页面装饰，不能扫码。'}</p></div></section>`;
 }
 function ordersPage(){const orders=state.orders||[];return `${pageHead('MY RESERVATIONS',state.user?.role==='owner'?'订单总览':'我的预约','查看每一笔订单的报价快照、取货码、验收和押金状态。',state.user?.role==='customer'?`<button class="btn" data-route="catalog">继续挑选装备</button>`:'')}${orders.length?orders.map(orderCard).join(''):empty('尚无预约','从装备目录开始你的第一次雪地旅程','calendar')}`;}
 function orderAttention(o){return o.attention?.unresolved?`${orderAlerts.marker(1,o.attention.reason)}${o.attention.isNew?'<span class="order-new-hint">新增待阅</span>':''}`:'';}

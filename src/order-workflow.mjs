@@ -12,10 +12,14 @@ export function orderWorkflow(db,user,order){
  const refund=event('DEPOSIT_DEDUCTION_APPROVED'),lastContact=event('DAMAGE_CUSTOMER_CONTACT'),paymentEvent=event('PAYMENT_DEMO_SUCCEEDED');
  const paymentActor=paymentEvent?.actor_id===order.user_id&&user.role==='contractor'?customer:person(db,paymentEvent?.actor_id,customer.name);
  const prep=db.prepare('SELECT * FROM preparations WHERE reservation_id=?').get(order.id),contract=db.prepare('SELECT * FROM contracts WHERE reservation_id=? AND version=?').get(order.id,order.contract_version);
+ const contractActor=contract?.signed_at?
+   contract.signed_by===order.user_id&&user.role==='contractor'?customer:
+     person(db,contract.signed_by,contract.signature_method==='PAPER_WITNESS'?clerk.name:customer.name):
+   contract?customer:order.created_by?clerk:customer;
  const partial=db.prepare('SELECT COUNT(*) AS n FROM rental_units ru JOIN reservation_items ri ON ri.id=ru.reservation_item_id WHERE ri.reservation_id=? AND ru.returned=0').get(order.id).n;
  const steps=[
   {key:'RESERVED',label:'创建预约 / 现场开单',done:true,actor:order.created_by?person(db,order.created_by,customer.name):customer,at:order.created_at},
-  {key:'CONTRACT',label:contract?'确认当前合同':'生成并阅读合同',done:!!contract?.signed_at,skip:!order.requires_fulfillment&&!contract,actor:contract?customer:order.created_by?clerk:customer,at:contract?.signed_at},
+  {key:'CONTRACT',label:contract?.signature_method==='PAPER_WITNESS'?'门店记录纸质签署见证':contract?'顾客本人确认当前合同':'生成并阅读合同',done:!!contract?.signed_at,skip:!order.requires_fulfillment&&!contract,actor:contractActor,at:contract?.signed_at},
   {key:'PAYMENT',label:'确认演示付款',done:!!order.paid_at,actor:paymentActor,at:order.paid_at},
   {key:'PREPARATION',label:prep?.status==='BLOCKED'?'备货异常待协调':prep?.status==='CHECKING'?'装备清洁与安全检查':'员工准备装备',done:!!order.picked_up_at||prep?.status==='READY',skip:!order.requires_fulfillment&&!prep,actor:person(db,prep?.assigned_to,clerk.name),at:prep?.ready_at},
   {key:'PICKUP',label:'门店核码交付',done:!!order.picked_up_at,actor:person(db,event('PICKUP_COMPLETED')?.actor_id,clerk.name),responsible:clerk,at:order.picked_up_at},

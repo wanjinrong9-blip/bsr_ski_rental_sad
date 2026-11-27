@@ -7,10 +7,11 @@ import {depositFor,depositRule} from './catalog-upgrade.mjs';
 import {damagePolicy} from './damage-policy.mjs';
 import {orderWorkflow} from './order-workflow.mjs';
 import {contracts,issueContract,preparation,signContract} from './fulfillment.mjs';
-import {damageOrder,damagePhoto} from './damage.mjs';
+import {damageOrder,damagePhoto,submitCustomerDamageDispute} from './damage.mjs';
 import {simulated} from './simulation.mjs';
 import {rentalPolicy} from './rental-policy.mjs';
 import {saveCustomerProfile} from './master-data.mjs';
+import {publicReleaseInfo} from './release-info.mjs';
 import {createWechatCodeSessionAdapter,WechatPlatformError} from './wechat-platform.mjs';
 import {bindMiniCustomer,claimMiniCodeExchange,logoutMiniSession,miniSessionUser,unbindMiniCustomer,
   wechatMiniLogin} from './mini-identity.mjs';
@@ -72,6 +73,7 @@ export function createMiniApi({db,runMode,env=process.env,adapter=null,orderDeta
         bootAuth.slice(7):null;
       const bootUser=enabled&&bootToken?miniSessionUser(db,bootToken):null;
       json(res,200,{status:enabled?'ready':'off',synthetic:runMode==='showcase',
+        releaseInfo:publicReleaseInfo({miniBackendEnabled:enabled}),
         customerOnly:true,currency:'NOK',bookingEnabled:enabled,loginEnabled:enabled,
         stores:enabled?db.prepare('SELECT * FROM stores ORDER BY id').all():[],
         damagePolicy:enabled?damagePolicy:null,
@@ -181,11 +183,14 @@ export function createMiniApi({db,runMode,env=process.env,adapter=null,orderDeta
         'content-security-policy':"default-src 'none'; sandbox"});
       res.end(Buffer.from(photo.image));return true;
     }
-    const reservation=path.match(/^\/api\/mini\/reservations\/(\d+)(?:\/(cancel|contracts|pay))?$/);
+    const reservation=path.match(/^\/api\/mini\/reservations\/(\d+)(?:\/(cancel|contracts|pay|damage\/dispute))?$/);
     if(reservation){
       const id=Number(reservation[1]),action=reservation[2];
       ownOrder(actor,id);
       if(!action&&method==='GET'){json(res,200,detail(actor,id));return true;}
+      if(action==='damage/dispute'&&method==='POST'){
+        json(res,200,simulated(submitCustomerDamageDispute(db,actor,id,await body(req,12000))));return true;
+      }
       if(action==='cancel'&&method==='POST'){
         const row=ownOrder(actor,id);
         json(res,200,simulated(row.status==='CANCELLED'?{id,status:'CANCELLED',

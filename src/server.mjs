@@ -18,7 +18,7 @@ import {orderWorkflow,staffReview,staffReviewVersion,checkDamageSLA} from './ord
 import {preparation,preparationList,updatePreparation,contracts,issueContract,signContract,printableContract} from './fulfillment.mjs';
 import {saveCustomerProfile,customerSearch,staffCustomer,employeeDirectory,saveEmployee,contractorRates,addRate,addStore,intakeUnit,clearCleaning} from './master-data.mjs';
 import {amendmentQuote,commitAmendment,proposalList,proposal as amendmentProposal,createProposal,confirmProposal} from './amendments.mjs';
-import {damageCases,damageCase,damageOrder,assessDamage,reviewDamage,uploadDamagePhoto,damagePhoto,contactDamageCustomer,recordDamageSupplement} from './damage.mjs';
+import {damageCases,damageCase,damageOrder,assessDamage,reviewDamage,uploadDamagePhoto,damagePhoto,contactDamageCustomer,recordDamageSupplement,submitCustomerDamageDispute} from './damage.mjs';
 import {rentalPolicy,rentalLateSummary} from './rental-policy.mjs';
 import {isInsidePath} from './startup-config.mjs';
 import {validateRuntimeConfig} from './runtime-config.mjs';
@@ -29,6 +29,7 @@ import {preflightRuntime} from './runtime-provenance.mjs';
 import {candidateSessionUser,candidateLogin,candidateLogout,candidateProvisionAccount,candidateChangePassword,
   candidateSetAccountState,candidateResetPassword,invalidateCandidateSessions,requireCandidateOrigin} from './identity.mjs';
 import {simulated,simulationNotice} from './simulation.mjs';
+import {publicReleaseInfo} from './release-info.mjs';
 
 const here = resolve(fileURLToPath(new URL('.',import.meta.url)));
 const root = resolve(here,'..');
@@ -191,15 +192,16 @@ async function api(req,res,url) {
   }
   if (path==='/api/bootstrap' && method==='GET') {
     const stores = db.prepare('SELECT * FROM stores ORDER BY id').all();
-    if(isCandidate)return json(res,200,{stores,user:safeUser(user),
+    const releaseInfo=publicReleaseInfo({miniBackendEnabled:miniApi.enabled,officialEntryStatus:effectiveMiniEntry(miniEntry).status});
+    if(isCandidate)return json(res,200,{stores,user:safeUser(user),releaseInfo,
       exchange:{NOK:exchange.NOK},exchangeSource:'仅 NOK；商业汇率未批准',exchangeUpdatedAt:null,
       demo:false,runMode:'candidate',capabilities:{selfRegistration:false,selfRecovery:false,bookingEnabled:false},
       damagePolicy:null,depositRule:null,rentalPolicy:null});
-    if(showcase)return json(res,200,{stores,user:safeUser(user),
+    if(showcase)return json(res,200,{stores,user:safeUser(user),releaseInfo,
       exchange:{NOK:exchange.NOK},exchangeSource:'合成预览仅以 NOK 记账',exchangeUpdatedAt:null,
       demo:false,synthetic:true,runMode:'showcase',capabilities:{selfRegistration:false,selfRecovery:false,bookingEnabled:true},
       notice:simulationNotice,temporaryPreview:process.env.BSR_TEMPORARY_PREVIEW==='1',damagePolicy,depositRule,rentalPolicy});
-    return json(res,200,{stores,user:safeUser(user),exchange,
+    return json(res,200,{stores,user:safeUser(user),exchange,releaseInfo,
       exchangeSource:'演示汇率快照（非实时市场数据）',exchangeUpdatedAt:'2026-10-25T00:00:00+02:00',
       demo:true,runMode:'demo',damagePolicy,depositRule,rentalPolicy,
       demoLogin:{password:'Demo123!',accounts:Object.fromEntries(
@@ -292,10 +294,11 @@ async function api(req,res,url) {
     requireRole(user,['customer','staff','manager','contractor']);const photo=damagePhoto(db,user,Number(photoPath[1]));
     res.writeHead(200,{'content-type':photo.mime,'content-length':photo.image.length,'cache-control':'private, no-store','x-content-type-options':'nosniff','content-security-policy':"default-src 'none'; sandbox"});res.end(Buffer.from(photo.image));return;
   }
-  const damageOrderPath=path.match(/^\/api\/reservations\/(\d+)\/damage(?:\/(contact|supplement))?$/);
+  const damageOrderPath=path.match(/^\/api\/reservations\/(\d+)\/damage(?:\/(contact|supplement|dispute))?$/);
   if(damageOrderPath){
     requireRole(user,['customer','staff','manager']);const id=Number(damageOrderPath[1]),action=damageOrderPath[2];
     if(!action&&method==='GET')return json(res,200,damageResponse(damageOrder(db,user,id)));
+    if(action==='dispute'&&method==='POST')return json(res,200,businessResponse(submitCustomerDamageDispute(db,user,id,await body(req))));
     if(action==='contact'&&method==='POST')return json(res,200,damageResponse(contactDamageCustomer(db,user,id,await body(req))));
     if(action==='supplement'&&method==='POST')return json(res,200,businessResponse(recordDamageSupplement(db,user,id,await body(req))));
   }

@@ -8,6 +8,8 @@ const damageGrades = { NONE: '无损 / 正常磨损', MINOR: '轻微受损', MOD
   SEVERE: '严重受损', TOTAL_LOSS: '无法修复' };
 const damageStages = { DRAFT: '待鉴定', SUBMITTED: '已反馈 · 待经理复核',
   RETURNED: '退回补充证据', APPROVED: '经理已复核' };
+const roleLabels = { customer: '顾客本人', staff: '门店租赁专员', manager: '门店运营经理', contractor: '装备检修技师' };
+const handlerText = handler => handler ? [roleLabels[handler.role], handler.name].filter(Boolean).join(' · ') || '待指派岗位' : '待指派岗位';
 
 const modalError = error => wx.showModal({ title: '操作未完成', content: error.message || '请重试', showCancel: false });
 const confirm = (title, content) => new Promise(resolve => wx.showModal({ title, content, success: result => resolve(result.confirm), fail: () => resolve(false) }));
@@ -16,6 +18,8 @@ Page({
   data: { id: 0, loading: true, acting: false, order: null, error: '', statusLabel: '', steps: [],
     contract: null, showContract: false, contractRead: false, contractAccepted: false, signedName: '',
     canCancel: false, canPay: false, canIssue: false, canSign: false, pickupText: '', returnText: '',
+    contractError: '', paymentError: '', holdText: '', paidText: '', signedText: '', currentHandler: '', currentTime: '',
+    canDispute: false, disputeNote: '', disputeKey: '', disputePending: false, disputeError: '',
     prepEvents: [], damageCases: [], damageContacts: [], wechatMode: api.isWechatShowcase() },
   onLoad(options) { this.setData({ id: Number(options.id) || 0 }); },
   async onShow() { if (this.data.id) await this.refresh(); },
@@ -26,10 +30,15 @@ Page({
     try {
       const order = await api.request(`/api/reservations/${this.data.id}`);
       const contract = order.contracts?.[0] || null;
-      this.setData({ order, contract, statusLabel: statusLabels[order.status] || order.status,
+      const steps = (order.workflow?.steps || []).map(step => ({ ...step, statusText: stepLabels[step.status] || step.status,
+        handlerText: handlerText(step.handler),
+        timeText: step.at ? booking.formatOslo(step.at) : step.dueAt ? `期限 ${booking.formatOslo(step.dueAt)}` : '' }));
+      this.setData({ order, contract, statusLabel: order.status === 'HOLD' && contract?.signed_at
+          ? '已确认合同 · 待演示付款' : statusLabels[order.status] || order.status,
         pickupText: booking.formatOslo(order.pickup_at), returnText: booking.formatOslo(order.return_at),
-        steps: (order.workflow?.steps || []).map(step => ({ ...step, statusText: stepLabels[step.status] || step.status,
-          timeText: step.at ? booking.formatOslo(step.at) : step.dueAt ? `期限 ${booking.formatOslo(step.dueAt)}` : '' })),
+        holdText: booking.formatOslo(order.hold_expires_at), paidText: order.paid_at ? booking.formatOslo(order.paid_at) : '',
+        signedText: contract?.signed_at ? booking.formatOslo(contract.signed_at) : '',
+        currentHandler: handlerText(order.workflow?.handler), currentTime: steps.find(step => step.status === 'CURRENT')?.timeText || '', steps,
         prepEvents: (order.preparation?.events || []).map(event => ({ ...event, timeText: booking.formatOslo(event.created_at) })),
         damageCases: (order.damage?.cases || []).map(damage => ({ ...damage,
           gradeLabel: damageGrades[damage.grade] || '待鉴定',
@@ -48,6 +57,7 @@ Page({
         canCancel: ['HOLD', 'CONFIRMED', 'READY'].includes(order.status),
         canIssue: order.status === 'HOLD' && !contract,
         canSign: order.status === 'HOLD' && !!contract && !contract.signed_at,
+        canDispute: ['REVIEW', 'SETTLEMENT'].includes(order.status) && (order.damage?.cases?.length || 0) > 0,
         canPay: order.status === 'HOLD' && !!contract?.signed_at });
     } catch (error) { this.setData({ error: error.message, order: null }); }
     finally { this.setData({ loading: false }); }
@@ -55,9 +65,9 @@ Page({
 
   async onIssueContract() {
     if (this.data.acting) return;
-    this.setData({ acting: true });
+    this.setData({ acting: true, contractError: '' });
     try { await api.request(`/api/reservations/${this.data.id}/contracts`, 'POST'); await this.refresh(); this.openContract(); }
-    catch (error) { modalError(error); }
+    catch (error) { this.setData({ contractError: error.message }); }
     finally { this.setData({ acting: false }); }
   },
   openContract() { if (this.data.contract) this.setData({ showContract: true, contractRead: false, contractAccepted: false,
@@ -69,24 +79,50 @@ Page({
   async onSignContract() {
     if (this.data.acting || !this.data.canSign) return;
     if (!this.data.contractRead || !this.data.contractAccepted) return modalError(new Error('请完整阅读当前合同并主动勾选确认'));
-    if (this.data.signedName.trim().length < 2) return modalError(new Error('请填写至少两个字的确认姓名'));
-    this.setData({ acting: true });
+    if (this.data.signedName.trim().length < 2 || this.data.signedName.trim().length > 100) return modalError(new Error('确认姓名须为2–100字'));
+    this.setData({ acting: true, contractError: '' });
     try {
       await api.request(`/api/contracts/${this.data.contract.id}/sign`, 'POST',
         { accepted: true, snapshotHash: this.data.contract.snapshot_hash, name: this.data.signedName.trim() });
       this.closeContract(); await this.refresh();
-    } catch (error) { modalError(error); }
+    } catch (error) { this.setData({ contractError: error.message }); }
     finally { this.setData({ acting: false }); }
   },
   async onDemoPay() {
     if (this.data.acting || !this.data.canPay) return;
-    if (!await confirm('确认演示付款', api.isWechatShowcase()
-      ? '此操作只在合成预览中记录模拟支付，不发生真实扣款。确认后门店开始准备装备。'
-      : '此操作只在本机记录模拟支付，不发生真实扣款。确认后门店开始准备装备。')) return;
-    this.setData({ acting: true });
-    try { await api.request(`/api/reservations/${this.data.id}/pay`, 'POST'); await this.refresh(); }
-    catch (error) { modalError(error); }
+    this.setData({ acting: true, paymentError: '' });
+    try {
+      const order = this.data.order, contract = this.data.contract;
+      const agreed = await confirm('确认演示付款', `合同 ${contract.code} · V${contract.version}。租金 NOK ${order.rent_nok} + 可退押金 NOK ${order.deposit_nok} = 应付 NOK ${order.total_nok}。仅记录模拟付款，无真实资金流；成功后才生成门店备货任务。`);
+      if (!agreed) return;
+      await api.request(`/api/reservations/${this.data.id}/pay`, 'POST');
+      await this.refresh();
+    } catch (error) { this.setData({ paymentError: error.message }); }
     finally { this.setData({ acting: false }); }
+  },
+  onDisputeInput(event) {
+    if (this.data.acting || this.data.disputePending) return;
+    this.setData({ disputeNote: event.detail.value, disputeKey: '', disputeError: '' });
+  },
+  async onSubmitDispute() {
+    if (this.data.acting || !this.data.canDispute) return;
+    if (this.data.order?.damage?.disputeActive && !this.data.disputePending) {
+      return this.setData({ disputeError: '已有待处理异议，请等待原门店联系核对。' });
+    }
+    const note = this.data.disputeNote.trim();
+    if (note.length < 5 || note.length > 2000) return this.setData({ disputeError: '异议说明须为5–2000字。' });
+    const requestKey = this.data.disputeKey || booking.newRequestKey();
+    this.setData({ acting: true, disputeError: '', disputeKey: requestKey });
+    try {
+      await api.request(`/api/reservations/${this.data.id}/damage/dispute`, 'POST', { note, requestKey });
+      this.setData({ disputeNote: '', disputeKey: '', disputePending: false });
+      await this.refresh();
+      wx.showToast({ title: '异议已记录', icon: 'success' });
+    } catch (error) {
+      this.setData({ disputePending: !!error.network, disputeError: error.network
+        ? '提交结果暂未确认，说明和提交标识已保留。请用下方按钮重试，避免重复记录。'
+        : error.message });
+    } finally { this.setData({ acting: false }); }
   },
   async onPreviewDamagePhoto(event) {
     if (this.data.acting) return;

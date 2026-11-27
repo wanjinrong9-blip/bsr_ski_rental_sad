@@ -1,5 +1,6 @@
 const api = require('../../utils/api');
 const cartSync = require('../../utils/cart-sync');
+const { profileIssues } = require('../../utils/customer-profile');
 
 const showError = error => wx.showModal({ title: '操作未完成', content: error.message || '请稍后重试', showCancel: false });
 
@@ -14,10 +15,10 @@ function profileFrom(user) {
 
 Page({
   data: { loading: true, busy: false, user: null, userInitial: '', mode: 'login',
-    wechatMode: api.isWechatShowcase(), bindingChallenge: '', bindingExpiresAt: '',
+    wechatMode: api.isWechatShowcase(), accountMode: api.isAccountShowcase(), bindingChallenge: '', bindingExpiresAt: '',
     bindConsent: false, unbindPassword: '',
     loginEmail: '', loginPassword: '', registerName: '', registerEmail: '', registerPassword: '',
-    profile: profileFrom(null), error: '' },
+    profile: profileFrom(null), profileIssues: [], profileError: '', releaseInfo: null, error: '' },
 
   async onShow() {
     this.setData({ loading: true, error: '' });
@@ -25,12 +26,16 @@ Page({
       const boot = await getApp().ensureBootstrap(true);
       const user = boot.user?.role === 'customer' ? boot.user : null;
       getApp().globalData.user = user;
-      this.setData({ user, userInitial: user?.name?.slice(0, 1) || '', profile: profileFrom(user) });
+      this.setData({ user, userInitial: user?.name?.slice(0, 1) || '', profile: profileFrom(user),
+        profileIssues: user ? profileIssues(user) : [], profileError: '', releaseInfo: boot.releaseInfo || null });
     } catch (error) { this.setData({ error: error.message, user: null }); }
     finally { this.setData({ loading: false }); }
   },
   onLoginInput(event) { this.setData({ [event.currentTarget.dataset.key]: event.detail.value }); },
-  onProfileInput(event) { this.setData({ [`profile.${event.currentTarget.dataset.key}`]: event.detail.value }); },
+  onProfileInput(event) {
+    const profile = { ...this.data.profile, [event.currentTarget.dataset.key]: event.detail.value };
+    this.setData({ profile, profileIssues: profileIssues(profile), profileError: '' });
+  },
   toggleMode() { this.setData({ mode: this.data.mode === 'login' ? 'register' : 'login', loginPassword: '', registerPassword: '' }); },
 
   async onWechatLogin() {
@@ -54,7 +59,7 @@ Page({
       app.globalData.user = user;
       if (app.globalData.boot) app.globalData.boot.user = user;
       this.setData({ user, userInitial: user.name.slice(0, 1),
-        profile: profileFrom(user), bindingChallenge: '' });
+        profile: profileFrom(user), profileIssues: profileIssues(user), profileError: '', bindingChallenge: '' });
       await cartSync.mergeAfterLogin(app);
     } catch (error) { showError(error); }
     finally { this.setData({ busy: false }); }
@@ -71,7 +76,7 @@ Page({
       const app = getApp();
       app.globalData.user = user;
       if (app.globalData.boot) app.globalData.boot.user = user;
-      this.setData({ user, userInitial: user.name.slice(0, 1), profile: profileFrom(user),
+      this.setData({ user, userInitial: user.name.slice(0, 1), profile: profileFrom(user), profileIssues: profileIssues(user), profileError: '',
         bindingChallenge: '', bindingExpiresAt: '', bindConsent: false, loginPassword: '' });
       await cartSync.mergeAfterLogin(app);
       wx.showToast({ title: '顾客账号已绑定', icon: 'success' });
@@ -90,7 +95,7 @@ Page({
     try {
       await api.unbindWechat(this.data.unbindPassword);
       getApp().clearIdentity();
-      this.setData({ user: null, userInitial: '', profile: profileFrom(null),
+      this.setData({ user: null, userInitial: '', profile: profileFrom(null), profileIssues: [], profileError: '',
         unbindPassword: '', bindingChallenge: '', bindConsent: false });
       wx.showToast({ title: '已解除绑定', icon: 'success' });
     } catch (error) { showError(error); }
@@ -105,7 +110,7 @@ Page({
       getApp().globalData.user = user;
       if (getApp().globalData.boot) getApp().globalData.boot.user = user;
       await cartSync.mergeAfterLogin(getApp());
-      this.setData({ user, userInitial: user.name.slice(0, 1), profile: profileFrom(user), loginPassword: '' });
+      this.setData({ user, userInitial: user.name.slice(0, 1), profile: profileFrom(user), profileIssues: profileIssues(user), profileError: '', loginPassword: '' });
       wx.showToast({ title: '已登录顾客账号', icon: 'success' });
     } catch (error) { showError(error); }
     finally { this.setData({ busy: false, loginPassword: '' }); }
@@ -126,14 +131,17 @@ Page({
 
   async onSaveProfile() {
     if (this.data.busy) return;
-    this.setData({ busy: true });
+    const issues = profileIssues(this.data.profile, { required: false });
+    if (issues.length) return this.setData({ profileError: issues.map(item => item.message).join('；') });
+    this.setData({ busy: true, profileError: '' });
     try {
       const saved = await api.request('/api/me', 'PATCH', this.data.profile);
       const user = { ...this.data.user, ...saved };
       getApp().globalData.user = user;
-      this.setData({ user, userInitial: user.name.slice(0, 1), profile: profileFrom(user) });
+      if (getApp().globalData.boot) getApp().globalData.boot.user = user;
+      this.setData({ user, userInitial: user.name.slice(0, 1), profile: profileFrom(user), profileIssues: profileIssues(user) });
       wx.showToast({ title: '资料已保存', icon: 'success' });
-    } catch (error) { showError(error); }
+    } catch (error) { this.setData({ profileError: error.message }); }
     finally { this.setData({ busy: false }); }
   },
 
@@ -145,8 +153,9 @@ Page({
     finally {
       getApp().clearIdentity();
       if (getApp().globalData.boot) getApp().globalData.boot.user = null;
-      this.setData({ busy: false, user: null, userInitial: '', profile: profileFrom(null), loginPassword: '' });
+      this.setData({ busy: false, user: null, userInitial: '', profile: profileFrom(null), profileIssues: [], profileError: '', loginPassword: '' });
     }
   },
-  goOrders() { wx.switchTab({ url: '/pages/orders/index' }); }
+  goOrders() { wx.switchTab({ url: '/pages/orders/index' }); },
+  goCart() { wx.switchTab({ url: '/pages/cart/index' }); }
 });

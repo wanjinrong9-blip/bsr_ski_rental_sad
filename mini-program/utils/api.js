@@ -2,14 +2,31 @@ const config = require('./config');
 
 const localSessionKey = 'bsr-mini-local-session';
 const wechatSessionKey = 'bsr-mini-wechat-session';
+const accountSessionKey = 'bsr-mini-account-cookie';
 let sessionToken = '';
 const downloadedPhotoPaths = new Set();
 
 function isWechatShowcase() { return config.mode === 'wechat-showcase'; }
-function sessionKey() { return isWechatShowcase() ? wechatSessionKey : localSessionKey; }
-function cartKey() { return isWechatShowcase() ? 'bsr-mini-wechat-cart' : 'bsr-mini-cart'; }
-function windowKey() { return isWechatShowcase() ? 'bsr-mini-wechat-window' : 'bsr-mini-window'; }
-function pendingKey() { return isWechatShowcase() ? 'bsr-mini-wechat-pending' : 'bsr-mini-pending'; }
+function isAccountShowcase() { return config.mode === 'account-showcase'; }
+function sessionKey() { return isAccountShowcase() ? accountSessionKey : isWechatShowcase() ? wechatSessionKey : localSessionKey; }
+function cartKey() { return isAccountShowcase() ? 'bsr-mini-account-cart' : isWechatShowcase() ? 'bsr-mini-wechat-cart' : 'bsr-mini-cart'; }
+function windowKey() { return isAccountShowcase() ? 'bsr-mini-account-window' : isWechatShowcase() ? 'bsr-mini-wechat-window' : 'bsr-mini-window'; }
+function pendingKey() { return isAccountShowcase() ? 'bsr-mini-account-pending' : isWechatShowcase() ? 'bsr-mini-wechat-pending' : 'bsr-mini-pending'; }
+
+function assertAccountShowcase() {
+  if (!isAccountShowcase() || !/^https:\/\/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(config.apiBase || '') ||
+      /\.(?:localhost|local|internal|invalid|test|onion)$/.test(config.apiBase || '')) {
+    throw new Error('顾客账号体验仅允许公网 HTTPS 地址；微信合法请求域名须另行配置');
+  }
+}
+
+function adaptWebUser(user) {
+  if (!user || typeof user !== 'object') return null;
+  return { id: user.id, name: user.name, email: user.email, role: user.role, storeId: user.storeId,
+    phone: user.phone || '', address: user.address || '', birthYear: user.birthYear ?? null,
+    heightCm: user.heightCm ?? null, weightKg: user.weightKg ?? null, shoeSize: user.shoeSize || '',
+    mustChangePassword: user.mustChangePassword === true };
+}
 
 function assertLocalDemo() {
   if (config.mode !== 'local-demo' || config.apiBase !== 'http://127.0.0.1:4173') {
@@ -37,6 +54,7 @@ function assertWechatShowcase() {
 }
 
 function assertRuntime() {
+  if (isAccountShowcase()) return assertAccountShowcase();
   if (isWechatShowcase()) return assertWechatShowcase();
   return assertLocalDemo();
 }
@@ -45,8 +63,12 @@ function mapPath(path) {
   if (!/^\/api\/[A-Za-z0-9/?=&%_.:-]+$/.test(path || '') || path.startsWith('//')) {
     throw new Error('接口路径无效');
   }
+  if (isAccountShowcase()) {
+    if (/^\/api\/(bootstrap|me|cart|quote|catalog(?:\?.*)?|reservations(?:\/\d+(?:\/(?:cancel|contracts|pay|damage\/dispute))?)?|contracts\/\d+\/sign|auth\/(?:login|logout))$/.test(path)) return path;
+    throw new Error('顾客账号体验不提供此接口');
+  }
   if (!isWechatShowcase()) return path;
-  if (/^\/api\/(bootstrap|me|cart|quote|catalog(?:\?.*)?|reservations(?:\/\d+(?:\/(?:cancel|contracts|pay))?)?|contracts\/\d+\/sign|auth\/(?:wechat|bind|logout|unbind))$/.test(path)) {
+  if (/^\/api\/(bootstrap|me|cart|quote|catalog(?:\?.*)?|reservations(?:\/\d+(?:\/(?:cancel|contracts|pay|damage\/dispute))?)?|contracts\/\d+\/sign|auth\/(?:wechat|bind|logout|unbind))$/.test(path)) {
     return path.replace(/^\/api\//, '/api/mini/');
   }
   throw new Error('安全模式不提供此接口');
@@ -78,8 +100,11 @@ function clearPrivateCache() {
 }
 
 function setToken(token) {
-  const nextToken = typeof token === 'string' ? token : '';
-  if (sessionToken && sessionToken !== nextToken) clearDownloadedPhotos();
+  let nextToken = typeof token === 'string' ? token : '';
+  if (isAccountShowcase() && !/^__Host-bsr_showcase_session=[a-f0-9]{64}$/.test(nextToken)) nextToken = '';
+  if (sessionToken && sessionToken !== nextToken) {
+    if (isAccountShowcase()) clearPrivateCache(); else clearDownloadedPhotos();
+  }
   sessionToken = nextToken;
   if (sessionToken) wx.setStorageSync(sessionKey(), sessionToken);
   else wx.removeStorageSync(sessionKey());
@@ -88,6 +113,23 @@ function setToken(token) {
 function restoreToken() {
   sessionToken = wx.getStorageSync(sessionKey()) || '';
   if (isWechatShowcase() && !/^[a-f0-9]{64}$/.test(sessionToken)) setToken('');
+  if (isAccountShowcase() && !/^__Host-bsr_showcase_session=[a-f0-9]{64}$/.test(sessionToken)) setToken('');
+}
+
+function captureAccountCookie(response) {
+  const values = Array.isArray(response.cookies) ? [...response.cookies] : [];
+  for (const [name, value] of Object.entries(response.header || {})) {
+    if (name.toLowerCase() === 'set-cookie') values.push(...(Array.isArray(value) ? value : [value]));
+  }
+  for (const value of values) {
+    const match = String(value).match(/^__Host-bsr_showcase_session=([a-f0-9]{64}|)(?:;|$)/);
+    if (match) setToken(match[1] ? `__Host-bsr_showcase_session=${match[1]}` : '');
+  }
+}
+
+function authHeaders(token = sessionToken) {
+  if (isAccountShowcase()) return { Origin: config.apiBase, ...(token ? { Cookie: token } : {}) };
+  return token ? isWechatShowcase() ? { Authorization: `Bearer ${token}` } : { 'X-BSR-Session': token } : {};
 }
 
 function request(path, method = 'GET', data, extraHeaders = {}) {
@@ -102,13 +144,12 @@ function request(path, method = 'GET', data, extraHeaders = {}) {
       timeout: 12000,
       header: {
         'Content-Type': 'application/json',
-        ...(sessionToken && !unauthenticated ? isWechatShowcase()
-          ? { Authorization: `Bearer ${sessionToken}` }
-          : { 'X-BSR-Session': sessionToken } : {}),
-        ...extraHeaders
+        ...extraHeaders,
+        ...(!unauthenticated ? authHeaders() : {})
       },
       success(response) {
         const result = response.data;
+        if (isAccountShowcase()) captureAccountCookie(response);
         if (response.statusCode >= 200 && response.statusCode < 300) {
           if (isWechatShowcase() && path.startsWith('/api/mini/catalog') && Array.isArray(result?.items)) {
             return resolve({ ...result, items: result.items.map(item => ({ ...item, available: item.availableCount })) });
@@ -117,7 +158,7 @@ function request(path, method = 'GET', data, extraHeaders = {}) {
         }
         if (response.statusCode === 401 && !unauthenticated) {
           setToken('');
-          if (isWechatShowcase()) clearPrivateCache();
+          if (isWechatShowcase() || isAccountShowcase()) clearPrivateCache();
         }
         const error = new Error((result && (result.error || result.message)) || `请求失败（${response.statusCode}）`);
         error.status = response.statusCode;
@@ -126,7 +167,7 @@ function request(path, method = 'GET', data, extraHeaders = {}) {
         reject(error);
       },
       fail(error) {
-        const wrapped = new Error(isWechatShowcase()
+        const wrapped = new Error(isWechatShowcase() || isAccountShowcase()
           ? '网络连接失败。请检查微信网络和服务状态，稍后重试；未确认结果的预约可用原提交标识找回。'
           : '无法连接本机 BSR 预览。请在电脑启动网页服务，并在微信开发者工具中关闭仅本机调试的域名校验。');
         wrapped.network = true;
@@ -139,6 +180,19 @@ function request(path, method = 'GET', data, extraHeaders = {}) {
 
 async function bootstrap() {
   const result = await request('/api/bootstrap');
+  if (isAccountShowcase()) {
+    if (result.runMode !== 'showcase' || result.synthetic !== true || result.demo !== false) {
+      setToken(''); clearPrivateCache();
+      throw new Error('顾客账号体验只能连接受控合成展示服务');
+    }
+    const user = adaptWebUser(result.user);
+    if (user && (user.role !== 'customer' || user.mustChangePassword)) {
+      await logout();
+      throw new Error(user.mustChangePassword ? '请先在网页更换一次性密码，再登录顾客账号体验' : '小程序仅提供顾客工作台，请使用顾客账号');
+    }
+    if (!user && sessionToken) { setToken(''); clearPrivateCache(); }
+    return { ...result, user };
+  }
   if (isWechatShowcase()) {
     if (result.status !== 'ready' || result.synthetic !== true || result.customerOnly !== true) {
       throw new Error('微信顾客服务尚未开放');
@@ -157,6 +211,18 @@ async function bootstrap() {
 
 async function login(email, password) {
   if (isWechatShowcase()) throw new Error('请使用微信身份验证和显式账号绑定');
+  if (isAccountShowcase()) {
+    try {
+      if (sessionToken) await logout();
+      const result = await request('/api/auth/login', 'POST', { email, password });
+      const user = adaptWebUser(result.user);
+      if (!sessionToken || user?.role !== 'customer' || user.mustChangePassword) {
+        if (sessionToken) await logout();
+        throw new Error(user?.mustChangePassword ? '请先在网页更换一次性密码，再登录顾客账号体验' : '小程序仅提供顾客工作台，请使用顾客账号');
+      }
+      return user;
+    } catch (error) { setToken(''); clearPrivateCache(); throw error; }
+  }
   const result = await request('/api/auth/login', 'POST', { email, password });
   if (!result.sessionToken || result.user?.role !== 'customer') {
     if (result.sessionToken) {
@@ -213,9 +279,7 @@ function downloadDamagePhoto(photoId) {
   return new Promise((resolve, reject) => {
     wx.downloadFile({
       url: config.apiBase + path,
-      header: isWechatShowcase()
-        ? { Authorization: 'Bearer ' + tokenAtStart }
-        : { 'X-BSR-Session': tokenAtStart },
+      header: authHeaders(tokenAtStart),
       success(response) {
         if (sessionToken !== tokenAtStart) {
           if (response.tempFilePath && typeof wx.getFileSystemManager === 'function') {
@@ -247,5 +311,5 @@ function canPreviewDamagePhoto(localPath) {
 
 module.exports = { request, bootstrap, login, wechatLogin, bindWechat, unbindWechat,
   logout, setToken, restoreToken, clearPrivateCache, assertLocalDemo,
-  assertWechatShowcase, isWechatShowcase, mapPath, cartKey, windowKey, pendingKey,
+  assertWechatShowcase, assertAccountShowcase, isWechatShowcase, isAccountShowcase, adaptWebUser, mapPath, cartKey, windowKey, pendingKey,
   downloadDamagePhoto, canPreviewDamagePhoto };
