@@ -423,7 +423,7 @@ function render(){
   damageUI.hydrate();
   if(state.boot?.temporaryPreview){
     const note=document.createElement('aside');note.className='temporary-preview-note';note.setAttribute('role','note');
-    note.textContent='临时课程演示 · 空闲后首次打开可能需等待约一分钟，重启后演示记录可能重置。请勿填写真实资料。正式域名 bsrski.cn 待网站备案通过后切换；小程序尚未发布。';
+    note.textContent='临时课程演示 · 免费额度有限，首次访问可能较慢；重新部署或平台回收后，演示记录可能重置。请勿填写真实资料。正式域名 bsrski.cn 待网站备案通过后切换；小程序尚未发布。';
     $('#app').prepend(note);
   }
 }
