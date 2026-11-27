@@ -198,7 +198,7 @@ async function api(req,res,url) {
     if(showcase)return json(res,200,{stores,user:safeUser(user),
       exchange:{NOK:exchange.NOK},exchangeSource:'合成预览仅以 NOK 记账',exchangeUpdatedAt:null,
       demo:false,synthetic:true,runMode:'showcase',capabilities:{selfRegistration:false,selfRecovery:false,bookingEnabled:true},
-      notice:simulationNotice,damagePolicy,depositRule,rentalPolicy});
+      notice:simulationNotice,temporaryPreview:process.env.BSR_TEMPORARY_PREVIEW==='1',damagePolicy,depositRule,rentalPolicy});
     return json(res,200,{stores,user:safeUser(user),exchange,
       exchangeSource:'演示汇率快照（非实时市场数据）',exchangeUpdatedAt:'2026-10-25T00:00:00+02:00',
       demo:true,runMode:'demo',damagePolicy,depositRule,rentalPolicy,

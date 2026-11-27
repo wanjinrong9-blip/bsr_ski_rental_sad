@@ -1,5 +1,6 @@
 # Runtime databases include sessions, customer data and private assessment photos.
 /data/
+/.preview-private/
 /test-results/
 node_modules/
 *.log

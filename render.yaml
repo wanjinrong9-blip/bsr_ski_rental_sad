@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: bsr-temporary-preview
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./deploy/render/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BSR_TEMPORARY_PREVIEW
+        value: "1"
+      - key: BSR_RUN_MODE
+        value: showcase
+      - key: BSR_PREVIEW_SEED
+        sync: false

@@ -421,6 +421,11 @@ function render(){
   if(isManaged()&&state.route==='users')$('#app').querySelector('section.card.pad')?.classList.add('candidate-users');
   const toastEl=$('#toast');if(toastEl)toastEl.classList.add('toast');
   damageUI.hydrate();
+  if(state.boot?.temporaryPreview){
+    const note=document.createElement('aside');note.className='temporary-preview-note';note.setAttribute('role','note');
+    note.textContent='临时课程演示 · 空闲后首次打开可能需等待约一分钟，重启后演示记录可能重置。请勿填写真实资料。正式域名 bsrski.cn 待网站备案通过后切换；小程序尚未发布。';
+    $('#app').prepend(note);
+  }
 }
 function modal(content,wide=false){state.modal=`<div class="modal-back" data-modal-backdrop><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true">${content}</div></div>`;render();}
 function closeModal(){state.modal=null;state.dirtyForm=false;render();if(state.pendingSync)syncData(true);}

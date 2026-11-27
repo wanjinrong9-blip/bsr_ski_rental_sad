@@ -222,3 +222,5 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline-color:#7eacd0
 }
 .order-meta>span:first-child{display:inline-flex;align-items:center;gap:5px}
 .order-meta svg{width:15px;height:15px;flex:0 0 15px;vertical-align:middle}
+.temporary-preview-note{padding:11px 24px;background:#edf4f9;color:#284c67;border-bottom:1px solid #c8d9e6;font-size:12px;line-height:1.7;text-align:center;}
+@media(max-width:600px){.temporary-preview-note{padding:10px 16px;text-align:left;}}

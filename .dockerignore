@@ -1,0 +1,29 @@
+# Build from a small source allowlist. Runtime state and private files are absent.
+**
+!package.json
+!src/
+!src/**
+!public/
+!public/**
+!tools/
+!tools/temporary-preview-setup.mjs
+!deploy/
+!deploy/render/
+!deploy/render/Dockerfile
+!deploy/render/start.mjs
+!deploy/render/nginx.conf.template
+
+# Keep these excluded even if placed under an allowed source directory.
+**/.env*
+**/*.sqlite
+**/*.sqlite-*
+**/*.db
+**/*.db-*
+**/*.pem
+**/*.key
+**/*.crt
+**/*.p12
+**/*.pfx
+**/*.log
+**/node_modules/
+**/project.private.config.json
