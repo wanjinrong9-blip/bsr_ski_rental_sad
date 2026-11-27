@@ -17,7 +17,7 @@ export function renderNginxConfig({platformPort,config},template=readFileSync(te
       config.host!=='127.0.0.1'||config.port!==4175||
       origin.protocol!=='https:'||origin.port||origin.pathname!=='/'||origin.search||origin.hash||
       origin.username||origin.password||origin.origin!==config.publicOrigin||
-      !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.onrender\.com$/.test(origin.hostname)||
+      !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.(?:onrender\.com|up\.railway\.app)$/.test(origin.hostname)||
       !/^[a-f0-9]{64}$/i.test(config.proxySecret||''))
     throw new Error('Invalid temporary preview proxy configuration');
   const rendered=template.replaceAll('__PLATFORM_PORT__',String(Number(portText)))

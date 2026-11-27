@@ -1,4 +1,4 @@
-// Host-only bootstrap for fictional, ephemeral Render previews. No HTTP caller.
+// Host-only bootstrap for fictional, ephemeral cloud previews. No HTTP caller.
 import {createHash,createHmac} from 'node:crypto';
 import {existsSync,mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {join,resolve} from 'node:path';
@@ -22,11 +22,16 @@ export function prepareTemporaryPreview(env,{root=resolve(import.meta.dirname,'.
   if(env.BSR_TEMPORARY_PREVIEW!=='1'||env.BSR_RUN_MODE!=='showcase')
     reject('自动初始化仅用于明确启用的临时 SHOWCASE');
   const seed=env.BSR_PREVIEW_SEED,credentials=previewCredentials(seed);
+  const provider=env.BSR_PREVIEW_PROVIDER||'render';
+  if(!['render','railway'].includes(provider))reject('临时托管平台无效');
+  const platformOrigin=provider==='railway'&&env.RAILWAY_PUBLIC_DOMAIN?
+    `https://${env.RAILWAY_PUBLIC_DOMAIN}`:provider==='render'?env.RENDER_EXTERNAL_URL:null;
   let origin;
-  try{origin=new URL(env.RENDER_EXTERNAL_URL||env.BSR_PUBLIC_ORIGIN);}catch{reject('缺少 Render HTTPS 站点地址');}
-  if(origin.protocol!=='https:'||!/^[-a-z0-9]+\.onrender\.com$/.test(origin.hostname)||
+  try{origin=new URL(platformOrigin||env.BSR_PUBLIC_ORIGIN);}catch{reject('缺少平台 HTTPS 站点地址');}
+  const hostPattern=provider==='railway'?/^[-a-z0-9]+\.up\.railway\.app$/:/^[-a-z0-9]+\.onrender\.com$/;
+  if(origin.protocol!=='https:'||!hostPattern.test(origin.hostname)||
       origin.port||origin.username||origin.password||origin.pathname!=='/'||origin.search||origin.hash)
-    reject('临时入口必须为 Render 提供的 HTTPS 来源');
+    reject('临时入口必须为所选平台提供的 HTTPS 来源');
   const runtime=resolve(runtimeDir),dbPath=join(runtime,'data','showcase.sqlite');
   const backupDir=join(runtime,'backups'),manifest=join(runtime,'preview-installation.json');
   const fingerprint=createHash('sha256').update(seed).digest('hex');
@@ -45,7 +50,7 @@ export function prepareTemporaryPreview(env,{root=resolve(import.meta.dirname,'.
       reject('临时预览凭据或来源变化；禁止重置已有账号');
   }else{
     if(existsSync(manifest))reject('数据文件缺失但来源记录仍存在；禁止静默重置');
-    const initialized=initializeShowcase(config,{operator:'temporary-render-synthetic-bootstrap',...credentials[0]});
+    const initialized=initializeShowcase(config,{operator:`temporary-${provider}-synthetic-bootstrap`,...credentials[0]});
     const db=openDb(dbPath,{runMode:'showcase'});
     try{
       const actor=db.prepare('SELECT * FROM users WHERE id=?').get(initialized.id);
@@ -53,7 +58,7 @@ export function prepareTemporaryPreview(env,{root=resolve(import.meta.dirname,'.
       for(const credential of credentials.slice(1)){
         const temporaryPassword=createHmac('sha256',seed).update('provision:'+credential.role).digest('hex')+'!Aa9';
         const created=candidateProvisionAccount(db,actor,{...credential,storeId,
-          temporaryPassword,verificationRef:'FICTIONAL-RENDER-PREVIEW-ONLY'}, {runMode:'showcase'});
+          temporaryPassword,verificationRef:`FICTIONAL-${provider.toUpperCase()}-PREVIEW-ONLY`}, {runMode:'showcase'});
         const user=db.prepare('SELECT * FROM users WHERE id=?').get(created.id);
         // Automation owns these fictional identities and completes normal
         // credential rotation before handing out distinct preview passwords.
